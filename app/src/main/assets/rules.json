@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "minAppVersion": "0.1.0",
   "screens": {
     "feed": {
@@ -34,12 +34,14 @@
       "viewIds": ["direct_", "thread_", "message_list"]
     },
     "explore": {
-      "tabIds": ["search_tab", "tab_search"],
-      "tabDescriptions": ["Search", "Ara", "Ara ve Keşfet", "Explore"]
+      "tabIds": ["search_tab", "tab_search", "explore_tab"],
+      "tabDescriptions": ["Search", "Ara", "Ara ve Keşfet", "Explore", "Keşfet"],
+      "contentIds": ["action_bar_search", "search_edit_text", "search_box", "explore_grid"]
     },
     "profile": {
       "tabIds": ["profile_tab", "tab_profile", "tab_avatar"],
-      "tabDescriptions": ["Profile", "Profil"]
+      "tabDescriptions": ["Profile", "Profil", "clips"],
+      "contentIds": ["profile_header", "edit_profile", "profile_tabs", "user_profile"]
     }
   }
 }

@@ -1,6 +1,5 @@
 package com.nomorereels.app.detection
 
-import org.json.JSONArray
 import org.json.JSONObject
 
 data class FeedRule(
@@ -40,17 +39,19 @@ data class DirectMessagesRule(
 )
 
 data class ExploreRule(
-    val tabIds: List<String> = listOf("search_tab", "tab_search"),
-    val tabDescriptions: List<String> = listOf("Search", "Ara", "Ara ve Keşfet", "Explore")
+    val tabIds: List<String> = listOf("search_tab", "tab_search", "explore_tab"),
+    val tabDescriptions: List<String> = listOf("Search", "Ara", "Ara ve Keşfet", "Explore", "Keşfet"),
+    val contentIds: List<String> = listOf("action_bar_search", "search_edit_text", "search_box", "explore_grid")
 )
 
 data class ProfileRule(
     val tabIds: List<String> = listOf("profile_tab", "tab_profile", "tab_avatar"),
-    val tabDescriptions: List<String> = listOf("Profile", "Profil")
+    val tabDescriptions: List<String> = listOf("Profile", "Profil", "clips"),
+    val contentIds: List<String> = listOf("profile_header", "edit_profile", "profile_tabs", "user_profile")
 )
 
 data class RuleSet(
-    val version: Int = 1,
+    val version: Int = 2,
     val minAppVersion: String = "0.1.0",
     val feed: FeedRule = FeedRule(),
     val reelsTab: ReelsTabRule = ReelsTabRule(),
@@ -66,7 +67,7 @@ data class RuleSet(
         fun fromJson(jsonStr: String): RuleSet {
             return try {
                 val json = JSONObject(jsonStr)
-                val version = json.optInt("version", 1)
+                val version = json.optInt("version", DEFAULT.version)
                 val minAppVersion = json.optString("minAppVersion", "0.1.0")
                 val screens = json.optJSONObject("screens") ?: JSONObject()
 
@@ -105,13 +106,15 @@ data class RuleSet(
                 val exploreObj = screens.optJSONObject("explore")
                 val explore = ExploreRule(
                     tabIds = exploreObj?.optStringList("tabIds") ?: DEFAULT.explore.tabIds,
-                    tabDescriptions = exploreObj?.optStringList("tabDescriptions") ?: DEFAULT.explore.tabDescriptions
+                    tabDescriptions = exploreObj?.optStringList("tabDescriptions") ?: DEFAULT.explore.tabDescriptions,
+                    contentIds = exploreObj?.optStringList("contentIds") ?: DEFAULT.explore.contentIds
                 )
 
                 val profileObj = screens.optJSONObject("profile")
                 val profile = ProfileRule(
                     tabIds = profileObj?.optStringList("tabIds") ?: DEFAULT.profile.tabIds,
-                    tabDescriptions = profileObj?.optStringList("tabDescriptions") ?: DEFAULT.profile.tabDescriptions
+                    tabDescriptions = profileObj?.optStringList("tabDescriptions") ?: DEFAULT.profile.tabDescriptions,
+                    contentIds = profileObj?.optStringList("contentIds") ?: DEFAULT.profile.contentIds
                 )
 
                 RuleSet(

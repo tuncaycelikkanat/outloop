@@ -60,7 +60,7 @@ class ReelsAccessibilityService : AccessibilityService() {
                 details = "Activity: ${activityName?.substringAfterLast('.')}",
                 actionTaken = if (handled) "Engellendi (Ana Sayfaya Geçildi)" else "Beklemede (Cooldown)"
             )
-        } else if (screenType != ScreenType.UNKNOWN) {
+        } else {
             DetectionLogStore.log(
                 screenType = screenType,
                 details = "Activity: ${activityName?.substringAfterLast('.')}",

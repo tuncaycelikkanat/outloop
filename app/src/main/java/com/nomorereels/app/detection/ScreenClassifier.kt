@@ -47,13 +47,13 @@ class ScreenClassifier(
             return ScreenType.DIRECT_MESSAGES
         }
 
-        // 5. KONTROL: Keşfet (Explore) sekmesi mi seçili?
-        if (isExploreSelected(snapshot)) {
+        // 5. KONTROL: Keşfet (Explore) ekranı mı?
+        if (isExplore(snapshot)) {
             return ScreenType.EXPLORE
         }
 
-        // 6. KONTROL: Profil sekmesi mi seçili?
-        if (isProfileSelected(snapshot)) {
+        // 6. KONTROL: Profil ekranı mı?
+        if (isProfile(snapshot)) {
             return ScreenType.PROFILE
         }
 
@@ -117,24 +117,45 @@ class ScreenClassifier(
         }.isNotEmpty()
     }
 
-    private fun isExploreSelected(snapshot: ScreenSnapshot): Boolean {
-        return snapshot.findNodes { node ->
+    private fun isExplore(snapshot: ScreenSnapshot): Boolean {
+        // Alt sekme çubuğu kontrolü
+        val hasExploreTab = snapshot.findNodes { node ->
             val id = node.viewId ?: ""
             val desc = node.contentDescription ?: ""
             val matchesId = rules.explore.tabIds.any { id.contains(it, ignoreCase = true) }
-            val matchesDesc = rules.explore.tabDescriptions.any { desc.equals(it, ignoreCase = true) }
+            val matchesDesc = rules.explore.tabDescriptions.any { desc.contains(it, ignoreCase = true) }
             (matchesId || matchesDesc) && node.isSelected
         }.isNotEmpty()
+
+        // Ekran içeriği kontrolü (arama kutusu, keşfet gridi)
+        val hasExploreContent = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            rules.explore.contentIds.any { id.contains(it, ignoreCase = true) }
+        }.isNotEmpty()
+
+        return hasExploreTab || hasExploreContent
     }
 
-    private fun isProfileSelected(snapshot: ScreenSnapshot): Boolean {
-        return snapshot.findNodes { node ->
+    private fun isProfile(snapshot: ScreenSnapshot): Boolean {
+        // Alt sekme çubuğu kontrolü (Profil avatar sekmesi)
+        val hasProfileTab = snapshot.findNodes { node ->
             val id = node.viewId ?: ""
             val desc = node.contentDescription ?: ""
             val matchesId = rules.profile.tabIds.any { id.contains(it, ignoreCase = true) }
-            val matchesDesc = rules.profile.tabDescriptions.any { desc.equals(it, ignoreCase = true) }
+            val matchesDesc = rules.profile.tabDescriptions.any { desc.contains(it, ignoreCase = true) }
             (matchesId || matchesDesc) && node.isSelected
         }.isNotEmpty()
+
+        // Ekran içeriği kontrolü (Profili düzenle butonu, kullanıcı başlığı)
+        val hasProfileContent = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val desc = node.contentDescription ?: ""
+            rules.profile.contentIds.any { id.contains(it, ignoreCase = true) } ||
+            desc.contains("profili düzenle", ignoreCase = true) ||
+            desc.contains("edit profile", ignoreCase = true)
+        }.isNotEmpty()
+
+        return hasProfileTab || hasProfileContent
     }
 
     private fun isClipsViewer(snapshot: ScreenSnapshot): Boolean {
