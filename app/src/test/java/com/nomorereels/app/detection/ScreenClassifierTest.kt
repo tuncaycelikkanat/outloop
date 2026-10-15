@@ -1,6 +1,7 @@
 package com.nomorereels.app.detection
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -47,6 +48,52 @@ class ScreenClassifierTest {
     }
 
     @Test
+    fun `stories tray in main feed should NOT classify as REELS`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/swipeable_tab_view_pager",
+                    children = listOf(
+                        NodeSnapshot(
+                            contentDescription = "reels tray container",
+                            isSelected = false
+                        ),
+                        NodeSnapshot(
+                            viewId = "com.instagram.android:id/avatar_image_view",
+                            contentDescription = "user's story, 0 of 10, Unseen.",
+                            isSelected = false
+                        )
+                    )
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/tab_bar",
+                    children = listOf(
+                        NodeSnapshot(
+                            contentDescription = "Ana Sayfa",
+                            isSelected = true
+                        ),
+                        NodeSnapshot(
+                            contentDescription = "Reels",
+                            isSelected = false
+                        )
+                    )
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.MAIN_FEED, result)
+        assertFalse(result.isReels)
+    }
+
+    @Test
     fun `clips viewer in modal activity should classify as REELS_VIEWER`() {
         val rootNode = NodeSnapshot(
             className = "android.widget.FrameLayout",
@@ -66,6 +113,28 @@ class ScreenClassifierTest {
         val result = classifier.classify(snapshot)
         assertEquals(ScreenType.REELS_VIEWER, result)
         assertTrue(result.isReels)
+    }
+
+    @Test
+    fun `story viewer should NOT classify as REELS`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/reel_viewer_layout"
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.modal.ReelViewerActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.MAIN_FEED, result)
+        assertFalse(result.isReels)
     }
 
     @Test

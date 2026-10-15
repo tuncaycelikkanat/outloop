@@ -45,10 +45,10 @@ class ReelsAccessibilityService : AccessibilityService() {
 
         Log.d(TAG, "Instagram Olayı: ${event.eventType}, Ekran: $screenType, Activity: $activityName")
 
-        // 3. Reels algılandıysa engelle / geri dön
+        // 3. Reels algılandıysa engelle / yönlendir
         if (screenType.isReels) {
-            Log.w(TAG, "Reels tespit edildi! Geri dönme tetikleniyor...")
-            actionExecutor.triggerBackAction(reason = "Tespit: $screenType")
+            Log.w(TAG, "Reels tespit edildi! Eylem çalıştırılıyor (Ekran: $screenType)...")
+            actionExecutor.executeBlock(screenType, rootNode)
             logNodeTreeSummary(snapshot.rootNode)
         }
     }

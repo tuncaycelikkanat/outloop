@@ -25,22 +25,35 @@ class ScreenClassifier {
             return ScreenType.UNKNOWN
         }
 
-        // 1. Kontrol: Reels Sekmesi aktif olarak seçili mi?
+        // ÖNEMLİ INSTAGRAM NOTU:
+        // Instagram iç kodunda "Reel" kelimesi HİKAYELER (Stories) için kullanılır:
+        // - "reels tray container" = Üstteki hikayeler çubuğu
+        // - "ReelViewerActivity" = Hikaye izleyicisi
+        // Kısa videolar (Reels) ise Instagram içinde "Clips" olarak adlandırılır:
+        // - "clips_tab" = Reels sekmesi
+        // - "clips_viewer" = Reels tam ekran video oynatıcısı
+
+        // 1. Kontrol: Hikaye (Story) ekranı mı? (Yanlış pozitifleri hemen önle)
+        if (isStoryScreen(snapshot)) {
+            return ScreenType.MAIN_FEED
+        }
+
+        // 2. Kontrol: Reels Sekmesi aktif olarak seçili mi?
         if (isReelsTabSelected(snapshot)) {
             return ScreenType.REELS_TAB
         }
 
-        // 2. Kontrol: Tam ekran Reels Oynatıcısı (Clips Viewer) açık mı?
-        if (isReelsViewer(snapshot)) {
+        // 3. Kontrol: Tam ekran Reels Oynatıcısı (Clips Viewer) açık mı?
+        if (isClipsViewer(snapshot)) {
             return ScreenType.REELS_VIEWER
         }
 
-        // 3. Kontrol: DM (Direkt Mesajlar) ekranı mı?
+        // 4. Kontrol: DM (Direkt Mesajlar) ekranı mı?
         if (isDirectMessageScreen(snapshot)) {
             return ScreenType.DIRECT_MESSAGES
         }
 
-        // 4. Kontrol: Ana Akış (Feed) mı?
+        // 5. Kontrol: Ana Akış (Feed) mı?
         if (isMainFeed(snapshot)) {
             return ScreenType.MAIN_FEED
         }
@@ -48,46 +61,51 @@ class ScreenClassifier {
         return ScreenType.UNKNOWN
     }
 
+    private fun isStoryScreen(snapshot: ScreenSnapshot): Boolean {
+        val activity = snapshot.currentActivity ?: ""
+        if (activity.contains("ReelViewerActivity", ignoreCase = true)) {
+            return true
+        }
+        return snapshot.containsId("reel_viewer_layout") ||
+               snapshot.containsId("story_viewer")
+    }
+
     private fun isReelsTabSelected(snapshot: ScreenSnapshot): Boolean {
-        // Alt sekme çubuğunda "Reels" açıklamasında veya ID'sinde seçili (selected) bir düğüm var mı?
-        val reelsTabNodes = snapshot.findNodes { node ->
-            val isReelsDesc = node.contentDescription?.equals("Reels", ignoreCase = true) == true
-            val isReelsId = node.viewId?.let { id ->
+        val matchingNodes = snapshot.findNodes { node ->
+            val desc = node.contentDescription ?: ""
+            // Hikayeleri kesinlikle ayıkla
+            if (desc.contains("story", ignoreCase = true) || desc.contains("tray", ignoreCase = true)) {
+                return@findNodes false
+            }
+
+            // Tam olarak "Reels" sekmesi kontrolü
+            val isReelsDesc = desc.equals("Reels", ignoreCase = true)
+            val isClipsTabId = node.viewId?.let { id ->
                 id.contains("clips_tab", ignoreCase = true) ||
-                id.contains("reels_tab", ignoreCase = true) ||
                 id.contains("tab_clips", ignoreCase = true)
             } == true
 
-            (isReelsDesc || isReelsId) && (node.isSelected || node.isClickable)
+            (isReelsDesc || isClipsTabId) && node.isSelected
         }
 
-        // Eğer seçili durumda bir reels tabı varsa
-        return reelsTabNodes.any { it.isSelected }
+        return matchingNodes.isNotEmpty()
     }
 
-    private fun isReelsViewer(snapshot: ScreenSnapshot): Boolean {
-        // Instagram Reels tam ekran video oynatıcı göstergeleri
-        val knownViewerIds = listOf(
+    private fun isClipsViewer(snapshot: ScreenSnapshot): Boolean {
+        val knownClipsViewerIds = listOf(
             "clips_viewer",
             "clips_video_container",
-            "reel_viewer",
             "clips_media_interactivity_container",
             "clips_swipe_refresh_container",
-            "clips_video_layout",
-            "clips_action_bar_button"
+            "clips_video_layout"
         )
 
-        // Modal activity veya viewer ID'leri
-        val activity = snapshot.currentActivity ?: ""
-        val isModalActivity = activity.contains("ModalActivity", ignoreCase = true) ||
-                              activity.contains("TransparentModalActivity", ignoreCase = true)
-
-        val hasViewerNode = snapshot.findNodes { node ->
+        val hasClipsNode = snapshot.findNodes { node ->
             val id = node.viewId ?: ""
-            knownViewerIds.any { id.contains(it, ignoreCase = true) }
+            knownClipsViewerIds.any { id.contains(it, ignoreCase = true) }
         }.isNotEmpty()
 
-        return hasViewerNode || (isModalActivity && snapshot.containsContentDescription("Reels"))
+        return hasClipsNode
     }
 
     private fun isDirectMessageScreen(snapshot: ScreenSnapshot): Boolean {
@@ -97,6 +115,7 @@ class ScreenClassifier {
 
     private fun isMainFeed(snapshot: ScreenSnapshot): Boolean {
         return snapshot.containsId("feed") ||
-               snapshot.containsId("action_bar_home")
+               snapshot.containsId("action_bar_home") ||
+               snapshot.containsId("swipeable_tab_view_pager")
     }
 }
