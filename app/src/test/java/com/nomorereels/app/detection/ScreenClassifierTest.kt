@@ -2,6 +2,7 @@ package com.nomorereels.app.detection
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -12,7 +13,30 @@ class ScreenClassifierTest {
 
     @Before
     fun setUp() {
-        classifier = ScreenClassifier()
+        classifier = ScreenClassifier(RuleSet.DEFAULT)
+    }
+
+    @Test
+    fun `RuleSet should parse correctly from JSON string`() {
+        val json = """
+            {
+              "version": 2,
+              "minAppVersion": "0.1.0",
+              "screens": {
+                "feed": {
+                  "tabIds": ["custom_feed_tab"],
+                  "tabDescriptions": ["CustomHome"],
+                  "containerIds": ["custom_container"]
+                }
+              }
+            }
+        """.trimIndent()
+
+        val ruleSet = RuleSet.fromJson(json)
+        assertEquals(2, ruleSet.version)
+        assertEquals(listOf("custom_feed_tab"), ruleSet.feed.tabIds)
+        assertEquals(listOf("CustomHome"), ruleSet.feed.tabDescriptions)
+        assertNotNull(ruleSet.reelsTab)
     }
 
     @Test
@@ -57,7 +81,7 @@ class ScreenClassifierTest {
                 NodeSnapshot(
                     className = "android.widget.LinearLayout",
                     contentDescription = "Reels",
-                    isSelected = true // Feed içi seçili LinearLayout olsa bile!
+                    isSelected = true
                 ),
                 NodeSnapshot(
                     viewId = "com.instagram.android:id/feed_tab",
@@ -80,6 +104,76 @@ class ScreenClassifierTest {
 
         val result = classifier.classify(snapshot)
         assertEquals(ScreenType.MAIN_FEED, result)
+        assertFalse(result.isReels)
+    }
+
+    @Test
+    fun `explore tab selected should classify as EXPLORE`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/search_tab",
+                    contentDescription = "Ara ve Keşfet",
+                    isSelected = true
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.EXPLORE, result)
+        assertFalse(result.isReels)
+    }
+
+    @Test
+    fun `profile tab selected should classify as PROFILE`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/profile_tab",
+                    contentDescription = "Profil",
+                    isSelected = true
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.PROFILE, result)
+        assertFalse(result.isReels)
+    }
+
+    @Test
+    fun `direct messages should classify as DIRECT_MESSAGES`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/direct_message_list_recycler_view"
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.direct.messagelist.DirectMessageListActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.DIRECT_MESSAGES, result)
         assertFalse(result.isReels)
     }
 

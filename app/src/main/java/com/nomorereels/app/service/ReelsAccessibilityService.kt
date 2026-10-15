@@ -4,7 +4,8 @@ import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.nomorereels.app.action.ActionExecutor
-import com.nomorereels.app.detection.NodeSnapshot
+import com.nomorereels.app.detection.DetectionLogStore
+import com.nomorereels.app.detection.RuleSet
 import com.nomorereels.app.detection.ScreenClassifier
 import com.nomorereels.app.detection.ScreenSnapshot
 import com.nomorereels.app.detection.ScreenType
@@ -20,7 +21,12 @@ class ReelsAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         currentInstance = this
         _isServiceActive.value = true
-        Log.i(TAG, "ReelsAccessibilityService başarıyla bağlandı ve dinlemeye başladı.")
+
+        // Dinamik kuralları assets/rules.json dosyasından yükle
+        classifier.rules = loadRulesFromAssets()
+        _ruleVersion.value = classifier.rules.version
+
+        Log.i(TAG, "ReelsAccessibilityService bağlandı (Kural sürümü: ${classifier.rules.version}).")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -32,38 +38,34 @@ class ReelsAccessibilityService : AccessibilityService() {
         val activityName = event.className?.toString()
         val rootNode = rootInActiveWindow ?: return
 
-        // 1. Düğüm ağacını güvenli, hafif saf veri modeline dönüştür
+        // 1. Düğüm ağacını saf veri modeline dönüştür
         val snapshot = ScreenSnapshot.fromNodeInfo(
             packageName = pkgName,
             activityName = activityName,
             rootNode = rootNode
         )
 
-        // 2. Ekranı sınıflandır
+        // 2. Ekranı dinamik kural motoruyla sınıflandır
         val screenType = classifier.classify(snapshot)
         _lastDetectedType.value = screenType
 
         Log.d(TAG, "Instagram Olayı: ${event.eventType}, Ekran: $screenType, Activity: $activityName")
 
-        // Teşhis: Seçili düğümleri ve Reels ile ilgili düğümleri logla
-        val selectedNodes = snapshot.findNodes { it.isSelected }
-        for (node in selectedNodes) {
-            Log.d(TAG, "--> SEÇİLİ DÜĞÜM: id=${node.viewId}, desc='${node.contentDescription}', class=${node.className}")
-        }
-
-        val reelsNodes = snapshot.findNodes { 
-            val desc = it.contentDescription ?: ""
-            val id = it.viewId ?: ""
-            desc.contains("reels", ignoreCase = true) || id.contains("clips", ignoreCase = true)
-        }
-        for (node in reelsNodes) {
-            Log.d(TAG, "--> REELS DÜĞÜMÜ: id=${node.viewId}, desc='${node.contentDescription}', isSelected=${node.isSelected}")
-        }
-
         // 3. Reels algılandıysa engelle / yönlendir
         if (screenType.isReels) {
             Log.w(TAG, "Reels tespit edildi! Eylem çalıştırılıyor (Ekran: $screenType)...")
-            actionExecutor.executeBlock(screenType, rootNode)
+            val handled = actionExecutor.executeBlock(screenType, rootNode)
+            DetectionLogStore.log(
+                screenType = screenType,
+                details = "Activity: ${activityName?.substringAfterLast('.')}",
+                actionTaken = if (handled) "Engellendi (Ana Sayfaya Geçildi)" else "Beklemede (Cooldown)"
+            )
+        } else if (screenType != ScreenType.UNKNOWN) {
+            DetectionLogStore.log(
+                screenType = screenType,
+                details = "Activity: ${activityName?.substringAfterLast('.')}",
+                actionTaken = null
+            )
         }
     }
 
@@ -76,6 +78,18 @@ class ReelsAccessibilityService : AccessibilityService() {
         currentInstance = null
         _isServiceActive.value = false
         Log.i(TAG, "ReelsAccessibilityService sonlandırıldı.")
+    }
+
+    private fun loadRulesFromAssets(): RuleSet {
+        return try {
+            val jsonStr = assets.open("rules.json").bufferedReader().use { it.readText() }
+            val loadedRules = RuleSet.fromJson(jsonStr)
+            Log.i(TAG, "Kurallar assets/rules.json dosyasından başarıyla yüklendi (v${loadedRules.version}).")
+            loadedRules
+        } catch (e: Exception) {
+            Log.w(TAG, "rules.json okunamadı, varsayılan kurallar devrede: ${e.message}")
+            RuleSet.DEFAULT
+        }
     }
 
     companion object {
@@ -92,5 +106,8 @@ class ReelsAccessibilityService : AccessibilityService() {
 
         private val _lastDetectedType = MutableStateFlow(ScreenType.UNKNOWN)
         val lastDetectedType: StateFlow<ScreenType> = _lastDetectedType.asStateFlow()
+
+        private val _ruleVersion = MutableStateFlow(1)
+        val ruleVersion: StateFlow<Int> = _ruleVersion.asStateFlow()
     }
 }

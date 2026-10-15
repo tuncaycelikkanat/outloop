@@ -44,11 +44,11 @@ Toplam v1 tahmini: yaklaşık 120 saat (8 hafta x 15 saat). Saatler kaba tahmind
 
 ### Faz 1: Algılama çekirdeği (Hafta 2-3, \~30 saat)
 
-- [ ] Ekran sınıflandırıcı: Ana akış, Reels sekmesi, DM, DM içinden açılmış oynatıcı, Keşfet, Profil (10 sa)
-- [ ] Algılama kurallarını koddan ayrı veri yapısına (gömülü JSON) taşıma, kural sürümü alanı (6 sa)
-- [ ] Yanlış pozitif azaltma: bekleme süresi, olay gürültüsünü süzme, tekrar tetiklemeyi önleme (6 sa)
-- [ ] Birim testler: kayıtlı düğüm ağacı örnekleriyle sınıflandırıcı testi (6 sa)
-- [ ] Algılama hata ayıklama günlüğü ekranı (yalnızca debug sürümünde) (2 sa)
+- [x] Ekran sınıflandırıcı: Ana akış, Reels sekmesi, DM, DM içinden açılmış oynatıcı, Keşfet, Profil (10 sa)
+- [x] Algılama kurallarını koddan ayrı veri yapısına (gömülü JSON) taşıma, kural sürümü alanı (6 sa)
+- [x] Yanlış pozitif azaltma: bekleme süresi, olay gürültüsünü süzme, tekrar tetiklemeyi önleme (6 sa)
+- [x] Birim testler: kayıtlı düğüm ağacı örnekleriyle sınıflandırıcı testi (6 sa)
+- [x] Algılama hata ayıklama günlüğü ekranı (yalnızca debug sürümünde) (2 sa)
 
 ### Faz 2: DM'den reel izni ve engelleme ekranı (Hafta 4-5, \~30 saat)
 

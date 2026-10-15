@@ -13,11 +13,13 @@ enum class ScreenType {
         get() = this == REELS_TAB || this == REELS_VIEWER
 }
 
-class ScreenClassifier {
+class ScreenClassifier(
+    var rules: RuleSet = RuleSet.DEFAULT
+) {
 
     /**
-     * Düğüm ağacı anlık görüntüsünü (snapshot) analiz ederek mevcut ekran türünü belirler.
-     * Saf fonksiyon mantığında çalışır; cihaz olmadan JVM birim testleriyle tamamen test edilebilir.
+     * Düğüm ağacı anlık görüntüsünü (snapshot) dinamik kural kümesine göre analiz ederek
+     * mevcut ekran türünü belirler. Saf Kotlin fonksiyonudur.
      */
     fun classify(snapshot: ScreenSnapshot): ScreenType {
         if (snapshot.rootNode == null) {
@@ -25,8 +27,7 @@ class ScreenClassifier {
         }
 
         // 1. KONTROL: Ana Akış (Feed) sekmesi aktif olarak seçili mi?
-        // Eğer alt bardaki feed_tab seçiliyse, kullanıcı kesinlikle Ana Sayfa'dadır.
-        // Akıştaki Reels videoları, kartlar veya hikayeler bu durumu bozamaz.
+        // Alt bardaki feed_tab seçiliyse akıştaki diğer öğeler görmezden gelinir.
         if (isFeedTabSelected(snapshot)) {
             return ScreenType.MAIN_FEED
         }
@@ -37,7 +38,6 @@ class ScreenClassifier {
         }
 
         // 3. KONTROL: Alt sekme çubuğundaki gerçek Reels sekmesi mi seçili?
-        // Instagram'da alt barın asıl Reels sekmesi 'clips_tab' ID'sine sahiptir.
         if (isClipsTabSelected(snapshot)) {
             return ScreenType.REELS_TAB
         }
@@ -47,13 +47,22 @@ class ScreenClassifier {
             return ScreenType.DIRECT_MESSAGES
         }
 
-        // 5. KONTROL: Tam ekran modal Reels Oynatıcısı mı?
-        // Alt sekme çubuğu yokken veya modal aktivitede açılan Reels izleyicisi.
+        // 5. KONTROL: Keşfet (Explore) sekmesi mi seçili?
+        if (isExploreSelected(snapshot)) {
+            return ScreenType.EXPLORE
+        }
+
+        // 6. KONTROL: Profil sekmesi mi seçili?
+        if (isProfileSelected(snapshot)) {
+            return ScreenType.PROFILE
+        }
+
+        // 7. KONTROL: Tam ekran modal Reels Oynatıcısı mı?
         if (isClipsViewer(snapshot)) {
             return ScreenType.REELS_VIEWER
         }
 
-        // 6. KONTROL: Genel Ana Akış belirteçleri
+        // 8. KONTROL: Genel Ana Akış belirteçleri
         if (isMainFeed(snapshot)) {
             return ScreenType.MAIN_FEED
         }
@@ -65,57 +74,86 @@ class ScreenClassifier {
         return snapshot.findNodes { node ->
             val id = node.viewId ?: ""
             val desc = node.contentDescription ?: ""
-            val isHomeId = id.contains("feed_tab", ignoreCase = true) || id.contains("tab_home", ignoreCase = true)
-            val isHomeDesc = desc.equals("Home", ignoreCase = true) || desc.equals("Ana Sayfa", ignoreCase = true)
-            (isHomeId || isHomeDesc) && node.isSelected
+            val matchesId = rules.feed.tabIds.any { id.contains(it, ignoreCase = true) }
+            val matchesDesc = rules.feed.tabDescriptions.any { desc.equals(it, ignoreCase = true) }
+            (matchesId || matchesDesc) && node.isSelected
         }.isNotEmpty()
     }
 
     private fun isClipsTabSelected(snapshot: ScreenSnapshot): Boolean {
         return snapshot.findNodes { node ->
             val id = node.viewId ?: ""
-            val isClipsTabId = id.contains("clips_tab", ignoreCase = true) || id.contains("tab_clips", ignoreCase = true)
-            isClipsTabId && node.isSelected
+            val desc = node.contentDescription ?: ""
+
+            // Hariç tutulacaklar kontrolü (örn. "story", "tray")
+            if (rules.reelsTab.excludedDescriptions.any { desc.contains(it, ignoreCase = true) }) {
+                return@findNodes false
+            }
+
+            val matchesId = rules.reelsTab.tabIds.any { id.contains(it, ignoreCase = true) }
+            matchesId && node.isSelected
         }.isNotEmpty()
     }
 
     private fun isStoryScreen(snapshot: ScreenSnapshot): Boolean {
         val activity = snapshot.currentActivity ?: ""
-        if (activity.contains("ReelViewerActivity", ignoreCase = true)) {
-            return true
-        }
-        return snapshot.containsId("reel_viewer_layout") || snapshot.containsId("story_viewer")
+        val matchesActivity = rules.story.activities.any { activity.contains(it, ignoreCase = true) }
+        if (matchesActivity) return true
+
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            rules.story.layoutIds.any { id.contains(it, ignoreCase = true) }
+        }.isNotEmpty()
+    }
+
+    private fun isDirectMessageScreen(snapshot: ScreenSnapshot): Boolean {
+        val activity = snapshot.currentActivity ?: ""
+        val matchesActivity = rules.directMessages.activityKeywords.any { activity.contains(it, ignoreCase = true) }
+        if (matchesActivity) return true
+
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            rules.directMessages.viewIds.any { id.contains(it, ignoreCase = true) }
+        }.isNotEmpty()
+    }
+
+    private fun isExploreSelected(snapshot: ScreenSnapshot): Boolean {
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val desc = node.contentDescription ?: ""
+            val matchesId = rules.explore.tabIds.any { id.contains(it, ignoreCase = true) }
+            val matchesDesc = rules.explore.tabDescriptions.any { desc.equals(it, ignoreCase = true) }
+            (matchesId || matchesDesc) && node.isSelected
+        }.isNotEmpty()
+    }
+
+    private fun isProfileSelected(snapshot: ScreenSnapshot): Boolean {
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val desc = node.contentDescription ?: ""
+            val matchesId = rules.profile.tabIds.any { id.contains(it, ignoreCase = true) }
+            val matchesDesc = rules.profile.tabDescriptions.any { desc.equals(it, ignoreCase = true) }
+            (matchesId || matchesDesc) && node.isSelected
+        }.isNotEmpty()
     }
 
     private fun isClipsViewer(snapshot: ScreenSnapshot): Boolean {
         val activity = snapshot.currentActivity ?: ""
-        val isModalActivity = activity.contains("ModalActivity", ignoreCase = true) ||
-                              activity.contains("TransparentModalActivity", ignoreCase = true)
-
-        val knownClipsViewerIds = listOf(
-            "clips_viewer_view_pager",
-            "clips_video_container",
-            "clips_media_interactivity_container"
-        )
+        val isModalActivity = rules.reelsViewer.modalActivities.any { activity.contains(it, ignoreCase = true) }
 
         val hasClipsNode = snapshot.findNodes { node ->
             val id = node.viewId ?: ""
-            knownClipsViewerIds.any { id.contains(it, ignoreCase = true) }
+            rules.reelsViewer.viewerIds.any { id.contains(it, ignoreCase = true) }
         }.isNotEmpty()
 
-        // Alt bar feed_tab'ı görünür ve seçiliyken asla bağımsız Clips Viewer sayılmaz
         val isFeedActive = isFeedTabSelected(snapshot)
         return hasClipsNode && !isFeedActive && (isModalActivity || !snapshot.containsId("feed_tab"))
     }
 
-    private fun isDirectMessageScreen(snapshot: ScreenSnapshot): Boolean {
-        return snapshot.containsId("direct_") ||
-               snapshot.currentActivity?.contains("Direct", ignoreCase = true) == true
-    }
-
     private fun isMainFeed(snapshot: ScreenSnapshot): Boolean {
-        return snapshot.containsId("feed") ||
-               snapshot.containsId("action_bar_home") ||
-               snapshot.containsId("swipeable_tab_view_pager")
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            rules.feed.containerIds.any { id.contains(it, ignoreCase = true) }
+        }.isNotEmpty()
     }
 }

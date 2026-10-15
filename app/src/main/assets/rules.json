@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "minAppVersion": "0.1.0",
+  "screens": {
+    "feed": {
+      "tabIds": ["feed_tab", "tab_home"],
+      "tabDescriptions": ["Home", "Ana Sayfa", "Akış", "Feed"],
+      "containerIds": ["swipeable_tab_view_pager", "action_bar_home"]
+    },
+    "reelsTab": {
+      "tabIds": ["clips_tab", "tab_clips", "reels_tab"],
+      "tabDescriptions": ["Reels"],
+      "excludedDescriptions": ["story", "tray"]
+    },
+    "reelsViewer": {
+      "viewerIds": [
+        "clips_viewer_view_pager",
+        "clips_video_container",
+        "clips_media_interactivity_container",
+        "clips_swipe_refresh_container",
+        "clips_video_layout"
+      ],
+      "modalActivities": [
+        "ModalActivity",
+        "TransparentModalActivity"
+      ]
+    },
+    "story": {
+      "activities": ["ReelViewerActivity"],
+      "layoutIds": ["reel_viewer_layout", "story_viewer"]
+    },
+    "directMessages": {
+      "activityKeywords": ["Direct"],
+      "viewIds": ["direct_", "thread_", "message_list"]
+    },
+    "explore": {
+      "tabIds": ["search_tab", "tab_search"],
+      "tabDescriptions": ["Search", "Ara", "Ara ve Keşfet", "Explore"]
+    },
+    "profile": {
+      "tabIds": ["profile_tab", "tab_profile", "tab_avatar"],
+      "tabDescriptions": ["Profile", "Profil"]
+    }
+  }
+}
