@@ -134,7 +134,7 @@ class ReelsAccessibilityService : AccessibilityService() {
         private val _lastDetectedType = MutableStateFlow(ScreenType.MAIN_FEED)
         val lastDetectedType: StateFlow<ScreenType> = _lastDetectedType.asStateFlow()
 
-        private val _ruleVersion = MutableStateFlow(2)
+        private val _ruleVersion = MutableStateFlow(4)
         val ruleVersion: StateFlow<Int> = _ruleVersion.asStateFlow()
     }
 }

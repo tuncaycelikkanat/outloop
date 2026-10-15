@@ -77,10 +77,19 @@ data class ScreenSnapshot(
             )
         }
 
+        private val STRUCTURAL_WORDS = setOf(
+            "reels", "reel", "akış", "feed", "ana sayfa", "home",
+            "keşfet", "explore", "ara", "search", "ara ve keşfet",
+            "profil", "profile", "gönderiler", "posts", "profili düzenle", "edit profile",
+            "mesajlar", "messages", "sohbetler", "chats", "sohbet", "chat",
+            "birincil", "primary", "genel", "general", "istekler", "requests",
+            "mesaj gönder", "send message", "mesaj yaz"
+        )
+
         private fun isStructuralText(text: String?): Boolean {
             if (text.isNullOrBlank()) return false
-            val lower = text.lowercase()
-            return lower == "reels" || lower == "reel" || lower == "akış" || lower == "feed"
+            val lower = text.trim().lowercase()
+            return STRUCTURAL_WORDS.any { lower == it || lower.startsWith(it) }
         }
     }
 }

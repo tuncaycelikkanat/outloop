@@ -170,20 +170,38 @@ class ScreenClassifier(
     }
 
     private fun isDirectMessageScreen(snapshot: ScreenSnapshot): Boolean {
-        // Ana Sayfa sekmesi seçiliyse ASLA DM ekranı olamaz!
-        if (isFeedTabSelected(snapshot)) {
+        // 1. Ana Sayfa, Keşfet veya Profil alt çubuğu mevcutsa veya Ana Sayfa sekmesi seçiliyse ASLA DM ekranı olamaz!
+        if (snapshot.containsId("feed_tab") || isFeedTabSelected(snapshot)) {
             return false
         }
 
-        val activity = snapshot.currentActivity ?: ""
-        val matchesActivity = rules.directMessages.activityKeywords.any { 
-            activity.contains(it, ignoreCase = true) 
+        // 2. Reels oynatıcı veya hikaye ekranındaysak DM sayılmaz
+        if (snapshot.containsId("clips_viewer_view_pager") || snapshot.containsId("reel_viewer_layout")) {
+            return false
         }
-        if (matchesActivity) return true
 
-        return snapshot.findNodes { node ->
+        // 3. Aktivite adı kontrolü
+        val activity = snapshot.currentActivity ?: ""
+        if (rules.directMessages.activityKeywords.any { activity.contains(it, ignoreCase = true) }) {
+            return true
+        }
+
+        // 4. Görünüm ID'leri kontrolü (direct_, thread_, message_composer, notes_tray vb.)
+        val hasDmViewId = snapshot.findNodes { node ->
             val id = node.viewId ?: ""
+            if (id.contains("direct_share", ignoreCase = true)) return@findNodes false
             rules.directMessages.viewIds.any { id.contains(it, ignoreCase = true) }
+        }.isNotEmpty()
+
+        if (hasDmViewId) return true
+
+        // 5. Metin ve İçerik Açıklaması Kontrolleri (Mesajlar, Sohbetler vb.)
+        return snapshot.findNodes { node ->
+            val text = node.text ?: ""
+            val desc = node.contentDescription ?: ""
+            rules.directMessages.textKeywords.any { kw ->
+                text.contains(kw, ignoreCase = true) || desc.contains(kw, ignoreCase = true)
+            }
         }.isNotEmpty()
     }
 

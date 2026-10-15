@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "minAppVersion": "0.1.0",
   "screens": {
     "feed": {
@@ -26,8 +26,9 @@
       "layoutIds": ["reel_viewer_layout", "story_viewer"]
     },
     "directMessages": {
-      "activityKeywords": ["DirectMainActivity", "DirectThreadActivity", "DirectInboxActivity", "DirectThread"],
-      "viewIds": ["direct_inbox_fragment", "direct_thread_layout", "message_list_recycler_view", "direct_messages_container"]
+      "activityKeywords": ["DirectMainActivity", "DirectThreadActivity", "DirectInboxActivity", "DirectThread", "Direct"],
+      "viewIds": ["direct_", "thread_", "message_composer", "row_thread", "direct_inbox", "thread_list", "notes_tray", "composer"],
+      "textKeywords": ["mesajlar", "messages", "sohbetler", "chats", "birincil", "primary", "genel", "general", "istekler", "requests"]
     },
     "explore": {
       "tabIds": ["search_tab", "tab_search", "explore_tab"],

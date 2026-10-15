@@ -30,8 +30,9 @@ data class StoryRule(
 )
 
 data class DirectMessagesRule(
-    val activityKeywords: List<String> = listOf("DirectMainActivity", "DirectThreadActivity", "DirectInboxActivity", "DirectThread"),
-    val viewIds: List<String> = listOf("direct_inbox_fragment", "direct_thread_layout", "message_list_recycler_view", "direct_messages_container")
+    val activityKeywords: List<String> = listOf("DirectMainActivity", "DirectThreadActivity", "DirectInboxActivity", "DirectThread", "Direct"),
+    val viewIds: List<String> = listOf("direct_", "thread_", "message_composer", "row_thread", "direct_inbox", "thread_list", "notes_tray", "composer"),
+    val textKeywords: List<String> = listOf("mesajlar", "messages", "sohbetler", "chats", "birincil", "primary", "genel", "general", "istekler", "requests")
 )
 
 data class ExploreRule(
@@ -47,7 +48,7 @@ data class ProfileRule(
 )
 
 data class RuleSet(
-    val version: Int = 3,
+    val version: Int = 4,
     val minAppVersion: String = "0.1.0",
     val feed: FeedRule = FeedRule(),
     val reelsTab: ReelsTabRule = ReelsTabRule(),
@@ -96,7 +97,8 @@ data class RuleSet(
                 val dmObj = screens.optJSONObject("directMessages")
                 val dm = DirectMessagesRule(
                     activityKeywords = dmObj?.optStringList("activityKeywords") ?: DEFAULT.directMessages.activityKeywords,
-                    viewIds = dmObj?.optStringList("viewIds") ?: DEFAULT.directMessages.viewIds
+                    viewIds = dmObj?.optStringList("viewIds") ?: DEFAULT.directMessages.viewIds,
+                    textKeywords = dmObj?.optStringList("textKeywords") ?: DEFAULT.directMessages.textKeywords
                 )
 
                 val exploreObj = screens.optJSONObject("explore")

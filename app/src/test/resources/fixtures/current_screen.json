@@ -1,0 +1,851 @@
+{
+  "class": "",
+  "id": "",
+  "desc": "",
+  "text": "",
+  "selected": false,
+  "clickable": false,
+  "bounds": "",
+  "children": [
+    {
+      "class": "android.widget.FrameLayout",
+      "id": "",
+      "desc": "",
+      "text": "",
+      "selected": false,
+      "clickable": false,
+      "bounds": "[0,0][1080,2340]",
+      "children": [
+        {
+          "class": "android.widget.LinearLayout",
+          "id": "",
+          "desc": "",
+          "text": "",
+          "selected": false,
+          "clickable": false,
+          "bounds": "[0,0][1080,2340]",
+          "children": [
+            {
+              "class": "android.widget.FrameLayout",
+              "id": "",
+              "desc": "",
+              "text": "",
+              "selected": false,
+              "clickable": false,
+              "bounds": "[0,0][1080,2340]",
+              "children": [
+                {
+                  "class": "android.widget.LinearLayout",
+                  "id": "com.instagram.android:id/action_bar_root",
+                  "desc": "",
+                  "text": "",
+                  "selected": false,
+                  "clickable": false,
+                  "bounds": "[0,0][1080,2340]",
+                  "children": [
+                    {
+                      "class": "android.widget.FrameLayout",
+                      "id": "android:id/content",
+                      "desc": "",
+                      "text": "",
+                      "selected": false,
+                      "clickable": false,
+                      "bounds": "[0,0][1080,2340]",
+                      "children": [
+                        {
+                          "class": "android.widget.FrameLayout",
+                          "id": "",
+                          "desc": "",
+                          "text": "",
+                          "selected": false,
+                          "clickable": false,
+                          "bounds": "[0,0][1080,2340]",
+                          "children": [
+                            {
+                              "class": "android.widget.FrameLayout",
+                              "id": "com.instagram.android:id/swipe_navigation_container",
+                              "desc": "",
+                              "text": "",
+                              "selected": false,
+                              "clickable": false,
+                              "bounds": "[0,0][1080,2340]",
+                              "children": [
+                                {
+                                  "class": "android.view.ViewGroup",
+                                  "id": "com.instagram.android:id/layout_container_center_right_coordinator_layout",
+                                  "desc": "",
+                                  "text": "",
+                                  "selected": false,
+                                  "clickable": false,
+                                  "bounds": "[0,0][1080,2295]",
+                                  "children": [
+                                    {
+                                      "class": "android.widget.FrameLayout",
+                                      "id": "com.instagram.android:id/layout_container_right",
+                                      "desc": "",
+                                      "text": "",
+                                      "selected": false,
+                                      "clickable": false,
+                                      "bounds": "[0,81][1080,2295]"
+                                    },
+                                    {
+                                      "class": "android.widget.FrameLayout",
+                                      "id": "com.instagram.android:id/activity_and_camera_shared_views_main_container",
+                                      "desc": "",
+                                      "text": "",
+                                      "selected": false,
+                                      "clickable": false,
+                                      "bounds": "[0,81][1080,2295]"
+                                    },
+                                    {
+                                      "class": "android.view.ViewGroup",
+                                      "id": "com.instagram.android:id/layout_container_main_panel",
+                                      "desc": "",
+                                      "text": "",
+                                      "selected": false,
+                                      "clickable": false,
+                                      "bounds": "[0,81][1080,2295]",
+                                      "children": [
+                                        {
+                                          "class": "android.widget.FrameLayout",
+                                          "id": "com.instagram.android:id/layout_container_main_wrapper",
+                                          "desc": "",
+                                          "text": "",
+                                          "selected": false,
+                                          "clickable": false,
+                                          "bounds": "[0,81][1080,2295]",
+                                          "children": [
+                                            {
+                                              "class": "android.widget.FrameLayout",
+                                              "id": "com.instagram.android:id/layout_container_main",
+                                              "desc": "",
+                                              "text": "",
+                                              "selected": false,
+                                              "clickable": false,
+                                              "bounds": "[0,81][1080,2295]"
+                                            },
+                                            {
+                                              "class": "androidx.viewpager.widget.ViewPager",
+                                              "id": "com.instagram.android:id/swipeable_tab_view_pager",
+                                              "desc": "",
+                                              "text": "",
+                                              "selected": false,
+                                              "clickable": false,
+                                              "bounds": "[0,81][1080,2295]",
+                                              "children": [
+                                                {
+                                                  "class": "androidx.recyclerview.widget.RecyclerView",
+                                                  "id": "com.instagram.android:id/swipeable_nav_view_pager_inner_recycler_view",
+                                                  "desc": "",
+                                                  "text": "",
+                                                  "selected": false,
+                                                  "clickable": false,
+                                                  "bounds": "[0,81][1080,2295]",
+                                                  "children": [
+                                                    {
+                                                      "class": "android.widget.FrameLayout",
+                                                      "id": "",
+                                                      "desc": "",
+                                                      "text": "",
+                                                      "selected": false,
+                                                      "clickable": false,
+                                                      "bounds": "[0,81][1080,2295]",
+                                                      "children": [
+                                                        {
+                                                          "class": "android.widget.FrameLayout",
+                                                          "id": "com.instagram.android:id/layout_container_swipeable",
+                                                          "desc": "",
+                                                          "text": "",
+                                                          "selected": false,
+                                                          "clickable": false,
+                                                          "bounds": "[0,81][1080,2295]",
+                                                          "children": [
+                                                            {
+                                                              "class": "android.widget.FrameLayout",
+                                                              "id": "com.instagram.android:id/root_clips_layout",
+                                                              "desc": "",
+                                                              "text": "",
+                                                              "selected": false,
+                                                              "clickable": false,
+                                                              "bounds": "[0,81][1080,2295]",
+                                                              "children": [
+                                                                {
+                                                                  "class": "android.widget.LinearLayout",
+                                                                  "id": "com.instagram.android:id/clips_linear_layout_container",
+                                                                  "desc": "",
+                                                                  "text": "",
+                                                                  "selected": false,
+                                                                  "clickable": false,
+                                                                  "bounds": "[0,81][1080,2295]",
+                                                                  "children": [
+                                                                    {
+                                                                      "class": "android.widget.FrameLayout",
+                                                                      "id": "com.instagram.android:id/gesture_manager",
+                                                                      "desc": "",
+                                                                      "text": "",
+                                                                      "selected": false,
+                                                                      "clickable": false,
+                                                                      "bounds": "[0,81][1080,2115]",
+                                                                      "children": [
+                                                                        {
+                                                                          "class": "android.widget.FrameLayout",
+                                                                          "id": "com.instagram.android:id/clips_viewer_container",
+                                                                          "desc": "",
+                                                                          "text": "",
+                                                                          "selected": false,
+                                                                          "clickable": false,
+                                                                          "bounds": "[0,81][1080,2115]",
+                                                                          "children": [
+                                                                            {
+                                                                              "class": "android.view.ViewGroup",
+                                                                              "id": "com.instagram.android:id/clips_swipe_refresh_container",
+                                                                              "desc": "",
+                                                                              "text": "",
+                                                                              "selected": false,
+                                                                              "clickable": false,
+                                                                              "bounds": "[0,81][1080,2115]",
+                                                                              "children": [
+                                                                                {
+                                                                                  "class": "androidx.viewpager.widget.ViewPager",
+                                                                                  "id": "com.instagram.android:id/clips_viewer_view_pager",
+                                                                                  "desc": "",
+                                                                                  "text": "",
+                                                                                  "selected": false,
+                                                                                  "clickable": false,
+                                                                                  "bounds": "[0,81][1080,2115]",
+                                                                                  "children": [
+                                                                                    {
+                                                                                      "class": "androidx.recyclerview.widget.RecyclerView",
+                                                                                      "id": "",
+                                                                                      "desc": "",
+                                                                                      "text": "",
+                                                                                      "selected": false,
+                                                                                      "clickable": false,
+                                                                                      "bounds": "[0,81][1080,2115]",
+                                                                                      "children": [
+                                                                                        {
+                                                                                          "class": "android.widget.FrameLayout",
+                                                                                          "id": "",
+                                                                                          "desc": "",
+                                                                                          "text": "",
+                                                                                          "selected": false,
+                                                                                          "clickable": false,
+                                                                                          "bounds": "[0,81][1080,2115]",
+                                                                                          "children": [
+                                                                                            {
+                                                                                              "class": "android.view.ViewGroup",
+                                                                                              "id": "",
+                                                                                              "desc": "",
+                                                                                              "text": "",
+                                                                                              "selected": false,
+                                                                                              "clickable": false,
+                                                                                              "bounds": "[0,81][1080,2115]",
+                                                                                              "children": [
+                                                                                                {
+                                                                                                  "class": "android.view.ViewGroup",
+                                                                                                  "id": "",
+                                                                                                  "desc": "",
+                                                                                                  "text": "",
+                                                                                                  "selected": false,
+                                                                                                  "clickable": false,
+                                                                                                  "bounds": "[0,81][1080,2115]",
+                                                                                                  "children": [
+                                                                                                    {
+                                                                                                      "class": "android.view.ViewGroup",
+                                                                                                      "id": "com.instagram.android:id/clips_item_overlay_component",
+                                                                                                      "desc": "",
+                                                                                                      "text": "",
+                                                                                                      "selected": false,
+                                                                                                      "clickable": false,
+                                                                                                      "bounds": "[0,81][1080,2115]",
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "class": "android.widget.FrameLayout",
+                                                                                                          "id": "",
+                                                                                                          "desc": "",
+                                                                                                          "text": "",
+                                                                                                          "selected": false,
+                                                                                                          "clickable": false,
+                                                                                                          "bounds": "[0,81][1080,2115]",
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "class": "android.widget.FrameLayout",
+                                                                                                              "id": "",
+                                                                                                              "desc": "",
+                                                                                                              "text": "",
+                                                                                                              "selected": false,
+                                                                                                              "clickable": false,
+                                                                                                              "bounds": "[0,81][1080,2115]"
+                                                                                                            }
+                                                                                                          ]
+                                                                                                        },
+                                                                                                        {
+                                                                                                          "class": "android.view.ViewGroup",
+                                                                                                          "id": "",
+                                                                                                          "desc": "",
+                                                                                                          "text": "",
+                                                                                                          "selected": false,
+                                                                                                          "clickable": false,
+                                                                                                          "bounds": "[540,1098][540,1098]"
+                                                                                                        }
+                                                                                                      ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                      "class": "android.view.ViewGroup",
+                                                                                                      "id": "",
+                                                                                                      "desc": "",
+                                                                                                      "text": "",
+                                                                                                      "selected": false,
+                                                                                                      "clickable": false,
+                                                                                                      "bounds": "[0,81][1080,2115]",
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "class": "android.view.ViewGroup",
+                                                                                                          "id": "com.instagram.android:id/clips_media_info_component",
+                                                                                                          "desc": "",
+                                                                                                          "text": "",
+                                                                                                          "selected": false,
+                                                                                                          "clickable": false,
+                                                                                                          "bounds": "[0,1763][924,2115]",
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "class": "android.view.ViewGroup",
+                                                                                                              "id": "",
+                                                                                                              "desc": "",
+                                                                                                              "text": "",
+                                                                                                              "selected": false,
+                                                                                                              "clickable": false,
+                                                                                                              "bounds": "[0,1763][924,2073]",
+                                                                                                              "children": [
+                                                                                                                {
+                                                                                                                  "class": "android.view.ViewGroup",
+                                                                                                                  "id": "",
+                                                                                                                  "desc": "",
+                                                                                                                  "text": "",
+                                                                                                                  "selected": false,
+                                                                                                                  "clickable": false,
+                                                                                                                  "bounds": "[0,1763][924,2073]",
+                                                                                                                  "children": [
+                                                                                                                    {
+                                                                                                                      "class": "android.view.ViewGroup",
+                                                                                                                      "id": "",
+                                                                                                                      "desc": "",
+                                                                                                                      "text": "",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": false,
+                                                                                                                      "bounds": "[48,1763][924,2073]",
+                                                                                                                      "children": [
+                                                                                                                        {
+                                                                                                                          "class": "android.view.ViewGroup",
+                                                                                                                          "id": "",
+                                                                                                                          "desc": "",
+                                                                                                                          "text": "",
+                                                                                                                          "selected": false,
+                                                                                                                          "clickable": false,
+                                                                                                                          "bounds": "[48,1763][924,1921]",
+                                                                                                                          "children": [
+                                                                                                                            {
+                                                                                                                              "class": "android.view.ViewGroup",
+                                                                                                                              "id": "com.instagram.android:id/clips_author_info_component",
+                                                                                                                              "desc": "",
+                                                                                                                              "text": "",
+                                                                                                                              "selected": false,
+                                                                                                                              "clickable": true,
+                                                                                                                              "bounds": "[48,1763][590,1921]",
+                                                                                                                              "children": [
+                                                                                                                                {
+                                                                                                                                  "class": "android.widget.ImageView",
+                                                                                                                                  "id": "com.instagram.android:id/clips_author_profile_pic",
+                                                                                                                                  "desc": "Profile picture of 9gofy",
+                                                                                                                                  "text": "",
+                                                                                                                                  "selected": false,
+                                                                                                                                  "clickable": true,
+                                                                                                                                  "bounds": "[48,1803][156,1911]"
+                                                                                                                                },
+                                                                                                                                {
+                                                                                                                                  "class": "android.view.ViewGroup",
+                                                                                                                                  "id": "",
+                                                                                                                                  "desc": "",
+                                                                                                                                  "text": "",
+                                                                                                                                  "selected": false,
+                                                                                                                                  "clickable": true,
+                                                                                                                                  "bounds": "[156,1805][314,1859]",
+                                                                                                                                  "children": [
+                                                                                                                                    {
+                                                                                                                                      "class": "android.widget.Button",
+                                                                                                                                      "id": "com.instagram.android:id/clips_author_username",
+                                                                                                                                      "desc": "9gofy",
+                                                                                                                                      "text": "9gofy",
+                                                                                                                                      "selected": false,
+                                                                                                                                      "clickable": true,
+                                                                                                                                      "bounds": "[156,1805][314,1859]"
+                                                                                                                                    }
+                                                                                                                                  ]
+                                                                                                                                },
+                                                                                                                                {
+                                                                                                                                  "class": "android.widget.Button",
+                                                                                                                                  "id": "",
+                                                                                                                                  "desc": "Teoman · İstanbul'da Sonbahar",
+                                                                                                                                  "text": "",
+                                                                                                                                  "selected": false,
+                                                                                                                                  "clickable": true,
+                                                                                                                                  "bounds": "[156,1867][578,1910]",
+                                                                                                                                  "children": [
+                                                                                                                                    {
+                                                                                                                                      "class": "android.widget.ImageView",
+                                                                                                                                      "id": "",
+                                                                                                                                      "desc": "",
+                                                                                                                                      "text": "",
+                                                                                                                                      "selected": false,
+                                                                                                                                      "clickable": false,
+                                                                                                                                      "bounds": "[180,1867][578,1910]"
+                                                                                                                                    }
+                                                                                                                                  ]
+                                                                                                                                }
+                                                                                                                              ]
+                                                                                                                            },
+                                                                                                                            {
+                                                                                                                              "class": "android.view.ViewGroup",
+                                                                                                                              "id": "",
+                                                                                                                              "desc": "",
+                                                                                                                              "text": "",
+                                                                                                                              "selected": false,
+                                                                                                                              "clickable": true,
+                                                                                                                              "bounds": "[590,1793][853,1921]",
+                                                                                                                              "children": [
+                                                                                                                                {
+                                                                                                                                  "class": "android.widget.TextView",
+                                                                                                                                  "id": "com.instagram.android:id/inline_follow_button",
+                                                                                                                                  "desc": "Follow 9Gofy",
+                                                                                                                                  "text": "Follow",
+                                                                                                                                  "selected": false,
+                                                                                                                                  "clickable": true,
+                                                                                                                                  "bounds": "[608,1817][811,1903]"
+                                                                                                                                }
+                                                                                                                              ]
+                                                                                                                            }
+                                                                                                                          ]
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                          "class": "android.view.ViewGroup",
+                                                                                                                          "id": "com.instagram.android:id/clips_caption_component",
+                                                                                                                          "desc": "",
+                                                                                                                          "text": "",
+                                                                                                                          "selected": false,
+                                                                                                                          "clickable": false,
+                                                                                                                          "bounds": "[48,1921][924,2073]",
+                                                                                                                          "children": [
+                                                                                                                            {
+                                                                                                                              "class": "android.widget.ScrollView",
+                                                                                                                              "id": "",
+                                                                                                                              "desc": "",
+                                                                                                                              "text": "",
+                                                                                                                              "selected": false,
+                                                                                                                              "clickable": false,
+                                                                                                                              "bounds": "[48,1921][924,2073]",
+                                                                                                                              "children": [
+                                                                                                                                {
+                                                                                                                                  "class": "android.view.ViewGroup",
+                                                                                                                                  "id": "",
+                                                                                                                                  "desc": "",
+                                                                                                                                  "text": "",
+                                                                                                                                  "selected": false,
+                                                                                                                                  "clickable": false,
+                                                                                                                                  "bounds": "[48,1933][924,2073]",
+                                                                                                                                  "children": [
+                                                                                                                                    {
+                                                                                                                                      "class": "android.view.ViewGroup",
+                                                                                                                                      "id": "",
+                                                                                                                                      "desc": "あらゆる追いかけっこを繰り広げる！「トムとジェリー 公式 …",
+                                                                                                                                      "text": "",
+                                                                                                                                      "selected": false,
+                                                                                                                                      "clickable": true,
+                                                                                                                                      "bounds": "[48,1933][924,2073]"
+                                                                                                                                    }
+                                                                                                                                  ]
+                                                                                                                                }
+                                                                                                                              ]
+                                                                                                                            }
+                                                                                                                          ]
+                                                                                                                        }
+                                                                                                                      ]
+                                                                                                                    }
+                                                                                                                  ]
+                                                                                                                }
+                                                                                                              ]
+                                                                                                            }
+                                                                                                          ]
+                                                                                                        },
+                                                                                                        {
+                                                                                                          "class": "android.view.ViewGroup",
+                                                                                                          "id": "com.instagram.android:id/clips_ufi_component",
+                                                                                                          "desc": "",
+                                                                                                          "text": "",
+                                                                                                          "selected": false,
+                                                                                                          "clickable": false,
+                                                                                                          "bounds": "[924,925][1080,2115]",
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "class": "android.view.ViewGroup",
+                                                                                                              "id": "",
+                                                                                                              "desc": "",
+                                                                                                              "text": "",
+                                                                                                              "selected": false,
+                                                                                                              "clickable": false,
+                                                                                                              "bounds": "[924,925][1056,2067]",
+                                                                                                              "children": [
+                                                                                                                {
+                                                                                                                  "class": "android.view.ViewGroup",
+                                                                                                                  "id": "",
+                                                                                                                  "desc": "",
+                                                                                                                  "text": "",
+                                                                                                                  "selected": false,
+                                                                                                                  "clickable": false,
+                                                                                                                  "bounds": "[924,925][1056,2067]",
+                                                                                                                  "children": [
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.ImageView",
+                                                                                                                      "id": "com.instagram.android:id/like_button",
+                                                                                                                      "desc": "Like",
+                                                                                                                      "text": "",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,925][1056,1057]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.Button",
+                                                                                                                      "id": "com.instagram.android:id/like_count",
+                                                                                                                      "desc": "Like number is 144409. View likes",
+                                                                                                                      "text": "Like number is 144409. View likes",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1057][1056,1127]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.ImageView",
+                                                                                                                      "id": "com.instagram.android:id/comment_button",
+                                                                                                                      "desc": "Comment",
+                                                                                                                      "text": "",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1127][1056,1259]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.Button",
+                                                                                                                      "id": "com.instagram.android:id/comment_count",
+                                                                                                                      "desc": "Comment number is 548. View comments",
+                                                                                                                      "text": "Comment number is 548. View comments",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1259][1056,1329]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.ImageView",
+                                                                                                                      "id": "",
+                                                                                                                      "desc": "Repost",
+                                                                                                                      "text": "",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1329][1056,1461]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.Button",
+                                                                                                                      "id": "com.instagram.android:id/repost_count",
+                                                                                                                      "desc": "Reposted 6580 times",
+                                                                                                                      "text": "Reposted 6580 times",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1461][1056,1531]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.ImageView",
+                                                                                                                      "id": "com.instagram.android:id/direct_share_button",
+                                                                                                                      "desc": "Share",
+                                                                                                                      "text": "",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1531][1056,1663]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.Button",
+                                                                                                                      "id": "com.instagram.android:id/ufi_text_component",
+                                                                                                                      "desc": "Reshare number is 28107",
+                                                                                                                      "text": "Reshare number is 28107",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1663][1056,1733]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.ImageView",
+                                                                                                                      "id": "com.instagram.android:id/save_button",
+                                                                                                                      "desc": "Save",
+                                                                                                                      "text": "",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1733][1056,1865]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.Button",
+                                                                                                                      "id": "com.instagram.android:id/save_count",
+                                                                                                                      "desc": "Save number is 10102",
+                                                                                                                      "text": "Save number is 10102",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1865][1056,1935]"
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                      "class": "android.widget.ImageView",
+                                                                                                                      "id": "com.instagram.android:id/clips_ufi_more_button_component",
+                                                                                                                      "desc": "More",
+                                                                                                                      "text": "",
+                                                                                                                      "selected": false,
+                                                                                                                      "clickable": true,
+                                                                                                                      "bounds": "[924,1935][1056,2067]"
+                                                                                                                    }
+                                                                                                                  ]
+                                                                                                                }
+                                                                                                              ]
+                                                                                                            }
+                                                                                                          ]
+                                                                                                        }
+                                                                                                      ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                      "class": "android.view.ViewGroup",
+                                                                                                      "id": "com.instagram.android:id/clips_bottom_legibility_gradient_component",
+                                                                                                      "desc": "",
+                                                                                                      "text": "",
+                                                                                                      "selected": false,
+                                                                                                      "clickable": false,
+                                                                                                      "bounds": "[0,1482][1080,2115]",
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "class": "android.view.ViewGroup",
+                                                                                                          "id": "",
+                                                                                                          "desc": "",
+                                                                                                          "text": "",
+                                                                                                          "selected": false,
+                                                                                                          "clickable": false,
+                                                                                                          "bounds": "[0,1482][1080,2115]"
+                                                                                                        }
+                                                                                                      ]
+                                                                                                    }
+                                                                                                  ]
+                                                                                                },
+                                                                                                {
+                                                                                                  "class": "android.view.ViewGroup",
+                                                                                                  "id": "com.instagram.android:id/clips_media_component",
+                                                                                                  "desc": "Reel by 9gofy. Double tap to play or pause.",
+                                                                                                  "text": "",
+                                                                                                  "selected": false,
+                                                                                                  "clickable": false,
+                                                                                                  "bounds": "[0,81][1080,2115]",
+                                                                                                  "children": [
+                                                                                                    {
+                                                                                                      "class": "android.view.ViewGroup",
+                                                                                                      "id": "com.instagram.android:id/clips_single_media_component",
+                                                                                                      "desc": "",
+                                                                                                      "text": "",
+                                                                                                      "selected": false,
+                                                                                                      "clickable": false,
+                                                                                                      "bounds": "[0,81][1080,2115]",
+                                                                                                      "children": [
+                                                                                                        {
+                                                                                                          "class": "android.view.ViewGroup",
+                                                                                                          "id": "com.instagram.android:id/clips_single_image_media_content",
+                                                                                                          "desc": "",
+                                                                                                          "text": "",
+                                                                                                          "selected": false,
+                                                                                                          "clickable": false,
+                                                                                                          "bounds": "[0,249][1080,1689]",
+                                                                                                          "children": [
+                                                                                                            {
+                                                                                                              "class": "android.widget.FrameLayout",
+                                                                                                              "id": "com.instagram.android:id/clips_viewer_video_layout",
+                                                                                                              "desc": "",
+                                                                                                              "text": "",
+                                                                                                              "selected": false,
+                                                                                                              "clickable": false,
+                                                                                                              "bounds": "[0,249][1080,1689]",
+                                                                                                              "children": [
+                                                                                                                {
+                                                                                                                  "class": "android.widget.ImageView",
+                                                                                                                  "id": "",
+                                                                                                                  "desc": "",
+                                                                                                                  "text": "",
+                                                                                                                  "selected": false,
+                                                                                                                  "clickable": false,
+                                                                                                                  "bounds": "[0,249][1080,1689]"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                  "class": "android.widget.FrameLayout",
+                                                                                                                  "id": "com.instagram.android:id/clips_video_container",
+                                                                                                                  "desc": "Reel by 9gofy. Double tap to play or pause.",
+                                                                                                                  "text": "",
+                                                                                                                  "selected": false,
+                                                                                                                  "clickable": false,
+                                                                                                                  "bounds": "[0,249][1080,1689]"
+                                                                                                                }
+                                                                                                              ]
+                                                                                                            }
+                                                                                                          ]
+                                                                                                        }
+                                                                                                      ]
+                                                                                                    }
+                                                                                                  ]
+                                                                                                }
+                                                                                              ]
+                                                                                            }
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        },
+                                                                        {
+                                                                          "class": "android.widget.RelativeLayout",
+                                                                          "id": "com.instagram.android:id/clips_viewer_action_bar",
+                                                                          "desc": "",
+                                                                          "text": "",
+                                                                          "selected": false,
+                                                                          "clickable": false,
+                                                                          "bounds": "[0,81][1080,249]",
+                                                                          "children": [
+                                                                            {
+                                                                              "class": "android.widget.LinearLayout",
+                                                                              "id": "com.instagram.android:id/clips_action_bar_start_action_buttons",
+                                                                              "desc": "",
+                                                                              "text": "",
+                                                                              "selected": false,
+                                                                              "clickable": false,
+                                                                              "bounds": "[0,81][144,249]"
+                                                                            },
+                                                                            {
+                                                                              "class": "android.widget.LinearLayout",
+                                                                              "id": "com.instagram.android:id/clips_viewer_action_bar_title_container",
+                                                                              "desc": "",
+                                                                              "text": "",
+                                                                              "selected": false,
+                                                                              "clickable": false,
+                                                                              "bounds": "[192,81][912,249]"
+                                                                            },
+                                                                            {
+                                                                              "class": "android.widget.LinearLayout",
+                                                                              "id": "com.instagram.android:id/clips_action_bar_end_action_buttons",
+                                                                              "desc": "",
+                                                                              "text": "",
+                                                                              "selected": false,
+                                                                              "clickable": false,
+                                                                              "bounds": "[912,81][1056,249]"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "class": "android.widget.LinearLayout",
+                                                                      "id": "com.instagram.android:id/clips_footer_mask_container",
+                                                                      "desc": "",
+                                                                      "text": "",
+                                                                      "selected": false,
+                                                                      "clickable": false,
+                                                                      "bounds": "[0,2115][1080,2295]",
+                                                                      "children": [
+                                                                        {
+                                                                          "class": "android.widget.FrameLayout",
+                                                                          "id": "",
+                                                                          "desc": "",
+                                                                          "text": "",
+                                                                          "selected": false,
+                                                                          "clickable": false,
+                                                                          "bounds": "[0,2115][1080,2295]",
+                                                                          "children": [
+                                                                            {
+                                                                              "class": "android.widget.LinearLayout",
+                                                                              "id": "com.instagram.android:id/comment_composer_inner_layout",
+                                                                              "desc": "",
+                                                                              "text": "",
+                                                                              "selected": false,
+                                                                              "clickable": false,
+                                                                              "bounds": "[48,2139][1032,2283]",
+                                                                              "children": [
+                                                                                {
+                                                                                  "class": "android.widget.Button",
+                                                                                  "id": "com.instagram.android:id/comment_composer_text_view",
+                                                                                  "desc": "",
+                                                                                  "text": "Add comment…",
+                                                                                  "selected": false,
+                                                                                  "clickable": true,
+                                                                                  "bounds": "[48,2139][1032,2283]"
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "class": "android.widget.FrameLayout",
+                                  "id": "com.instagram.android:id/bottom_sheet_camera_container",
+                                  "desc": "",
+                                  "text": "",
+                                  "selected": false,
+                                  "clickable": false,
+                                  "bounds": "[0,81][1080,2295]"
+                                }
+                              ]
+                            },
+                            {
+                              "class": "android.widget.FrameLayout",
+                              "id": "com.instagram.android:id/modal_container",
+                              "desc": "",
+                              "text": "",
+                              "selected": false,
+                              "clickable": false,
+                              "bounds": "[0,0][1080,2295]"
+                            },
+                            {
+                              "class": "android.widget.FrameLayout",
+                              "id": "com.instagram.android:id/overlay_layout_container",
+                              "desc": "",
+                              "text": "",
+                              "selected": false,
+                              "clickable": false,
+                              "bounds": "[0,0][1080,2295]"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -167,4 +167,86 @@ class ScreenClassifierTest {
         assertEquals(ScreenType.REELS_VIEWER, result)
         assertTrue(result.isReels)
     }
+
+    @Test
+    fun `direct message inbox without feed_tab should classify as DIRECT_MESSAGES`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/action_bar_title",
+                    text = "Mesajlar"
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/direct_inbox_filter_button",
+                    contentDescription = "Sohbetler"
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/thread_list_item"
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.DIRECT_MESSAGES, result)
+        assertFalse(result.isReels)
+    }
+
+    @Test
+    fun `direct message chat thread with composer should classify as DIRECT_MESSAGES`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/row_thread_composer_edittext",
+                    text = "Mesaj gönder..."
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/row_thread_composer_button_send"
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.DIRECT_MESSAGES, result)
+        assertFalse(result.isReels)
+    }
+
+    @Test
+    fun `reels viewer containing direct_share_button must classify as REELS_VIEWER not DIRECT_MESSAGES`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/clips_viewer_view_pager"
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/direct_share_button",
+                    contentDescription = "Share"
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.REELS_VIEWER, result)
+        assertTrue(result.isReels)
+    }
 }
