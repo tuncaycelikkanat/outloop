@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "minAppVersion": "0.1.0",
   "screens": {
     "feed": {
@@ -15,13 +15,9 @@
     "reelsViewer": {
       "viewerIds": [
         "clips_viewer_view_pager",
-        "clips_video_container",
-        "clips_media_interactivity_container",
-        "clips_swipe_refresh_container",
-        "clips_video_layout"
+        "clips_swipe_refresh_container"
       ],
       "modalActivities": [
-        "ModalActivity",
         "TransparentModalActivity"
       ]
     },
@@ -30,8 +26,8 @@
       "layoutIds": ["reel_viewer_layout", "story_viewer"]
     },
     "directMessages": {
-      "activityKeywords": ["Direct"],
-      "viewIds": ["direct_", "thread_", "message_list"]
+      "activityKeywords": ["DirectMainActivity", "DirectThreadActivity", "DirectInboxActivity", "DirectThread"],
+      "viewIds": ["direct_inbox_fragment", "direct_thread_layout", "message_list_recycler_view", "direct_messages_container"]
     },
     "explore": {
       "tabIds": ["search_tab", "tab_search", "explore_tab"],

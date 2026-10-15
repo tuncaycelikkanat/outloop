@@ -17,13 +17,9 @@ data class ReelsTabRule(
 data class ReelsViewerRule(
     val viewerIds: List<String> = listOf(
         "clips_viewer_view_pager",
-        "clips_video_container",
-        "clips_media_interactivity_container",
-        "clips_swipe_refresh_container",
-        "clips_video_layout"
+        "clips_swipe_refresh_container"
     ),
     val modalActivities: List<String> = listOf(
-        "ModalActivity",
         "TransparentModalActivity"
     )
 )
@@ -34,8 +30,8 @@ data class StoryRule(
 )
 
 data class DirectMessagesRule(
-    val activityKeywords: List<String> = listOf("Direct"),
-    val viewIds: List<String> = listOf("direct_", "thread_", "message_list")
+    val activityKeywords: List<String> = listOf("DirectMainActivity", "DirectThreadActivity", "DirectInboxActivity", "DirectThread"),
+    val viewIds: List<String> = listOf("direct_inbox_fragment", "direct_thread_layout", "message_list_recycler_view", "direct_messages_container")
 )
 
 data class ExploreRule(
@@ -51,7 +47,7 @@ data class ProfileRule(
 )
 
 data class RuleSet(
-    val version: Int = 2,
+    val version: Int = 3,
     val minAppVersion: String = "0.1.0",
     val feed: FeedRule = FeedRule(),
     val reelsTab: ReelsTabRule = ReelsTabRule(),

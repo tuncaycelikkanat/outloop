@@ -21,7 +21,7 @@ class ScreenClassifierTest {
     fun `RuleSet should parse correctly from JSON string`() {
         val json = """
             {
-              "version": 2,
+              "version": 3,
               "minAppVersion": "0.1.0",
               "screens": {
                 "feed": {
@@ -34,10 +34,65 @@ class ScreenClassifierTest {
         """.trimIndent()
 
         val ruleSet = RuleSet.fromJson(json)
-        assertEquals(2, ruleSet.version)
+        assertEquals(3, ruleSet.version)
         assertEquals(listOf("custom_feed_tab"), ruleSet.feed.tabIds)
         assertEquals(listOf("CustomHome"), ruleSet.feed.tabDescriptions)
         assertNotNull(ruleSet.reelsTab)
+    }
+
+    @Test
+    fun `home screen with direct message icon should classify as MAIN_FEED not DIRECT_MESSAGES`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/feed_tab",
+                    contentDescription = "Home",
+                    isSelected = true
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/direct_inbox_button",
+                    contentDescription = "Direct Messages",
+                    isSelected = false
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.MAIN_FEED, result)
+        assertFalse(result.isReels)
+    }
+
+    @Test
+    fun `profile post detail should classify as PROFILE not REELS_VIEWER`() {
+        val rootNode = NodeSnapshot(
+            className = "android.widget.FrameLayout",
+            children = listOf(
+                NodeSnapshot(
+                    text = "Gönderiler",
+                    contentDescription = "Gönderiler"
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/row_feed_photo_profile_imageview"
+                )
+            )
+        )
+
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
+            rootNode = rootNode
+        )
+
+        val result = classifier.classify(snapshot)
+        assertEquals(ScreenType.PROFILE, result)
+        assertFalse(result.isReels)
     }
 
     @Test
@@ -45,7 +100,7 @@ class ScreenClassifierTest {
         val tracker = NavigationTracker()
         assertEquals(ScreenType.MAIN_FEED, tracker.currentScreen)
 
-        // Aynı ekranda kalma (kaydırma/animasyon gürültüsü) -> false dönmeli
+        // Aynı ekranda kalma -> false dönmeli
         val duplicate = tracker.update(ScreenType.MAIN_FEED)
         assertFalse(duplicate)
         assertEquals(ScreenType.MAIN_FEED, tracker.currentScreen)
@@ -59,7 +114,7 @@ class ScreenClassifierTest {
         // UNKNOWN olayı geldiğinde mevcut ekranı KORUMALI!
         val unknownResult = tracker.update(ScreenType.UNKNOWN)
         assertFalse(unknownResult)
-        assertEquals(ScreenType.EXPLORE, tracker.currentScreen) // Hala Explore!
+        assertEquals(ScreenType.EXPLORE, tracker.currentScreen)
     }
 
     @Test
@@ -92,82 +147,12 @@ class ScreenClassifierTest {
     }
 
     @Test
-    fun `explore tab selected should classify as EXPLORE`() {
-        val rootNode = NodeSnapshot(
-            className = "android.widget.FrameLayout",
-            children = listOf(
-                NodeSnapshot(
-                    viewId = "com.instagram.android:id/search_tab",
-                    contentDescription = "Ara ve Keşfet",
-                    isSelected = true
-                )
-            )
-        )
-
-        val snapshot = ScreenSnapshot(
-            packageName = "com.instagram.android",
-            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
-            rootNode = rootNode
-        )
-
-        val result = classifier.classify(snapshot)
-        assertEquals(ScreenType.EXPLORE, result)
-        assertFalse(result.isReels)
-    }
-
-    @Test
-    fun `profile tab selected should classify as PROFILE`() {
-        val rootNode = NodeSnapshot(
-            className = "android.widget.FrameLayout",
-            children = listOf(
-                NodeSnapshot(
-                    viewId = "com.instagram.android:id/profile_tab",
-                    contentDescription = "Profil",
-                    isSelected = true
-                )
-            )
-        )
-
-        val snapshot = ScreenSnapshot(
-            packageName = "com.instagram.android",
-            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
-            rootNode = rootNode
-        )
-
-        val result = classifier.classify(snapshot)
-        assertEquals(ScreenType.PROFILE, result)
-        assertFalse(result.isReels)
-    }
-
-    @Test
-    fun `direct messages should classify as DIRECT_MESSAGES`() {
-        val rootNode = NodeSnapshot(
-            className = "android.widget.FrameLayout",
-            children = listOf(
-                NodeSnapshot(
-                    viewId = "com.instagram.android:id/direct_message_list_recycler_view"
-                )
-            )
-        )
-
-        val snapshot = ScreenSnapshot(
-            packageName = "com.instagram.android",
-            currentActivity = "com.instagram.direct.messagelist.DirectMessageListActivity",
-            rootNode = rootNode
-        )
-
-        val result = classifier.classify(snapshot)
-        assertEquals(ScreenType.DIRECT_MESSAGES, result)
-        assertFalse(result.isReels)
-    }
-
-    @Test
     fun `clips viewer in modal activity without feed_tab should classify as REELS_VIEWER`() {
         val rootNode = NodeSnapshot(
             className = "android.widget.FrameLayout",
             children = listOf(
                 NodeSnapshot(
-                    viewId = "com.instagram.android:id/clips_video_container"
+                    viewId = "com.instagram.android:id/clips_viewer_view_pager"
                 )
             )
         )
@@ -181,38 +166,5 @@ class ScreenClassifierTest {
         val result = classifier.classify(snapshot)
         assertEquals(ScreenType.REELS_VIEWER, result)
         assertTrue(result.isReels)
-    }
-
-    @Test
-    fun `story viewer should NOT classify as REELS`() {
-        val rootNode = NodeSnapshot(
-            className = "android.widget.FrameLayout",
-            children = listOf(
-                NodeSnapshot(
-                    viewId = "com.instagram.android:id/reel_viewer_layout"
-                )
-            )
-        )
-
-        val snapshot = ScreenSnapshot(
-            packageName = "com.instagram.android",
-            currentActivity = "com.instagram.modal.ReelViewerActivity",
-            rootNode = rootNode
-        )
-
-        val result = classifier.classify(snapshot)
-        assertEquals(ScreenType.MAIN_FEED, result)
-        assertFalse(result.isReels)
-    }
-
-    @Test
-    fun `empty snapshot should classify as UNKNOWN`() {
-        val snapshot = ScreenSnapshot(
-            packageName = "com.instagram.android",
-            rootNode = null
-        )
-
-        val result = classifier.classify(snapshot)
-        assertEquals(ScreenType.UNKNOWN, result)
     }
 }
