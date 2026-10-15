@@ -45,11 +45,25 @@ class ReelsAccessibilityService : AccessibilityService() {
 
         Log.d(TAG, "Instagram Olayı: ${event.eventType}, Ekran: $screenType, Activity: $activityName")
 
+        // Teşhis: Seçili düğümleri ve Reels ile ilgili düğümleri logla
+        val selectedNodes = snapshot.findNodes { it.isSelected }
+        for (node in selectedNodes) {
+            Log.d(TAG, "--> SEÇİLİ DÜĞÜM: id=${node.viewId}, desc='${node.contentDescription}', class=${node.className}")
+        }
+
+        val reelsNodes = snapshot.findNodes { 
+            val desc = it.contentDescription ?: ""
+            val id = it.viewId ?: ""
+            desc.contains("reels", ignoreCase = true) || id.contains("clips", ignoreCase = true)
+        }
+        for (node in reelsNodes) {
+            Log.d(TAG, "--> REELS DÜĞÜMÜ: id=${node.viewId}, desc='${node.contentDescription}', isSelected=${node.isSelected}")
+        }
+
         // 3. Reels algılandıysa engelle / yönlendir
         if (screenType.isReels) {
             Log.w(TAG, "Reels tespit edildi! Eylem çalıştırılıyor (Ekran: $screenType)...")
             actionExecutor.executeBlock(screenType, rootNode)
-            logNodeTreeSummary(snapshot.rootNode)
         }
     }
 
@@ -62,15 +76,6 @@ class ReelsAccessibilityService : AccessibilityService() {
         currentInstance = null
         _isServiceActive.value = false
         Log.i(TAG, "ReelsAccessibilityService sonlandırıldı.")
-    }
-
-    private fun logNodeTreeSummary(root: NodeSnapshot?) {
-        if (root == null) return
-        val nodesWithId = root.find { it.viewId != null || it.contentDescription != null }
-        Log.d(TAG, "--- Reels Ekran Düğüm Özeti (Toplam ${nodesWithId.size} önemli düğüm) ---")
-        nodesWithId.take(15).forEach { node ->
-            Log.d(TAG, "Node: id=${node.viewId}, desc=${node.contentDescription}, selected=${node.isSelected}")
-        }
     }
 
     companion object {

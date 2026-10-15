@@ -16,29 +16,26 @@ class ScreenClassifierTest {
     }
 
     @Test
-    fun `reels tab selected should classify as REELS_TAB`() {
+    fun `clips tab selected should classify as REELS_TAB`() {
         val rootNode = NodeSnapshot(
             className = "android.widget.FrameLayout",
             children = listOf(
                 NodeSnapshot(
-                    viewId = "com.instagram.android:id/tab_bar",
-                    children = listOf(
-                        NodeSnapshot(
-                            contentDescription = "Ana Akış",
-                            isSelected = false
-                        ),
-                        NodeSnapshot(
-                            contentDescription = "Reels",
-                            isSelected = true
-                        )
-                    )
+                    viewId = "com.instagram.android:id/feed_tab",
+                    contentDescription = "Home",
+                    isSelected = false
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/clips_tab",
+                    contentDescription = "Reels",
+                    isSelected = true
                 )
             )
         )
 
         val snapshot = ScreenSnapshot(
             packageName = "com.instagram.android",
-            currentActivity = "com.instagram.mainactivity.MainActivity",
+            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
             rootNode = rootNode
         )
 
@@ -48,36 +45,29 @@ class ScreenClassifierTest {
     }
 
     @Test
-    fun `stories tray in main feed should NOT classify as REELS`() {
+    fun `main feed with embedded reels video and feed_tab selected should classify as MAIN_FEED`() {
         val rootNode = NodeSnapshot(
             className = "android.widget.FrameLayout",
             children = listOf(
                 NodeSnapshot(
-                    viewId = "com.instagram.android:id/swipeable_tab_view_pager",
-                    children = listOf(
-                        NodeSnapshot(
-                            contentDescription = "reels tray container",
-                            isSelected = false
-                        ),
-                        NodeSnapshot(
-                            viewId = "com.instagram.android:id/avatar_image_view",
-                            contentDescription = "user's story, 0 of 10, Unseen.",
-                            isSelected = false
-                        )
-                    )
+                    viewId = "com.instagram.android:id/clips_video_container",
+                    contentDescription = "Reel by sample_user",
+                    isSelected = false
                 ),
                 NodeSnapshot(
-                    viewId = "com.instagram.android:id/tab_bar",
-                    children = listOf(
-                        NodeSnapshot(
-                            contentDescription = "Ana Sayfa",
-                            isSelected = true
-                        ),
-                        NodeSnapshot(
-                            contentDescription = "Reels",
-                            isSelected = false
-                        )
-                    )
+                    className = "android.widget.LinearLayout",
+                    contentDescription = "Reels",
+                    isSelected = true // Feed içi seçili LinearLayout olsa bile!
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/feed_tab",
+                    contentDescription = "Home",
+                    isSelected = true
+                ),
+                NodeSnapshot(
+                    viewId = "com.instagram.android:id/clips_tab",
+                    contentDescription = "Reels",
+                    isSelected = false
                 )
             )
         )
@@ -94,7 +84,7 @@ class ScreenClassifierTest {
     }
 
     @Test
-    fun `clips viewer in modal activity should classify as REELS_VIEWER`() {
+    fun `clips viewer in modal activity without feed_tab should classify as REELS_VIEWER`() {
         val rootNode = NodeSnapshot(
             className = "android.widget.FrameLayout",
             children = listOf(

@@ -17,43 +17,43 @@ class ScreenClassifier {
 
     /**
      * Düğüm ağacı anlık görüntüsünü (snapshot) analiz ederek mevcut ekran türünü belirler.
-     * Saf fonksiyon mantığında çalışır; Android Framework bağımlılığı olmadığı için
-     * cihaz olmadan JVM birim testleriyle tamamen test edilebilir.
+     * Saf fonksiyon mantığında çalışır; cihaz olmadan JVM birim testleriyle tamamen test edilebilir.
      */
     fun classify(snapshot: ScreenSnapshot): ScreenType {
         if (snapshot.rootNode == null) {
             return ScreenType.UNKNOWN
         }
 
-        // ÖNEMLİ INSTAGRAM NOTU:
-        // Instagram iç kodunda "Reel" kelimesi HİKAYELER (Stories) için kullanılır:
-        // - "reels tray container" = Üstteki hikayeler çubuğu
-        // - "ReelViewerActivity" = Hikaye izleyicisi
-        // Kısa videolar (Reels) ise Instagram içinde "Clips" olarak adlandırılır:
-        // - "clips_tab" = Reels sekmesi
-        // - "clips_viewer" = Reels tam ekran video oynatıcısı
+        // 1. KONTROL: Ana Akış (Feed) sekmesi aktif olarak seçili mi?
+        // Eğer alt bardaki feed_tab seçiliyse, kullanıcı kesinlikle Ana Sayfa'dadır.
+        // Akıştaki Reels videoları, kartlar veya hikayeler bu durumu bozamaz.
+        if (isFeedTabSelected(snapshot)) {
+            return ScreenType.MAIN_FEED
+        }
 
-        // 1. Kontrol: Hikaye (Story) ekranı mı? (Yanlış pozitifleri hemen önle)
+        // 2. KONTROL: Hikaye (Story) ekranı mı?
         if (isStoryScreen(snapshot)) {
             return ScreenType.MAIN_FEED
         }
 
-        // 2. Kontrol: Reels Sekmesi aktif olarak seçili mi?
-        if (isReelsTabSelected(snapshot)) {
+        // 3. KONTROL: Alt sekme çubuğundaki gerçek Reels sekmesi mi seçili?
+        // Instagram'da alt barın asıl Reels sekmesi 'clips_tab' ID'sine sahiptir.
+        if (isClipsTabSelected(snapshot)) {
             return ScreenType.REELS_TAB
         }
 
-        // 3. Kontrol: Tam ekran Reels Oynatıcısı (Clips Viewer) açık mı?
-        if (isClipsViewer(snapshot)) {
-            return ScreenType.REELS_VIEWER
-        }
-
-        // 4. Kontrol: DM (Direkt Mesajlar) ekranı mı?
+        // 4. KONTROL: DM (Direkt Mesajlar) ekranı mı?
         if (isDirectMessageScreen(snapshot)) {
             return ScreenType.DIRECT_MESSAGES
         }
 
-        // 5. Kontrol: Ana Akış (Feed) mı?
+        // 5. KONTROL: Tam ekran modal Reels Oynatıcısı mı?
+        // Alt sekme çubuğu yokken veya modal aktivitede açılan Reels izleyicisi.
+        if (isClipsViewer(snapshot)) {
+            return ScreenType.REELS_VIEWER
+        }
+
+        // 6. KONTROL: Genel Ana Akış belirteçleri
         if (isMainFeed(snapshot)) {
             return ScreenType.MAIN_FEED
         }
@@ -61,43 +61,41 @@ class ScreenClassifier {
         return ScreenType.UNKNOWN
     }
 
+    private fun isFeedTabSelected(snapshot: ScreenSnapshot): Boolean {
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val desc = node.contentDescription ?: ""
+            val isHomeId = id.contains("feed_tab", ignoreCase = true) || id.contains("tab_home", ignoreCase = true)
+            val isHomeDesc = desc.equals("Home", ignoreCase = true) || desc.equals("Ana Sayfa", ignoreCase = true)
+            (isHomeId || isHomeDesc) && node.isSelected
+        }.isNotEmpty()
+    }
+
+    private fun isClipsTabSelected(snapshot: ScreenSnapshot): Boolean {
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val isClipsTabId = id.contains("clips_tab", ignoreCase = true) || id.contains("tab_clips", ignoreCase = true)
+            isClipsTabId && node.isSelected
+        }.isNotEmpty()
+    }
+
     private fun isStoryScreen(snapshot: ScreenSnapshot): Boolean {
         val activity = snapshot.currentActivity ?: ""
         if (activity.contains("ReelViewerActivity", ignoreCase = true)) {
             return true
         }
-        return snapshot.containsId("reel_viewer_layout") ||
-               snapshot.containsId("story_viewer")
-    }
-
-    private fun isReelsTabSelected(snapshot: ScreenSnapshot): Boolean {
-        val matchingNodes = snapshot.findNodes { node ->
-            val desc = node.contentDescription ?: ""
-            // Hikayeleri kesinlikle ayıkla
-            if (desc.contains("story", ignoreCase = true) || desc.contains("tray", ignoreCase = true)) {
-                return@findNodes false
-            }
-
-            // Tam olarak "Reels" sekmesi kontrolü
-            val isReelsDesc = desc.equals("Reels", ignoreCase = true)
-            val isClipsTabId = node.viewId?.let { id ->
-                id.contains("clips_tab", ignoreCase = true) ||
-                id.contains("tab_clips", ignoreCase = true)
-            } == true
-
-            (isReelsDesc || isClipsTabId) && node.isSelected
-        }
-
-        return matchingNodes.isNotEmpty()
+        return snapshot.containsId("reel_viewer_layout") || snapshot.containsId("story_viewer")
     }
 
     private fun isClipsViewer(snapshot: ScreenSnapshot): Boolean {
+        val activity = snapshot.currentActivity ?: ""
+        val isModalActivity = activity.contains("ModalActivity", ignoreCase = true) ||
+                              activity.contains("TransparentModalActivity", ignoreCase = true)
+
         val knownClipsViewerIds = listOf(
-            "clips_viewer",
+            "clips_viewer_view_pager",
             "clips_video_container",
-            "clips_media_interactivity_container",
-            "clips_swipe_refresh_container",
-            "clips_video_layout"
+            "clips_media_interactivity_container"
         )
 
         val hasClipsNode = snapshot.findNodes { node ->
@@ -105,7 +103,9 @@ class ScreenClassifier {
             knownClipsViewerIds.any { id.contains(it, ignoreCase = true) }
         }.isNotEmpty()
 
-        return hasClipsNode
+        // Alt bar feed_tab'ı görünür ve seçiliyken asla bağımsız Clips Viewer sayılmaz
+        val isFeedActive = isFeedTabSelected(snapshot)
+        return hasClipsNode && !isFeedActive && (isModalActivity || !snapshot.containsId("feed_tab"))
     }
 
     private fun isDirectMessageScreen(snapshot: ScreenSnapshot): Boolean {
