@@ -13,7 +13,8 @@ data class DetectionEventLog(
     val timeFormatted: String = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(timestamp)),
     val screenType: ScreenType,
     val details: String,
-    val actionTaken: String? = null
+    val actionTaken: String? = null,
+    val keyNodes: List<String> = emptyList()
 )
 
 object DetectionLogStore {
@@ -24,12 +25,18 @@ object DetectionLogStore {
     private val _logs = MutableStateFlow<List<DetectionEventLog>>(emptyList())
     val logs: StateFlow<List<DetectionEventLog>> = _logs.asStateFlow()
 
-    fun log(screenType: ScreenType, details: String, actionTaken: String? = null) {
+    fun log(
+        screenType: ScreenType,
+        details: String,
+        actionTaken: String? = null,
+        keyNodes: List<String> = emptyList()
+    ) {
         synchronized(lock) {
             val event = DetectionEventLog(
                 screenType = screenType,
                 details = details,
-                actionTaken = actionTaken
+                actionTaken = actionTaken,
+                keyNodes = keyNodes
             )
             logsList.add(0, event)
             if (logsList.size > MAX_LOGS) {

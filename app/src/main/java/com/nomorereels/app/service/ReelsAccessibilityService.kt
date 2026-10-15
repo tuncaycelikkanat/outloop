@@ -51,6 +51,19 @@ class ReelsAccessibilityService : AccessibilityService() {
 
         Log.d(TAG, "Instagram Olayı: ${event.eventType}, Ekran: $screenType, Activity: $activityName")
 
+        // Teşhis için ekrandaki kilit düğümleri topla
+        val keyNodes = mutableListOf<String>()
+        val selectedNodes = snapshot.findNodes { it.isSelected }
+        for (n in selectedNodes.take(4)) {
+            val shortId = n.viewId?.substringAfterLast('/') ?: "no-id"
+            keyNodes.add("★ SEÇİLİ: id=$shortId, desc='${n.contentDescription}'")
+        }
+        val tabNodes = snapshot.findNodes { (it.viewId?.contains("tab") == true || it.viewId?.contains("clips") == true) && !it.isSelected }
+        for (n in tabNodes.take(4)) {
+            val shortId = n.viewId?.substringAfterLast('/') ?: "no-id"
+            keyNodes.add("Sekme: id=$shortId, desc='${n.contentDescription}'")
+        }
+
         // 3. Reels algılandıysa engelle / yönlendir
         if (screenType.isReels) {
             Log.w(TAG, "Reels tespit edildi! Eylem çalıştırılıyor (Ekran: $screenType)...")
@@ -58,13 +71,15 @@ class ReelsAccessibilityService : AccessibilityService() {
             DetectionLogStore.log(
                 screenType = screenType,
                 details = "Activity: ${activityName?.substringAfterLast('.')}",
-                actionTaken = if (handled) "Engellendi (Ana Sayfaya Geçildi)" else "Beklemede (Cooldown)"
+                actionTaken = if (handled) "Engellendi (Ana Sayfaya Geçildi)" else "Beklemede (Cooldown)",
+                keyNodes = keyNodes
             )
         } else {
             DetectionLogStore.log(
                 screenType = screenType,
                 details = "Activity: ${activityName?.substringAfterLast('.')}",
-                actionTaken = null
+                actionTaken = null,
+                keyNodes = keyNodes
             )
         }
     }
@@ -107,7 +122,7 @@ class ReelsAccessibilityService : AccessibilityService() {
         private val _lastDetectedType = MutableStateFlow(ScreenType.UNKNOWN)
         val lastDetectedType: StateFlow<ScreenType> = _lastDetectedType.asStateFlow()
 
-        private val _ruleVersion = MutableStateFlow(1)
+        private val _ruleVersion = MutableStateFlow(2)
         val ruleVersion: StateFlow<Int> = _ruleVersion.asStateFlow()
     }
 }

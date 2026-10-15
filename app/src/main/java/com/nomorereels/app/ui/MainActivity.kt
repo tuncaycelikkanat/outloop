@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +33,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -163,7 +168,7 @@ fun DashboardScreen(
                         }
                     } else {
                         Text(
-                            text = "Gömülü rules.json motoru devrede. Instagram ekranları anlık sınıflandırılıyor.",
+                            text = "Gömülü rules.json devrede. Instagram olayları tıklandığında detayları açmak için karta dokunabilirsiniz.",
                             fontSize = 13.sp,
                             color = Color(0xFF2E7D32)
                         )
@@ -220,8 +225,8 @@ fun DashboardScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Algılama Günlüğü (${eventLogs.size})",
-                    fontSize = 16.sp,
+                    text = "Algılama Günlüğü (${eventLogs.size}) - Dokun ve Aç",
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
                 if (eventLogs.isNotEmpty()) {
@@ -257,8 +262,12 @@ fun DashboardScreen(
 
 @Composable
 fun LogItemView(log: DetectionEventLog) {
+    var isExpanded by remember { mutableStateOf(false) }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (log.screenType.isReels) Color(0xFFFFF1F2) else Color(0xFFF8FAFC)
@@ -315,6 +324,35 @@ fun LogItemView(log: DetectionEventLog) {
                 color = Color.DarkGray,
                 fontFamily = FontFamily.Monospace
             )
+
+            // Tıklandığında genişleyen düğüm ayrıntıları
+            AnimatedVisibility(visible = isExpanded) {
+                Column(modifier = Modifier.padding(top = 8.dp)) {
+                    Text(
+                        text = "Ekrandaki Düğümler:",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    if (log.keyNodes.isEmpty()) {
+                        Text(
+                            text = "Özel düğüm yakalanmadı.",
+                            fontSize = 10.sp,
+                            color = Color.Gray
+                        )
+                    } else {
+                        log.keyNodes.forEach { nodeInfo ->
+                            Text(
+                                text = "• $nodeInfo",
+                                fontSize = 10.sp,
+                                fontFamily = FontFamily.Monospace,
+                                color = Color(0xFF334155),
+                                modifier = Modifier.padding(vertical = 1.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
