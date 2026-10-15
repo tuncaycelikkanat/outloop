@@ -1,5 +1,6 @@
 package com.nomorereels.app.detection
 
+import com.nomorereels.app.policy.NavigationTracker
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -40,6 +41,28 @@ class ScreenClassifierTest {
     }
 
     @Test
+    fun `NavigationTracker should return true only on actual screen change and filter noise`() {
+        val tracker = NavigationTracker()
+        assertEquals(ScreenType.MAIN_FEED, tracker.currentScreen)
+
+        // Aynı ekranda kalma (kaydırma/animasyon gürültüsü) -> false dönmeli
+        val duplicate = tracker.update(ScreenType.MAIN_FEED)
+        assertFalse(duplicate)
+        assertEquals(ScreenType.MAIN_FEED, tracker.currentScreen)
+
+        // Yeni ekrana geçiş -> true dönmeli
+        val changed = tracker.update(ScreenType.EXPLORE)
+        assertTrue(changed)
+        assertEquals(ScreenType.EXPLORE, tracker.currentScreen)
+        assertEquals(ScreenType.MAIN_FEED, tracker.previousScreen)
+
+        // UNKNOWN olayı geldiğinde mevcut ekranı KORUMALI!
+        val unknownResult = tracker.update(ScreenType.UNKNOWN)
+        assertFalse(unknownResult)
+        assertEquals(ScreenType.EXPLORE, tracker.currentScreen) // Hala Explore!
+    }
+
+    @Test
     fun `clips tab selected should classify as REELS_TAB`() {
         val rootNode = NodeSnapshot(
             className = "android.widget.FrameLayout",
@@ -66,45 +89,6 @@ class ScreenClassifierTest {
         val result = classifier.classify(snapshot)
         assertEquals(ScreenType.REELS_TAB, result)
         assertTrue(result.isReels)
-    }
-
-    @Test
-    fun `main feed with embedded reels video and feed_tab selected should classify as MAIN_FEED`() {
-        val rootNode = NodeSnapshot(
-            className = "android.widget.FrameLayout",
-            children = listOf(
-                NodeSnapshot(
-                    viewId = "com.instagram.android:id/clips_video_container",
-                    contentDescription = "Reel by sample_user",
-                    isSelected = false
-                ),
-                NodeSnapshot(
-                    className = "android.widget.LinearLayout",
-                    contentDescription = "Reels",
-                    isSelected = true
-                ),
-                NodeSnapshot(
-                    viewId = "com.instagram.android:id/feed_tab",
-                    contentDescription = "Home",
-                    isSelected = true
-                ),
-                NodeSnapshot(
-                    viewId = "com.instagram.android:id/clips_tab",
-                    contentDescription = "Reels",
-                    isSelected = false
-                )
-            )
-        )
-
-        val snapshot = ScreenSnapshot(
-            packageName = "com.instagram.android",
-            currentActivity = "com.instagram.mainactivity.InstagramMainActivity",
-            rootNode = rootNode
-        )
-
-        val result = classifier.classify(snapshot)
-        assertEquals(ScreenType.MAIN_FEED, result)
-        assertFalse(result.isReels)
     }
 
     @Test

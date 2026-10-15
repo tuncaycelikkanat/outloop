@@ -9,6 +9,7 @@ import com.nomorereels.app.detection.RuleSet
 import com.nomorereels.app.detection.ScreenClassifier
 import com.nomorereels.app.detection.ScreenSnapshot
 import com.nomorereels.app.detection.ScreenType
+import com.nomorereels.app.policy.NavigationTracker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class ReelsAccessibilityService : AccessibilityService() {
 
     private val classifier = ScreenClassifier()
+    private val navigationTracker = NavigationTracker()
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -46,38 +48,47 @@ class ReelsAccessibilityService : AccessibilityService() {
         )
 
         // 2. Ekranı dinamik kural motoruyla sınıflandır
-        val screenType = classifier.classify(snapshot)
-        _lastDetectedType.value = screenType
-
-        Log.d(TAG, "Instagram Olayı: ${event.eventType}, Ekran: $screenType, Activity: $activityName")
+        val detectedScreen = classifier.classify(snapshot)
 
         // Teşhis için ekrandaki kilit düğümleri topla
         val keyNodes = mutableListOf<String>()
         val selectedNodes = snapshot.findNodes { it.isSelected }
-        for (n in selectedNodes.take(4)) {
+        for (n in selectedNodes.take(3)) {
             val shortId = n.viewId?.substringAfterLast('/') ?: "no-id"
             keyNodes.add("★ SEÇİLİ: id=$shortId, desc='${n.contentDescription}'")
         }
         val tabNodes = snapshot.findNodes { (it.viewId?.contains("tab") == true || it.viewId?.contains("clips") == true) && !it.isSelected }
-        for (n in tabNodes.take(4)) {
+        for (n in tabNodes.take(3)) {
             val shortId = n.viewId?.substringAfterLast('/') ?: "no-id"
             keyNodes.add("Sekme: id=$shortId, desc='${n.contentDescription}'")
         }
 
-        // 3. Reels algılandıysa engelle / yönlendir
-        if (screenType.isReels) {
-            Log.w(TAG, "Reels tespit edildi! Eylem çalıştırılıyor (Ekran: $screenType)...")
-            val handled = actionExecutor.executeBlock(screenType, rootNode)
+        // 3. Reels algılandıysa derhal engelle
+        if (detectedScreen.isReels) {
+            Log.w(TAG, "Reels tespit edildi! Eylem çalıştırılıyor (Ekran: $detectedScreen)...")
+            val handled = actionExecutor.executeBlock(detectedScreen, rootNode)
+            navigationTracker.update(detectedScreen)
+            _lastDetectedType.value = detectedScreen
+
             DetectionLogStore.log(
-                screenType = screenType,
+                screenType = detectedScreen,
                 details = "Activity: ${activityName?.substringAfterLast('.')}",
                 actionTaken = if (handled) "Engellendi (Ana Sayfaya Geçildi)" else "Beklemede (Cooldown)",
                 keyNodes = keyNodes
             )
-        } else {
+            return
+        }
+
+        // 4. Normal ekran geçişi: YALNIZCA EKRAN DEĞİŞİMİ OLDUĞUNDA VE UNKNOWN DEĞİLSE LOGLA!
+        val isScreenChanged = navigationTracker.update(detectedScreen)
+        val activeScreen = navigationTracker.currentScreen
+        _lastDetectedType.value = activeScreen
+
+        if (isScreenChanged && activeScreen != ScreenType.UNKNOWN) {
+            Log.i(TAG, ">>> EKRAN DEĞİŞİMİ: ${navigationTracker.previousScreen} -> $activeScreen <<<")
             DetectionLogStore.log(
-                screenType = screenType,
-                details = "Activity: ${activityName?.substringAfterLast('.')}",
+                screenType = activeScreen,
+                details = "Ekran: ${activeScreen.name} (${activityName?.substringAfterLast('.')})",
                 actionTaken = null,
                 keyNodes = keyNodes
             )
@@ -92,6 +103,7 @@ class ReelsAccessibilityService : AccessibilityService() {
         super.onDestroy()
         currentInstance = null
         _isServiceActive.value = false
+        navigationTracker.reset()
         Log.i(TAG, "ReelsAccessibilityService sonlandırıldı.")
     }
 
@@ -119,7 +131,7 @@ class ReelsAccessibilityService : AccessibilityService() {
         private val _isServiceActive = MutableStateFlow(false)
         val isServiceActive: StateFlow<Boolean> = _isServiceActive.asStateFlow()
 
-        private val _lastDetectedType = MutableStateFlow(ScreenType.UNKNOWN)
+        private val _lastDetectedType = MutableStateFlow(ScreenType.MAIN_FEED)
         val lastDetectedType: StateFlow<ScreenType> = _lastDetectedType.asStateFlow()
 
         private val _ruleVersion = MutableStateFlow(2)
