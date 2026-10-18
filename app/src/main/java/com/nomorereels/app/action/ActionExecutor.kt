@@ -24,24 +24,30 @@ class ActionExecutor(
      * - REELS_TAB ise: Instagram'dan çıkmak yerine alt bardaki "Ana Sayfa" sekmesine tıklar!
      * - REELS_VIEWER (modal) ise: Modalı kapatmak için GLOBAL_ACTION_BACK tetikler.
      */
-    fun executeBlock(screenType: ScreenType, rootNode: AccessibilityNodeInfo?): Boolean {
+    fun executeBlock(
+        screenType: ScreenType,
+        rootNode: AccessibilityNodeInfo?,
+        force: Boolean = false
+    ): Boolean {
         val now = System.currentTimeMillis()
 
-        // 1. Devre Kesici (Circuit Breaker): 2.5 saniyede 3'ten fazla deneme olursa kullanıcıyı kilitlememek için dur
-        if (now - recentAttemptWindowStart > 2500L) {
-            recentAttemptWindowStart = now
-            recentAttempts = 0
-        }
-        recentAttempts++
-        if (recentAttempts > 2) {
-            Log.w(TAG, "Devre kesici devrede: Çok sık tetikleme oldu ($recentAttempts), 2 saniye bekleniyor...")
-            return false
-        }
+        if (!force) {
+            // 1. Devre Kesici (Circuit Breaker): 2.5 saniyede 3'ten fazla deneme olursa kullanıcıyı kilitlememek için dur
+            if (now - recentAttemptWindowStart > 2500L) {
+                recentAttemptWindowStart = now
+                recentAttempts = 0
+            }
+            recentAttempts++
+            if (recentAttempts > 2) {
+                Log.w(TAG, "Devre kesici devrede: Çok sık tetikleme oldu ($recentAttempts), 2 saniye bekleniyor...")
+                return false
+            }
 
-        // 2. Normal Cooldown kontrolü
-        if (now - lastActionTime < cooldownMs) {
-            Log.d(TAG, "İşlem bekleme süresinde (cooldown aktif), atlandı. Ekran: $screenType")
-            return false
+            // 2. Normal Cooldown kontrolü
+            if (now - lastActionTime < cooldownMs) {
+                Log.d(TAG, "İşlem bekleme süresinde (cooldown aktif), atlandı. Ekran: $screenType")
+                return false
+            }
         }
 
         val service = serviceProvider()

@@ -13,6 +13,63 @@ enum class ScreenType {
         get() = this == REELS_TAB || this == REELS_VIEWER
 }
 
+/**
+ * Oynatılan Reel videosunun kimliğini temsil eden yapısal parmak izi.
+ * DM'den açılan tek bir Reel izlenirken kullanıcının parmağını kaydırıp
+ * 2. bir Reel videosuna geçip geçmediğini tespit etmek için kullanılır.
+ */
+data class ReelContentFingerprint(
+    val author: String? = null,
+    val mediaDesc: String? = null,
+    val caption: String? = null
+) {
+    val isEmpty: Boolean
+        get() = author.isNullOrBlank() && mediaDesc.isNullOrBlank() && caption.isNullOrBlank()
+
+    /**
+     * İki parmak izinin farklı bir Reel videosuna ait olup olmadığını döner.
+     * İlk yükleme anında bazı alanların (örn. caption) 100-200ms geç yüklenmesi
+     * yanlış pozitif üretmesin diye yalnızca her iki tarafta da dolu olan alanlar karşılaştırılır.
+     */
+    fun isDifferentReelFrom(other: ReelContentFingerprint): Boolean {
+        if (!author.isNullOrBlank() && !other.author.isNullOrBlank() &&
+            !author.equals(other.author, ignoreCase = true)
+        ) {
+            return true
+        }
+        if (!mediaDesc.isNullOrBlank() && !other.mediaDesc.isNullOrBlank() &&
+            !mediaDesc.equals(other.mediaDesc, ignoreCase = true)
+        ) {
+            return true
+        }
+        if (!caption.isNullOrBlank() && !other.caption.isNullOrBlank() &&
+            caption != other.caption
+        ) {
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Aynı Reel yüklenirken sonradan gelen eksik alanları (örn. geç yüklenen caption) tamamlar.
+     */
+    fun mergeWith(newer: ReelContentFingerprint): ReelContentFingerprint {
+        return ReelContentFingerprint(
+            author = author?.takeIf { it.isNotBlank() } ?: newer.author?.takeIf { it.isNotBlank() },
+            mediaDesc = mediaDesc?.takeIf { it.isNotBlank() } ?: newer.mediaDesc?.takeIf { it.isNotBlank() },
+            caption = caption?.takeIf { it.isNotBlank() } ?: newer.caption?.takeIf { it.isNotBlank() }
+        )
+    }
+
+    fun toSummaryString(): String {
+        val parts = mutableListOf<String>()
+        if (!author.isNullOrBlank()) parts.add("@$author")
+        if (!caption.isNullOrBlank()) parts.add("\"${caption.take(20)}\"")
+        else if (!mediaDesc.isNullOrBlank()) parts.add("\"${mediaDesc.take(24)}\"")
+        return if (parts.isEmpty()) "belirsiz" else parts.joinToString(" ")
+    }
+}
+
 class ScreenClassifier(
     var rules: RuleSet = RuleSet.DEFAULT
 ) {
@@ -27,56 +84,136 @@ class ScreenClassifier(
         }
 
         // 1. KONTROL: Alt sekme çubuğundaki gerçek Reels sekmesi mi seçili?
-        // En yüksek öncelik: Kullanıcı alt bardaki Reels butonuna bastığında anında yakala!
         if (isClipsTabSelected(snapshot)) {
             return ScreenType.REELS_TAB
         }
 
         // 2. KONTROL: Ana Akış (Feed) sekmesi aktif olarak seçili mi?
-        // ÇOK ÖNEMLİ: DM kontrolünden ÖNCE çalışır! Sağ üstteki DM ikonu ana akışı DM yapamaz!
+        // Ana Sayfa aktifken arkada önbellekte kalan fragment'lar geri butonu spam'i yapamaz.
         if (isFeedTabSelected(snapshot)) {
             return ScreenType.MAIN_FEED
         }
 
-        // 3. KONTROL: Profilde açılmış bir gönderi (Fotoğraf, Video postu) detayı mı?
-        // Kendi postunu açtığında Reels sanıp çıkmayı önler.
-        if (isProfilePostDetail(snapshot)) {
-            return ScreenType.PROFILE
-        }
-
-        // 4. KONTROL: Profil ana ekranı mı?
-        if (isProfile(snapshot)) {
-            return ScreenType.PROFILE
-        }
-
-        // 5. KONTROL: Keşfet (Explore) ekranı mı?
+        // 3. KONTROL: Keşfet (Explore - Mercek ikonu) ızgara ekranı mı?
         if (isExplore(snapshot)) {
             return ScreenType.EXPLORE
         }
 
-        // 6. KONTROL: Gerçek DM (Direkt Mesajlar) ekranı mı?
-        // (Sadece DM aktivitesi veya mesaj kutusu fragment'ı açıkken geçerli)
+        // 4. KONTROL: Profil ekranı veya normal fotoğraf/gönderi detayı mı?
+        if (isProfilePostDetail(snapshot) || isProfile(snapshot)) {
+            return ScreenType.PROFILE
+        }
+
+        // 5. KONTROL: DM (Direkt Mesajlar) sekmesi veya mesajlaşma ekranı mı?
         if (isDirectMessageScreen(snapshot)) {
             return ScreenType.DIRECT_MESSAGES
         }
 
-        // 7. KONTROL: Tam ekran dikey kaydırmalı Reels Oynatıcısı mı?
-        // (Sadece clips_viewer_view_pager olduğunda ve normal gönderi detayı değilken)
+        // 6. KONTROL: Tam ekran dikey kaydırmalı Reels Oynatıcısı mı?
+        // (DM'den, Keşfet'ten, Akış'tan veya Profil'den açılan Reels oynatıcısı)
         if (isClipsViewer(snapshot)) {
             return ScreenType.REELS_VIEWER
         }
 
-        // 8. KONTROL: Hikaye (Story) ekranı mı?
+        // 7. KONTROL: Hikaye (Story) ekranı mı?
         if (isStoryScreen(snapshot)) {
             return ScreenType.MAIN_FEED
         }
 
-        // 9. KONTROL: Genel Ana Akış belirteçleri
+        // 8. KONTROL: Genel Ana Akış belirteçleri
         if (isMainFeed(snapshot)) {
             return ScreenType.MAIN_FEED
         }
 
         return ScreenType.UNKNOWN
+    }
+
+    /**
+     * REELS_VIEWER ekranındayken üst bar başlığı veya görünüm yapısından videonun
+     * hangi ekrandan açıldığına dair doğrudan bir ipucu çıkarır (örn. Keşfet üst barında 'Explore').
+     */
+    fun extractReelOriginHint(snapshot: ScreenSnapshot): ScreenType? {
+        if (snapshot.rootNode == null) return null
+
+        // 1. Keşfet'ten açılan Reel: Üst barda clips_viewer_action_bar_title 'Explore' / 'Keşfet' yazar
+        val hasExploreTitle = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val text = node.text ?: ""
+            val desc = node.contentDescription ?: ""
+            id.contains("clips_viewer_action_bar_title", ignoreCase = true) &&
+                (text.equals("Explore", ignoreCase = true) ||
+                 text.equals("Keşfet", ignoreCase = true) ||
+                 desc.equals("Explore", ignoreCase = true) ||
+                 desc.equals("Keşfet", ignoreCase = true))
+        }.isNotEmpty()
+        if (hasExploreTitle) return ScreenType.EXPLORE
+
+        // 2. DM'den açılan Reel
+        val hasDmHint = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            id.contains("inbox_refreshable_thread_list", ignoreCase = true) ||
+            id.contains("message_composer", ignoreCase = true) ||
+            id.contains("thread_fragment", ignoreCase = true)
+        }.isNotEmpty()
+        if (hasDmHint) return ScreenType.DIRECT_MESSAGES
+
+        // 3. Profil'den açılan Reel
+        if (isProfileTabSelected(snapshot)) return ScreenType.PROFILE
+
+        // 4. Ana Akış'tan açılan Reel: Üst barda "Reels" / "Friends" sekmesi
+        val hasFeedTabs = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val desc = node.contentDescription ?: ""
+            (id.contains("action_bar_tab_layout", ignoreCase = true) || desc.equals("Friends", ignoreCase = true))
+        }.isNotEmpty()
+        if (hasFeedTabs) return ScreenType.MAIN_FEED
+
+        return null
+    }
+
+    /**
+     * REELS_VIEWER ekranındayken aktif videonun yazar, medya açıklaması ve altyazı (caption)
+     * bilgilerinden yapısal bir parmak izi çıkarır. Kullanıcı 2. bir Reel'e kaydırdığında
+     * bu parmak izi değişir.
+     */
+    fun extractReelFingerprint(snapshot: ScreenSnapshot): ReelContentFingerprint {
+        if (snapshot.rootNode == null) return ReelContentFingerprint()
+
+        val authorNode = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            id.contains("clips_author_username", ignoreCase = true) ||
+            id.contains("clips_author_profile_pic", ignoreCase = true)
+        }.firstOrNull { !it.contentDescription.isNullOrBlank() || !it.text.isNullOrBlank() }
+
+        val rawAuthor = authorNode?.contentDescription?.takeIf { it.isNotBlank() }
+            ?: authorNode?.text?.takeIf { it.isNotBlank() }
+        val normalizedAuthor = rawAuthor
+            ?.removePrefix("Profile picture of ")
+            ?.removeSuffix("'s profile picture")
+            ?.trim()
+
+        val mediaNode = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            id.contains("clips_media_component", ignoreCase = true) ||
+            id.contains("clips_video_container", ignoreCase = true)
+        }.firstOrNull { !it.contentDescription.isNullOrBlank() }
+
+        val captionContainer = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            id.contains("clips_caption_component", ignoreCase = true)
+        }.firstOrNull()
+
+        val captionDesc = captionContainer
+            ?.find { !it.contentDescription.isNullOrBlank() }
+            ?.firstOrNull()
+            ?.contentDescription
+            ?.trim()
+
+        return ReelContentFingerprint(
+            author = normalizedAuthor,
+            mediaDesc = mediaNode?.contentDescription?.trim(),
+            caption = captionDesc
+        )
     }
 
     private fun isFeedTabSelected(snapshot: ScreenSnapshot): Boolean {
@@ -99,94 +236,143 @@ class ScreenClassifier(
                 return@findNodes false
             }
 
+            // Yalnızca gerçek alt bar sekme ID'si (clips_tab) kontrol edilir
             val matchesId = rules.reelsTab.tabIds.any { id.contains(it, ignoreCase = true) }
             matchesId && node.isSelected
         }.isNotEmpty()
     }
 
+    private fun isDirectTabSelected(snapshot: ScreenSnapshot): Boolean {
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val desc = node.contentDescription ?: ""
+            val matchesId = id.contains("direct_tab", ignoreCase = true) ||
+                id.contains("tab_direct", ignoreCase = true)
+            val matchesDesc = desc.equals("Message", ignoreCase = true) ||
+                desc.equals("Mesaj", ignoreCase = true) ||
+                desc.contains("Direct", ignoreCase = true)
+            (matchesId || matchesDesc) && node.isSelected
+        }.isNotEmpty()
+    }
+
+    private fun isExploreTabSelected(snapshot: ScreenSnapshot): Boolean {
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val desc = node.contentDescription ?: ""
+            val matchesId = rules.explore.tabIds.any { id.contains(it, ignoreCase = true) }
+            val matchesDesc = rules.explore.tabDescriptions.any {
+                desc.equals(it, ignoreCase = true) || desc.contains(it, ignoreCase = true)
+            }
+            (matchesId || matchesDesc) && node.isSelected
+        }.isNotEmpty()
+    }
+
+    private fun isProfileTabSelected(snapshot: ScreenSnapshot): Boolean {
+        return snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            val desc = node.contentDescription ?: ""
+            val matchesId = rules.profile.tabIds.any { id.contains(it, ignoreCase = true) }
+            val matchesDesc = rules.profile.tabDescriptions.any { desc.equals(it, ignoreCase = true) }
+            (matchesId || matchesDesc) && node.isSelected
+        }.isNotEmpty()
+    }
+
     private fun isProfilePostDetail(snapshot: ScreenSnapshot): Boolean {
-        // Profildeyken bir gönderiye tıklandığında:
-        // Üst barda "Gönderiler" / "Posts" başlığı veya geri butonu yer alır.
+        if (hasClipsViewerContainer(snapshot)) {
+            return false
+        }
+
         val hasPostTitle = snapshot.findNodes { node ->
             val text = node.text ?: ""
             val desc = node.contentDescription ?: ""
             text.equals("Gönderiler", ignoreCase = true) ||
             text.equals("Posts", ignoreCase = true) ||
             desc.equals("Gönderiler", ignoreCase = true) ||
-            desc.equals("Posts", ignoreCase = true) ||
-            desc.contains("gönderi", ignoreCase = true)
+            desc.equals("Posts", ignoreCase = true)
         }.isNotEmpty()
 
         val hasDetailFeedId = snapshot.containsId("feed_detail") ||
-                              snapshot.containsId("media_set") ||
-                              snapshot.containsId("row_feed")
+            (snapshot.containsId("row_feed_photo") && isProfileTabSelected(snapshot))
 
         return hasPostTitle || hasDetailFeedId
     }
 
     private fun isProfile(snapshot: ScreenSnapshot): Boolean {
-        // Alt sekme çubuğu kontrolü (Profil avatar sekmesi)
-        val hasProfileTab = snapshot.findNodes { node ->
-            val id = node.viewId ?: ""
-            val desc = node.contentDescription ?: ""
-            val matchesId = rules.profile.tabIds.any { id.contains(it, ignoreCase = true) }
-            val matchesDesc = rules.profile.tabDescriptions.any { desc.contains(it, ignoreCase = true) }
-            (matchesId || matchesDesc) && node.isSelected
-        }.isNotEmpty()
-
-        // Ekran içeriği kontrolü (Profili düzenle butonu, kullanıcı başlığı, istatistikler)
         val hasProfileContent = snapshot.findNodes { node ->
             val id = node.viewId ?: ""
             val desc = node.contentDescription ?: ""
+            if (id.contains("row_feed_", ignoreCase = true)) {
+                return@findNodes false
+            }
             rules.profile.contentIds.any { id.contains(it, ignoreCase = true) } ||
             desc.contains("profili düzenle", ignoreCase = true) ||
-            desc.contains("edit profile", ignoreCase = true) ||
-            desc.contains("takipçi", ignoreCase = true)
+            desc.contains("edit profile", ignoreCase = true)
         }.isNotEmpty()
 
-        return hasProfileTab || hasProfileContent
+        if (hasClipsViewerContainer(snapshot) && !hasProfileContent) {
+            return false
+        }
+
+        return isProfileTabSelected(snapshot) || hasProfileContent
     }
 
     private fun isExplore(snapshot: ScreenSnapshot): Boolean {
-        // Alt sekme çubuğu kontrolü
-        val hasExploreTab = snapshot.findNodes { node ->
-            val id = node.viewId ?: ""
-            val desc = node.contentDescription ?: ""
-            val matchesId = rules.explore.tabIds.any { id.contains(it, ignoreCase = true) }
-            val matchesDesc = rules.explore.tabDescriptions.any { desc.contains(it, ignoreCase = true) }
-            (matchesId || matchesDesc) && node.isSelected
-        }.isNotEmpty()
-
-        // Ekran içeriği kontrolü (arama kutusu, keşfet gridi)
         val hasExploreContent = snapshot.findNodes { node ->
             val id = node.viewId ?: ""
             val desc = node.contentDescription ?: ""
+            val text = node.text ?: ""
+            if (id.contains("tab", ignoreCase = true)) {
+                return@findNodes false
+            }
             rules.explore.contentIds.any { id.contains(it, ignoreCase = true) } ||
-            desc.contains("Arama", ignoreCase = true) ||
-            desc.contains("Ara ve Keşfet", ignoreCase = true)
+            desc.equals("Arama", ignoreCase = true) ||
+            desc.equals("Search", ignoreCase = true) ||
+            text.equals("Arama", ignoreCase = true) ||
+            text.equals("Search", ignoreCase = true)
         }.isNotEmpty()
+
+        if (hasClipsViewerContainer(snapshot) && !hasExploreContent) {
+            return false
+        }
+
+        val hasExploreTab = isExploreTabSelected(snapshot)
 
         return hasExploreTab || hasExploreContent
     }
 
     private fun isDirectMessageScreen(snapshot: ScreenSnapshot): Boolean {
-        // 1. Ana Sayfa, Keşfet veya Profil alt çubuğu mevcutsa veya Ana Sayfa sekmesi seçiliyse ASLA DM ekranı olamaz!
-        if (snapshot.containsId("feed_tab") || isFeedTabSelected(snapshot)) {
+        if (hasClipsViewerContainer(snapshot) || snapshot.containsId("reel_viewer_layout")) {
             return false
         }
 
-        // 2. Reels oynatıcı veya hikaye ekranındaysak DM sayılmaz
-        if (snapshot.containsId("clips_viewer_view_pager") || snapshot.containsId("reel_viewer_layout")) {
+        if (isDirectTabSelected(snapshot)) {
+            return true
+        }
+
+        val hasDmComponents = snapshot.findNodes { node ->
+            val id = node.viewId ?: ""
+            id.contains("inbox_refreshable_thread_list", ignoreCase = true) ||
+            id.contains("cf_hub_recycler_view", ignoreCase = true) ||
+            id.contains("message_list", ignoreCase = true) ||
+            id.contains("message_composer", ignoreCase = true) ||
+            id.contains("thread_fragment", ignoreCase = true) ||
+            id.contains("direct_quick_snap", ignoreCase = true) ||
+            id.contains("row_thread", ignoreCase = true)
+        }.isNotEmpty()
+
+        if (hasDmComponents) {
+            return true
+        }
+
+        if (isFeedTabSelected(snapshot) || isExploreTabSelected(snapshot) || isProfileTabSelected(snapshot)) {
             return false
         }
 
-        // 3. Aktivite adı kontrolü
         val activity = snapshot.currentActivity ?: ""
         if (rules.directMessages.activityKeywords.any { activity.contains(it, ignoreCase = true) }) {
             return true
         }
 
-        // 4. Görünüm ID'leri kontrolü (direct_, thread_, message_composer, notes_tray vb.)
         val hasDmViewId = snapshot.findNodes { node ->
             val id = node.viewId ?: ""
             if (id.contains("direct_share", ignoreCase = true)) return@findNodes false
@@ -195,32 +381,33 @@ class ScreenClassifier(
 
         if (hasDmViewId) return true
 
-        // 5. Metin ve İçerik Açıklaması Kontrolleri (Mesajlar, Sohbetler vb.)
         return snapshot.findNodes { node ->
-            val text = node.text ?: ""
-            val desc = node.contentDescription ?: ""
+            val text = node.text?.trim() ?: ""
+            val desc = node.contentDescription?.trim() ?: ""
             rules.directMessages.textKeywords.any { kw ->
-                text.contains(kw, ignoreCase = true) || desc.contains(kw, ignoreCase = true)
+                text.equals(kw, ignoreCase = true) || desc.equals(kw, ignoreCase = true)
             }
         }.isNotEmpty()
     }
 
-    private fun isClipsViewer(snapshot: ScreenSnapshot): Boolean {
-        // Normal gönderi detayındaysak veya Ana Sayfa aktifse ASLA Reels Viewer sayılmaz!
-        if (isProfilePostDetail(snapshot) || isFeedTabSelected(snapshot)) {
-            return false
-        }
-
-        val activity = snapshot.currentActivity ?: ""
-        val isModalActivity = rules.reelsViewer.modalActivities.any { activity.contains(it, ignoreCase = true) }
-
-        // Gerçek dikey Reels izleyicisi göstergeleri
-        val hasClipsViewerPager = snapshot.findNodes { node ->
+    private fun hasClipsViewerContainer(snapshot: ScreenSnapshot): Boolean {
+        return snapshot.findNodes { node ->
             val id = node.viewId ?: ""
             rules.reelsViewer.viewerIds.any { id.contains(it, ignoreCase = true) }
         }.isNotEmpty()
+    }
 
-        return hasClipsViewerPager || isModalActivity
+    private fun isClipsViewer(snapshot: ScreenSnapshot): Boolean {
+        if (isProfilePostDetail(snapshot)) {
+            return false
+        }
+
+        if (hasClipsViewerContainer(snapshot)) {
+            return true
+        }
+
+        val activity = snapshot.currentActivity ?: ""
+        return rules.reelsViewer.modalActivities.any { activity.contains(it, ignoreCase = true) }
     }
 
     private fun isStoryScreen(snapshot: ScreenSnapshot): Boolean {

@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 6,
   "minAppVersion": "0.1.0",
   "screens": {
     "feed": {
@@ -27,18 +27,45 @@
     },
     "directMessages": {
       "activityKeywords": ["DirectMainActivity", "DirectThreadActivity", "DirectInboxActivity", "DirectThread", "Direct"],
-      "viewIds": ["direct_", "thread_", "message_composer", "row_thread", "direct_inbox", "thread_list", "notes_tray", "composer"],
-      "textKeywords": ["mesajlar", "messages", "sohbetler", "chats", "birincil", "primary", "genel", "general", "istekler", "requests"]
+      "viewIds": [
+        "direct_tab",
+        "inbox_refreshable_thread_list",
+        "cf_hub_recycler_view",
+        "direct_quick_snap",
+        "message_list",
+        "message_composer",
+        "row_thread",
+        "direct_inbox",
+        "thread_list",
+        "notes_tray",
+        "direct_"
+      ],
+      "textKeywords": ["mesajlar", "messages", "sohbetler", "chats", "birincil", "primary", "genel", "general", "istekler", "requests", "direct"]
     },
     "explore": {
       "tabIds": ["search_tab", "tab_search", "explore_tab"],
-      "tabDescriptions": ["Search", "Ara", "Ara ve Keşfet", "Explore", "Keşfet"],
-      "contentIds": ["action_bar_search", "search_edit_text", "search_box", "explore_grid"]
+      "tabDescriptions": ["Search and explore", "Ara ve Keşfet", "Search", "Ara", "Explore", "Keşfet"],
+      "contentIds": [
+        "explore_action_bar",
+        "action_bar_search",
+        "search_edit_text",
+        "search_box",
+        "grid_card_layout_container",
+        "preview_clip_play_count",
+        "explore_grid",
+        "image_preview"
+      ]
     },
     "profile": {
       "tabIds": ["profile_tab", "tab_profile", "tab_avatar"],
-      "tabDescriptions": ["Profile", "Profil", "clips"],
-      "contentIds": ["profile_header", "edit_profile", "profile_tabs", "user_profile"]
+      "tabDescriptions": ["Profile", "Profil"],
+      "contentIds": [
+        "profile_header",
+        "edit_profile",
+        "profile_tabs",
+        "user_profile",
+        "media_set_row_content_identifier"
+      ]
     }
   }
 }

@@ -41,27 +41,52 @@ data class ScreenSnapshot(
     }
 
     companion object {
+        private const val MAX_TREE_DEPTH = 22
+        private const val MAX_TOTAL_NODES = 250
+
         fun fromNodeInfo(
             packageName: String,
             activityName: String?,
             rootNode: AccessibilityNodeInfo?
         ): ScreenSnapshot {
+            val nodeCounter = intArrayOf(0)
             return ScreenSnapshot(
                 packageName = packageName,
                 currentActivity = activityName,
-                rootNode = rootNode?.let { createNodeSnapshot(it) }
+                rootNode = rootNode?.let { createNodeSnapshot(it, depth = 0, nodeCounter = nodeCounter) }
             )
         }
 
-        private fun createNodeSnapshot(node: AccessibilityNodeInfo): NodeSnapshot {
+        private fun createNodeSnapshot(
+            node: AccessibilityNodeInfo,
+            depth: Int,
+            nodeCounter: IntArray
+        ): NodeSnapshot {
+            nodeCounter[0]++
+
             val childCount = node.childCount
             val children = ArrayList<NodeSnapshot>(childCount)
-            for (i in 0 until childCount) {
-                val child = node.getChild(i)
-                if (child != null) {
-                    children.add(createNodeSnapshot(child))
-                    // Child node must be recycled if using older APIs, but in modern Android
-                    // recycling happens automatically. We don't hold references to child node.
+
+            // Derinlik sınırı ve toplam düğüm kotası kontrolü:
+            // Instagram ekranındaki tüm yapısal bileşenler (sekmeler, Reels oynatıcı, ızgara vb.)
+            // ilk 22 katman ve 250 düğüm içerisindedir. Yorumlar gibi devasa alt listelerin taranması
+            // engellenerek Binder IPC yükü ve bellek tahsisi en aza indirilir.
+            val shouldTraverseChildren = depth < MAX_TREE_DEPTH && nodeCounter[0] < MAX_TOTAL_NODES
+
+            if (shouldTraverseChildren) {
+                for (i in 0 until childCount) {
+                    if (nodeCounter[0] >= MAX_TOTAL_NODES) break
+                    val child = node.getChild(i)
+                    if (child != null) {
+                        if (child.isVisibleToUser) {
+                            val childId = child.viewIdResourceName ?: ""
+                            val isIrrelevantSubtree = childId.contains("row_comment", ignoreCase = true) ||
+                                childId.contains("comment_thread", ignoreCase = true)
+                            if (!isIrrelevantSubtree) {
+                                children.add(createNodeSnapshot(child, depth + 1, nodeCounter))
+                            }
+                        }
+                    }
                 }
             }
 

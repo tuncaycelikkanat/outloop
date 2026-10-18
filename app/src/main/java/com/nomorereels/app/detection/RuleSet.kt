@@ -31,24 +31,51 @@ data class StoryRule(
 
 data class DirectMessagesRule(
     val activityKeywords: List<String> = listOf("DirectMainActivity", "DirectThreadActivity", "DirectInboxActivity", "DirectThread", "Direct"),
-    val viewIds: List<String> = listOf("direct_", "thread_", "message_composer", "row_thread", "direct_inbox", "thread_list", "notes_tray", "composer"),
-    val textKeywords: List<String> = listOf("mesajlar", "messages", "sohbetler", "chats", "birincil", "primary", "genel", "general", "istekler", "requests")
+    val viewIds: List<String> = listOf(
+        "direct_tab",
+        "inbox_refreshable_thread_list",
+        "cf_hub_recycler_view",
+        "direct_quick_snap",
+        "message_list",
+        "message_composer",
+        "row_thread",
+        "direct_inbox",
+        "thread_list",
+        "notes_tray",
+        "direct_"
+    ),
+    val textKeywords: List<String> = listOf("mesajlar", "messages", "sohbetler", "chats", "birincil", "primary", "genel", "general", "istekler", "requests", "direct")
 )
 
 data class ExploreRule(
     val tabIds: List<String> = listOf("search_tab", "tab_search", "explore_tab"),
-    val tabDescriptions: List<String> = listOf("Search", "Ara", "Ara ve Keşfet", "Explore", "Keşfet"),
-    val contentIds: List<String> = listOf("action_bar_search", "search_edit_text", "search_box", "explore_grid")
+    val tabDescriptions: List<String> = listOf("Search and explore", "Ara ve Keşfet", "Search", "Ara", "Explore", "Keşfet"),
+    val contentIds: List<String> = listOf(
+        "explore_action_bar",
+        "action_bar_search",
+        "search_edit_text",
+        "search_box",
+        "grid_card_layout_container",
+        "preview_clip_play_count",
+        "explore_grid",
+        "image_preview"
+    )
 )
 
 data class ProfileRule(
     val tabIds: List<String> = listOf("profile_tab", "tab_profile", "tab_avatar"),
-    val tabDescriptions: List<String> = listOf("Profile", "Profil", "clips"),
-    val contentIds: List<String> = listOf("profile_header", "edit_profile", "profile_tabs", "user_profile")
+    val tabDescriptions: List<String> = listOf("Profile", "Profil"),
+    val contentIds: List<String> = listOf(
+        "profile_header",
+        "edit_profile",
+        "profile_tabs",
+        "user_profile",
+        "media_set_row_content_identifier"
+    )
 )
 
 data class RuleSet(
-    val version: Int = 4,
+    val version: Int = 6,
     val minAppVersion: String = "0.1.0",
     val feed: FeedRule = FeedRule(),
     val reelsTab: ReelsTabRule = ReelsTabRule(),
