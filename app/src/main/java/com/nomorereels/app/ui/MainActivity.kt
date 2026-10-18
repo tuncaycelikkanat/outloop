@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,8 +30,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -164,6 +167,7 @@ data class NoMoreReelsUiState(
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         SettingsStore.init(this)
         QuotaStore.init(this)
@@ -268,7 +272,12 @@ fun NoMoreReelsAppRoot() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+    ) {
         if (!hasCompletedOnboarding) {
             // ONBOARDING AKIŞI (Ekran 1, 2, 3)
             OnboardingFlow(
@@ -563,7 +572,7 @@ fun OnboardingFlow(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 24.dp),
+                    .padding(top = 16.dp, bottom = 24.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -888,7 +897,7 @@ fun ScreenKorumalar(
         verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
     ) {
         item {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "No More Reels",
                 style = MaterialTheme.typography.titleLarge,
@@ -1049,7 +1058,7 @@ fun ScreenBolgeler(
         verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
     ) {
         item {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Bölgeler",
                 style = MaterialTheme.typography.titleLarge,
@@ -1199,7 +1208,7 @@ fun ScreenKotaSure(
         verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
     ) {
         item {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Kökle Kotanı",
                 style = MaterialTheme.typography.titleLarge,
@@ -1446,7 +1455,7 @@ fun ScreenAyarlar(
         verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
     ) {
         item {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Ayarlar",
                 style = MaterialTheme.typography.titleLarge,
@@ -1724,6 +1733,7 @@ fun LiveLogsScreen(
             .fillMaxSize()
             .padding(horizontal = NmrTheme.dimens.screenHorizontalMargin, vertical = 12.dp)
     ) {
+        Spacer(modifier = Modifier.height(12.dp))
         // Üst Bar: Geri oku, başlık, sağda duraklat ve temizle ikonları
         Row(
             modifier = Modifier
