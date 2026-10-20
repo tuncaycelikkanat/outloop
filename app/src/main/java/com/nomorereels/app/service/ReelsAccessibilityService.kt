@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.nomorereels.app.action.ActionExecutor
 import com.nomorereels.app.action.OverlayController
+import com.nomorereels.app.data.HeatmapStore
 import com.nomorereels.app.data.QuotaStore
 import com.nomorereels.app.data.SettingsStore
 import com.nomorereels.app.detection.DetectionLogStore
@@ -13,6 +14,7 @@ import com.nomorereels.app.detection.RuleSet
 import com.nomorereels.app.detection.ScreenClassifier
 import com.nomorereels.app.detection.ScreenSnapshot
 import com.nomorereels.app.detection.ScreenType
+import com.nomorereels.app.policy.DmReelMode
 import com.nomorereels.app.policy.NavigationTracker
 import com.nomorereels.app.policy.PolicyDecision
 import com.nomorereels.app.policy.ReelsPolicy
@@ -29,19 +31,41 @@ class ReelsAccessibilityService : AccessibilityService() {
     private var lastReelViewerActiveTimeMs: Long = 0L
     private var accumulatedViewerTimeMs: Long = 0L
 
+    /** Debug derlemede ayrıntılı ağaç dökümü (NoMoreReelsDump) yapılır; release'te tamamen kapalı. */
+    private var isDebuggableBuild = false
+
+    private var cachedInspectMode = false
+    private var inspectModeCheckedAtMs = 0L
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         currentInstance = this
         _isServiceActive.value = true
 
+        isDebuggableBuild = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+
         SettingsStore.init(this)
         QuotaStore.init(this)
+        HeatmapStore.init(this)
 
         // Dinamik kuralları assets/rules.json dosyasından yükle
         classifier.rules = loadRulesFromAssets()
         _ruleVersion.value = classifier.rules.version
 
         Log.i(TAG, "ReelsAccessibilityService bağlandı (Kural sürümü: ${classifier.rules.version}).")
+    }
+
+    private fun isInspectModeEnabled(now: Long): Boolean {
+        if (!isDebuggableBuild) return false
+        if (now - inspectModeCheckedAtMs > 5_000L) {
+            inspectModeCheckedAtMs = now
+            cachedInspectMode = try {
+                android.provider.Settings.Global.getInt(contentResolver, "nmr_inspect_mode", 0) == 1
+            } catch (_: Exception) {
+                false
+            }
+        }
+        return cachedInspectMode
     }
 
     private var lastContentChangeProcessedMs = 0L
@@ -68,24 +92,31 @@ class ReelsAccessibilityService : AccessibilityService() {
         }
 
         val activityName = event.className?.toString()
-        val srcId = try { event.source?.viewIdResourceName } catch (_: Exception) { null }
+        // event.source bir Binder IPC çağrısıdır; yalnızca kaydırma olaylarında gerekir.
+        val srcId = if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            try { event.source?.viewIdResourceName } catch (_: Exception) { null }
+        } else {
+            null
+        }
 
         // B. HIZLI YOL (FAST-PATH - Kaydırma Olayı Süzgeci):
-        // 1. Eğer halihazırda Reels oynatıcısında değilsek (örn. Ana Akış veya Keşfet kaydırılıyorsa),
+        // 1. Eğer halihazırda bir Reels ekranında değilsek (örn. Ana Akış veya Keşfet kaydırılıyorsa),
         //    liste kaydırmaları ekran türünü değiştiremez. Ağacı çekip analiz etmeden hemen çık!
-        // 2. Reels izleyicisindeysek ama dikey ViewPager kaydırması değilse (örn. arka plan fling) çık!
+        // 2. Reels ekranındaysak ama dikey ViewPager kaydırması değilse (örn. arka plan fling) çık!
         if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            if (navigationTracker.currentScreen != ScreenType.REELS_VIEWER) {
+            if (!navigationTracker.currentScreen.isReels) {
                 return
             }
             if (!isVerticalReelPagerScroll(event, activityName, srcId)) {
                 return
             }
-            Log.i(
-                "NoMoreReelsDump",
-                "SCROLL_EVENT class=$activityName srcId=$srcId from=${event.fromIndex} to=${event.toIndex} " +
-                    "count=${event.itemCount} dX=${event.scrollDeltaX} dY=${event.scrollDeltaY} curScreen=${navigationTracker.currentScreen}"
-            )
+            if (isDebuggableBuild) {
+                Log.i(
+                    "NoMoreReelsDump",
+                    "SCROLL_EVENT class=$activityName srcId=$srcId from=${event.fromIndex} to=${event.toIndex} " +
+                        "count=${event.itemCount} dX=${event.scrollDeltaX} dY=${event.scrollDeltaY} curScreen=${navigationTracker.currentScreen}"
+                )
+            }
         }
 
         val rootNode = rootInActiveWindow ?: return
@@ -97,12 +128,19 @@ class ReelsAccessibilityService : AccessibilityService() {
             rootNode = rootNode
         )
 
+        // 1b. Mola (Bilinçli Pencere) süresi doldu mu kontrol et
+        val wasSnoozeActive = SettingsStore.isSnoozeActiveNow(now)
+        SettingsStore.checkSnoozeExpiration(this, now)
+        if (wasSnoozeActive && !SettingsStore.isSnoozeActiveNow(now)) {
+            val plan = SettingsStore.consumeLastMicroPlan(this)
+            val isEnglish = SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.EN
+            overlayController.showMindfulWindowExpired(plan, isEnglish)
+        }
+
         // 2. Ekranı dinamik kural motoruyla sınıflandır
         val detectedScreen = classifier.classify(snapshot)
-        val originHint = classifier.extractReelOriginHint(snapshot)
-
-        // Teşhis için ekrandaki kilit düğümleri topla
-        val keyNodes = collectDiagnosticKeyNodes(snapshot)
+        // Köken ipucu yalnızca Reels ekranlarında anlamlıdır; diğer ekranlarda ağacı tekrar taramaya gerek yok.
+        val originHint = if (detectedScreen.isReels) classifier.extractReelOriginHint(snapshot) else null
 
         // 3. Reels ekranındaysak aktif videonun parmak izini (yazar/medya/altyazı) çıkar
         val reelFingerprint = if (detectedScreen.isReels) {
@@ -111,8 +149,13 @@ class ReelsAccessibilityService : AccessibilityService() {
             ReelContentFingerprint()
         }
 
-        if (!reelFingerprint.isEmpty) {
-            keyNodes.add(0, "🎬 Reel Kimliği: ${reelFingerprint.toSummaryString()}")
+        // Teşhis için ekrandaki kilit düğümler yalnızca günlüğe bir şey yazılacağı zaman toplanır (lazy)
+        val keyNodes: List<String> by lazy {
+            val nodes = collectDiagnosticKeyNodes(snapshot)
+            if (!reelFingerprint.isEmpty) {
+                nodes.add(0, "🎬 Reel Kimliği: ${reelFingerprint.toSummaryString()}")
+            }
+            nodes
         }
 
         // 4. Gezinme durum makinesini güncelle (Ekran geçişi + Köken tespiti + 2. Reel parmak izi değişimi)
@@ -136,7 +179,9 @@ class ReelsAccessibilityService : AccessibilityService() {
             }
         }
 
-        logScenarioSnapshotIfNeeded(event, snapshot, detectedScreen, activeScreen, isScreenChanged, reelFingerprint)
+        if (isDebuggableBuild) {
+            logScenarioSnapshotIfNeeded(event, snapshot, detectedScreen, activeScreen, isScreenChanged, reelFingerprint)
+        }
 
         // Reels dışındaki bir ekrana geçildiyse açık olan Sürtünme (Friction) katmanını kapat ve süreyi kaydet
         if (!activeScreen.isReels) {
@@ -152,6 +197,7 @@ class ReelsAccessibilityService : AccessibilityService() {
                 QuotaStore.addTimeSpent(this, secs)
             }
             accumulatedViewerTimeMs = 0L
+            QuotaStore.flush(this)
 
             if (overlayController.isFrictionOverlayShowing) {
                 overlayController.dismissMindfulFrictionOverlay()
@@ -169,13 +215,60 @@ class ReelsAccessibilityService : AccessibilityService() {
             return
         }
 
-        // 5. Reels ekranındayız (REELS_TAB veya REELS_VIEWER):
-        // Reels süresini ve adet sayacını takip et
-        if (activeScreen.isReels) {
-            val newReelEntered = isScreenChanged || navigationTracker.checkAndClearNewReelSwiped()
+        // 5. Reels ekranındayız (REELS_TAB veya REELS_VIEWER)
+        QuotaStore.ensureToday(this)
+        val newReelEntered = isScreenChanged || navigationTracker.checkAndClearNewReelSwiped()
+        if (newReelEntered) {
+            HeatmapStore.recordAttempt(this, now)
+        }
+
+        val dmMode = SettingsStore.dmReelMode.value
+        val exploreMode = SettingsStore.exploreReelMode.value
+        val feedMode = SettingsStore.feedReelMode.value
+        val profileMode = SettingsStore.profileReelMode.value
+        val reelsTabMode = SettingsStore.reelsTabMode.value
+        val generalMode = SettingsStore.generalMode.value
+
+        val activeMode = ReelsPolicy.resolveActiveMode(
+            detectedScreen = activeScreen,
+            originScreen = navigationTracker.reelOriginScreen,
+            dmMode = dmMode,
+            exploreMode = exploreMode,
+            feedMode = feedMode,
+            profileMode = profileMode,
+            reelsTabMode = reelsTabMode,
+            generalMode = generalMode
+        )
+
+        // Politikayı çalıştır
+        val decision = reelsPolicy.evaluate(
+            detectedScreen = activeScreen,
+            tracker = navigationTracker,
+            dmMode = dmMode,
+            exploreMode = exploreMode,
+            feedMode = feedMode,
+            profileMode = profileMode,
+            reelsTabMode = reelsTabMode,
+            generalMode = generalMode,
+            isBedtimeActive = SettingsStore.isBedtimeActiveNow(),
+            isCountLimitExceeded = QuotaStore.isCountLimitExceeded(enteringNewReel = newReelEntered),
+            isTimeLimitExceeded = QuotaStore.isTimeLimitExceeded(),
+            customSingleReelMaxDurationMs = QuotaStore.singleReelMaxSeconds.value * 1000L
+        )
+
+        val originLabel = navigationTracker.reelOriginScreen?.name ?: "DOĞRUDAN"
+        val activeModeForLog = activeMode
+
+        if (isInspectModeEnabled(now)) {
+            Log.i("NoMoreReelsDump", "INSPECT_MODE decision=$decision active=$activeScreen origin=$originLabel mode=$activeMode swiped=${navigationTracker.hasSwipedToNextReel} fp=${reelFingerprint.toSummaryString()}")
+            return
+        }
+
+        // 6. Kullanım muhasebesi: yalnızca gerçekten izin verilen (izlenen) Reel'ler sayılır.
+        if (decision == PolicyDecision.ALLOW) {
             if (newReelEntered) {
                 QuotaStore.incrementReelCount(this)
-                if (QuotaStore.checkAndTriggerCountWarning()) {
+                if (activeMode == DmReelMode.COUNT_QUOTA && QuotaStore.checkAndTriggerCountWarning()) {
                     overlayController.showQuotaWarningBanner(
                         title = "Günlük Kota Uyarısı ⏳",
                         message = "Kotana yaklaştın: Bugün ${QuotaStore.todayReelCount.value}/${QuotaStore.dailyCountLimit.value} Reel izledin."
@@ -191,7 +284,7 @@ class ReelsAccessibilityService : AccessibilityService() {
                         val secs = accumulatedViewerTimeMs / 1000L
                         accumulatedViewerTimeMs %= 1000L
                         QuotaStore.addTimeSpent(this, secs)
-                        if (QuotaStore.checkAndTriggerTimeWarning()) {
+                        if (activeMode == DmReelMode.TIME_QUOTA && QuotaStore.checkAndTriggerTimeWarning()) {
                             val currentMins = QuotaStore.todayTimeSpentSeconds.value / 60
                             overlayController.showQuotaWarningBanner(
                                 title = "Günlük Süre Uyarısı ⏱️",
@@ -202,105 +295,149 @@ class ReelsAccessibilityService : AccessibilityService() {
                 }
             }
             lastReelViewerActiveTimeMs = now
-        }
-
-        // Politikayı çalıştır
-        val dmMode = SettingsStore.dmReelMode.value
-        val exploreMode = SettingsStore.exploreReelMode.value
-        val feedMode = SettingsStore.feedReelMode.value
-        val profileMode = SettingsStore.profileReelMode.value
-        val reelsTabMode = SettingsStore.reelsTabMode.value
-
-        val decision = reelsPolicy.evaluate(
-            detectedScreen = activeScreen,
-            tracker = navigationTracker,
-            dmMode = dmMode,
-            exploreMode = exploreMode,
-            feedMode = feedMode,
-            profileMode = profileMode,
-            reelsTabMode = reelsTabMode,
-            generalMode = SettingsStore.generalMode.value,
-            isBedtimeActive = SettingsStore.isBedtimeActiveNow(),
-            isCountLimitExceeded = QuotaStore.isCountLimitExceeded(),
-            isTimeLimitExceeded = QuotaStore.isTimeLimitExceeded(),
-            customSingleReelMaxDurationMs = QuotaStore.singleReelMaxSeconds.value * 1000L
-        )
-
-        val originLabel = navigationTracker.reelOriginScreen?.name ?: "DOĞRUDAN"
-        val activeModeForLog = if (activeScreen == ScreenType.REELS_TAB) {
-            reelsTabMode
         } else {
-            when (navigationTracker.reelOriginScreen) {
-                ScreenType.DIRECT_MESSAGES -> dmMode
-                ScreenType.EXPLORE -> exploreMode
-                ScreenType.MAIN_FEED -> feedMode
-                ScreenType.PROFILE -> profileMode
-                else -> dmMode
-            }
+            // Engellenen veya onay bekleyen Reel'de geçen süre izleme süresine eklenmez
+            lastReelViewerActiveTimeMs = 0L
         }
-
-        val isInspectMode = try {
-            android.provider.Settings.Global.getInt(contentResolver, "nmr_inspect_mode", 0) == 1
-        } catch (_: Exception) {
-            false
-        }
-        if (isInspectMode) {
-            Log.i("NoMoreReelsDump", "INSPECT_MODE decision=$decision active=$activeScreen origin=$originLabel swiped=${navigationTracker.hasSwipedToNextReel} fp=${reelFingerprint.toSummaryString()}")
-            return
-        }
-
         when {
             decision.shouldBlock -> {
                 if (overlayController.isFrictionOverlayShowing) {
-                    overlayController.dismissMindfulFrictionOverlay()
+                    return
                 }
 
-                Log.w(TAG, "Reels engelleniyor! Karar: $decision, Ekran: $activeScreen, Köken: $originLabel, Mod: ${activeModeForLog.name}")
-                val handled = actionExecutor.executeBlock(activeScreen, rootNode)
+                if (SettingsStore.mindfulGatewayEnabled.value) {
+                    val isEnglish = SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.EN
+                    val isNightMode = (decision == PolicyDecision.BLOCK_BEDTIME) || SettingsStore.isBedtimeActiveNow()
 
-                if (handled && SettingsStore.overlayFeedbackEnabled.value) {
-                    overlayController.showBlockBanner(decision)
+                    if (decision == PolicyDecision.BLOCK_BEDTIME && !SettingsStore.nightCompassionEnabled.value) {
+                        Log.w(TAG, "Gece Odak Saati engellemesi (Şefkat modu kapalı).")
+                        val handled = actionExecutor.executeBlock(activeScreen, rootNode)
+                        if (handled && SettingsStore.overlayFeedbackEnabled.value) {
+                            overlayController.showBlockBanner(decision)
+                        }
+                    } else {
+                        val barrierType = SettingsStore.mindfulBarrierType.value
+                        val shown = overlayController.showMindfulGatewayOverlay(
+                            barrierType = barrierType,
+                            isNightMode = isNightMode,
+                            isEnglish = isEnglish,
+                            onApproved = { durationMinutes, microPlan ->
+                                SettingsStore.startSnooze(
+                                    context = this,
+                                    durationMinutes = durationMinutes,
+                                    microPlan = microPlan
+                                )
+                                DetectionLogStore.log(
+                                    screenType = activeScreen,
+                                    details = "Farkındalık Kapısı: $durationMinutes dk Bilinçli Pencere ($microPlan)",
+                                    actionTaken = "Bilinçli İzin Verildi",
+                                    keyNodes = keyNodes
+                                )
+                            },
+                            onCancelAndGoBack = {
+                                actionExecutor.executeBlock(activeScreen, rootNode, force = true)
+                                DetectionLogStore.log(
+                                    screenType = activeScreen,
+                                    details = "Farkındalık Kapısı: Çıkış / Vazgeçme",
+                                    actionTaken = "Geri Dönüldü",
+                                    keyNodes = keyNodes
+                                )
+                            }
+                        )
+
+                        if (isScreenChanged && shown) {
+                            DetectionLogStore.log(
+                                screenType = activeScreen,
+                                details = "Farkındalık Kapısı Açıldı · Mod: ${activeModeForLog.name}",
+                                actionTaken = decision.reasonText,
+                                keyNodes = keyNodes
+                            )
+                        }
+                        return
+                    }
+                } else {
+                    Log.w(TAG, "Reels engelleniyor! Karar: $decision, Ekran: $activeScreen, Köken: $originLabel, Mod: ${activeModeForLog.name}")
+                    val handled = actionExecutor.executeBlock(activeScreen, rootNode)
+
+                    if (handled && SettingsStore.overlayFeedbackEnabled.value) {
+                        overlayController.showBlockBanner(decision)
+                    }
+
+                    DetectionLogStore.log(
+                        screenType = activeScreen,
+                        details = "Köken: $originLabel · Mod: ${activeModeForLog.name}",
+                        actionTaken = if (handled) decision.reasonText else "Beklemede (Cooldown)",
+                        keyNodes = keyNodes
+                    )
                 }
-
-                DetectionLogStore.log(
-                    screenType = activeScreen,
-                    details = "Köken: $originLabel · Mod: ${activeModeForLog.name}",
-                    actionTaken = if (handled) decision.reasonText else "Beklemede (Cooldown)",
-                    keyNodes = keyNodes
-                )
             }
 
             decision.shouldShowFriction -> {
                 if (!overlayController.isFrictionOverlayShowing) {
-                    val shown = overlayController.showMindfulFrictionOverlay(
-                        reelSummary = reelFingerprint.toSummaryString(),
-                        onApproved = {
-                            navigationTracker.approveCurrentDmReel()
+                    if (SettingsStore.mindfulGatewayEnabled.value) {
+                        val isEnglish = SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.EN
+                        val isNightMode = SettingsStore.isBedtimeActiveNow()
+                        val barrierType = SettingsStore.mindfulBarrierType.value
+
+                        overlayController.showMindfulGatewayOverlay(
+                            barrierType = barrierType,
+                            isNightMode = isNightMode,
+                            isEnglish = isEnglish,
+                            onApproved = { durationMinutes, microPlan ->
+                                navigationTracker.approveCurrentDmReel()
+                                SettingsStore.startSnooze(
+                                    context = this,
+                                    durationMinutes = durationMinutes,
+                                    microPlan = microPlan
+                                )
+                                DetectionLogStore.log(
+                                    screenType = ScreenType.REELS_VIEWER,
+                                    details = "Farkındalık Kapısı (DM): $durationMinutes dk ($microPlan)",
+                                    actionTaken = "Onaylandı",
+                                    keyNodes = keyNodes
+                                )
+                            },
+                            onCancelAndGoBack = {
+                                actionExecutor.executeBlock(ScreenType.REELS_VIEWER, null, force = true)
+                                DetectionLogStore.log(
+                                    screenType = ScreenType.REELS_VIEWER,
+                                    details = "Farkındalık Kapısı (DM): Vazgeçildi",
+                                    actionTaken = "Geri Dönüldü",
+                                    keyNodes = keyNodes
+                                )
+                            }
+                        )
+                    } else {
+                        val shown = overlayController.showMindfulFrictionOverlay(
+                            reelSummary = reelFingerprint.toSummaryString(),
+                            onApproved = {
+                                navigationTracker.approveCurrentDmReel()
+                                DetectionLogStore.log(
+                                    screenType = ScreenType.REELS_VIEWER,
+                                    details = "Köken: $originLabel · 5 Sn Basılı Tutma Tamamlandı",
+                                    actionTaken = "Onaylandı (Tek Reel İzleniyor)",
+                                    keyNodes = keyNodes
+                                )
+                            },
+                            onCancelAndGoBack = {
+                                actionExecutor.executeBlock(ScreenType.REELS_VIEWER, null, force = true)
+                                DetectionLogStore.log(
+                                    screenType = ScreenType.REELS_VIEWER,
+                                    details = "Köken: $originLabel · Kullanıcı Vazgeçti",
+                                    actionTaken = "Geri Dönüldü",
+                                    keyNodes = keyNodes
+                                )
+                            }
+                        )
+
+                        if (isScreenChanged && shown) {
                             DetectionLogStore.log(
-                                screenType = ScreenType.REELS_VIEWER,
-                                details = "Köken: $originLabel · 5 Sn Basılı Tutma Tamamlandı",
-                                actionTaken = "Onaylandı (Tek Reel İzleniyor)",
-                                keyNodes = keyNodes
-                            )
-                        },
-                        onCancelAndGoBack = {
-                            actionExecutor.executeBlock(ScreenType.REELS_VIEWER, null, force = true)
-                            DetectionLogStore.log(
-                                screenType = ScreenType.REELS_VIEWER,
-                                details = "Köken: $originLabel · Kullanıcı Vazgeçti",
-                                actionTaken = "Geri Dönüldü",
+                                screenType = activeScreen,
+                                details = "Köken: $originLabel · 5 Sn Onay Kapısı Açıldı",
+                                actionTaken = decision.reasonText,
                                 keyNodes = keyNodes
                             )
                         }
-                    )
-
-                    if (isScreenChanged && shown) {
-                        DetectionLogStore.log(
-                            screenType = activeScreen,
-                            details = "Köken: $originLabel · 5 Sn Onay Kapısı Açıldı",
-                            actionTaken = decision.reasonText,
-                            keyNodes = keyNodes
-                        )
                     }
                 }
             }

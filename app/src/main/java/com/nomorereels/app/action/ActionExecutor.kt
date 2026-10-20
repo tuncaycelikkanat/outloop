@@ -75,6 +75,11 @@ class ActionExecutor(
         if (handled) {
             lastActionTime = now
             _blockCount.value += 1
+            service?.let { s ->
+                try {
+                    com.nomorereels.app.data.QuotaStore.incrementBlockCount(s)
+                } catch (_: Exception) {}
+            }
         }
 
         return handled

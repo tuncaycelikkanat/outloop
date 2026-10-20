@@ -10,7 +10,7 @@ import java.util.Locale
 data class DetectionEventLog(
     val id: Long = System.currentTimeMillis() + (0..999).random(),
     val timestamp: Long = System.currentTimeMillis(),
-    val timeFormatted: String = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(timestamp)),
+    val timeFormatted: String = SimpleDateFormat("HH:mm:ss.SS", Locale.getDefault()).format(Date(timestamp)),
     val screenType: ScreenType,
     val details: String,
     val actionTaken: String? = null,
@@ -18,7 +18,7 @@ data class DetectionEventLog(
 )
 
 object DetectionLogStore {
-    private const val MAX_LOGS = 25
+    private const val MAX_LOGS = 50
     private val lock = Any()
     private val logsList = mutableListOf<DetectionEventLog>()
 

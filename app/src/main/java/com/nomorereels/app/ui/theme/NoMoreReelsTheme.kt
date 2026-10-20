@@ -242,10 +242,10 @@ object NmrIcons {
 // 5. TEMA YÖNETİCİSİ (THEME COMPOSABLE) - Açık | Sistem | AMOLED
 // ============================================================================
 
-enum class NmrThemeMode(val labelTr: String) {
-    LIGHT("Açık"),
-    SYSTEM("Sistem"),
-    AMOLED("AMOLED")
+enum class NmrThemeMode(val labelTr: String, val labelEn: String = labelTr) {
+    LIGHT("Açık", "Light"),
+    SYSTEM("Sistem", "System"),
+    AMOLED("AMOLED", "AMOLED")
 }
 
 enum class NmrLanguage(val code: String) {
@@ -464,6 +464,33 @@ fun NmrFilledButton(
 }
 
 @Composable
+fun NmrOutlinedButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 52.dp),
+        shape = CircleShape,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.primary
+        )
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium
+        )
+    }
+}
+
+
+@Composable
 fun NmrChip(
     label: String,
     selected: Boolean,
@@ -623,6 +650,7 @@ fun NmrBottomNavigationBar(
     onTabSelected: (NmrBottomTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val strings = com.nomorereels.app.ui.i18n.LocalAppStrings.current
     Column(modifier = modifier.fillMaxWidth()) {
         NmrHairlineDivider()
         NavigationBar(
@@ -631,19 +659,25 @@ fun NmrBottomNavigationBar(
         ) {
             NmrBottomTab.entries.forEach { tab ->
                 val selected = tab == currentTab
+                val labelText = when (tab) {
+                    NmrBottomTab.KORUMALAR -> strings.tabProtection
+                    NmrBottomTab.BOLGELER -> strings.tabRegions
+                    NmrBottomTab.KOTA_SURE -> strings.tabQuota
+                    NmrBottomTab.AYARLAR -> strings.tabSettings
+                }
                 NavigationBarItem(
                     selected = selected,
                     onClick = { onTabSelected(tab) },
                     icon = {
                         Icon(
                             imageVector = tab.icon,
-                            contentDescription = tab.label,
+                            contentDescription = labelText,
                             modifier = Modifier.size(NmrTheme.dimens.iconSize)
                         )
                     },
                     label = {
                         Text(
-                            text = tab.label,
+                            text = labelText,
                             style = MaterialTheme.typography.labelSmall
                         )
                     },
@@ -659,3 +693,4 @@ fun NmrBottomNavigationBar(
         }
     }
 }
+

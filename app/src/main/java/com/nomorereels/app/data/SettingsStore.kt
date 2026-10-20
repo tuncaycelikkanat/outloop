@@ -40,6 +40,16 @@ enum class AppThemeMode(val code: String, val titleTr: String, val titleEn: Stri
     }
 }
 
+enum class MindfulBarrierType(val code: String, val titleTr: String, val titleEn: String) {
+    BREATH_AND_INTENT("breath_intent", "Bilinçli Nefes ve Niyet (Önerilen)", "Mindful Breath & Intent (Recommended)"),
+    COGNITIVE_MATH("cognitive_math", "Zihinsel Kıvılcım (Kısa Matematik)", "Cognitive Spark (Quick Math)"),
+    MINDFUL_TYPING("mindful_typing", "Farkındalık Cümlesi Yazma (Katı Mod)", "Mindful Sentence (Strict Mode)");
+
+    companion object {
+        fun fromCode(code: String?): MindfulBarrierType = entries.firstOrNull { it.code == code } ?: BREATH_AND_INTENT
+    }
+}
+
 /**
  * Kullanıcı tercihlerini (DM Reel Modu, Engelleme Ekranı, Hazır Seviyeler, Gece Odak Saati vb.)
  * hem bellekte reaktif StateFlow olarak tutan hem de DataStore'a kalıcı olarak kaydeden depo.
@@ -64,6 +74,17 @@ object SettingsStore {
     private val KEY_APP_LANGUAGE = stringPreferencesKey("app_language")
     private val KEY_APP_THEME_MODE = stringPreferencesKey("app_theme_mode")
     private val KEY_PUNCH_HOLE_ALERT_ENABLED = booleanPreferencesKey("punch_hole_alert_enabled")
+    private val KEY_SNOOZE_END_TIME_MS = androidx.datastore.preferences.core.longPreferencesKey("snooze_end_time_ms")
+    private val KEY_SNOOZE_SAVED_GENERAL_MODE = stringPreferencesKey("snooze_saved_general_mode")
+    private val KEY_SNOOZE_SAVED_DM_MODE = stringPreferencesKey("snooze_saved_dm_mode")
+    private val KEY_SNOOZE_SAVED_EXPLORE_MODE = stringPreferencesKey("snooze_saved_explore_mode")
+    private val KEY_SNOOZE_SAVED_FEED_MODE = stringPreferencesKey("snooze_saved_feed_mode")
+    private val KEY_SNOOZE_SAVED_PROFILE_MODE = stringPreferencesKey("snooze_saved_profile_mode")
+    private val KEY_SNOOZE_SAVED_REELS_TAB_MODE = stringPreferencesKey("snooze_saved_reels_tab_mode")
+    private val KEY_MINDFUL_GATEWAY_ENABLED = booleanPreferencesKey("mindful_gateway_enabled")
+    private val KEY_MINDFUL_BARRIER_TYPE = stringPreferencesKey("mindful_barrier_type")
+    private val KEY_NIGHT_COMPASSION_ENABLED = booleanPreferencesKey("night_compassion_enabled")
+    private val KEY_LAST_MICRO_PLAN = stringPreferencesKey("last_micro_plan")
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -124,6 +145,21 @@ object SettingsStore {
     private val _punchHoleAlertEnabled = MutableStateFlow(true)
     val punchHoleAlertEnabled: StateFlow<Boolean> = _punchHoleAlertEnabled.asStateFlow()
 
+    private val _snoozeEndTimeMs = MutableStateFlow(0L)
+    val snoozeEndTimeMs: StateFlow<Long> = _snoozeEndTimeMs.asStateFlow()
+
+    private val _mindfulGatewayEnabled = MutableStateFlow(true)
+    val mindfulGatewayEnabled: StateFlow<Boolean> = _mindfulGatewayEnabled.asStateFlow()
+
+    private val _mindfulBarrierType = MutableStateFlow(MindfulBarrierType.BREATH_AND_INTENT)
+    val mindfulBarrierType: StateFlow<MindfulBarrierType> = _mindfulBarrierType.asStateFlow()
+
+    private val _nightCompassionEnabled = MutableStateFlow(true)
+    val nightCompassionEnabled: StateFlow<Boolean> = _nightCompassionEnabled.asStateFlow()
+
+    private val _lastMicroPlan = MutableStateFlow("")
+    val lastMicroPlan: StateFlow<String> = _lastMicroPlan.asStateFlow()
+
     fun init(context: Context) {
         if (isInitialized) return
         isInitialized = true
@@ -150,6 +186,13 @@ object SettingsStore {
                 _appLanguage.value = AppLanguage.fromCode(prefs[KEY_APP_LANGUAGE])
                 _appThemeMode.value = AppThemeMode.fromCode(prefs[KEY_APP_THEME_MODE])
                 _punchHoleAlertEnabled.value = prefs[KEY_PUNCH_HOLE_ALERT_ENABLED] ?: true
+                val savedSnooze = prefs[KEY_SNOOZE_END_TIME_MS] ?: 0L
+                _snoozeEndTimeMs.value = if (savedSnooze > System.currentTimeMillis()) savedSnooze else 0L
+
+                _mindfulGatewayEnabled.value = prefs[KEY_MINDFUL_GATEWAY_ENABLED] ?: true
+                _mindfulBarrierType.value = MindfulBarrierType.fromCode(prefs[KEY_MINDFUL_BARRIER_TYPE])
+                _nightCompassionEnabled.value = prefs[KEY_NIGHT_COMPASSION_ENABLED] ?: true
+                _lastMicroPlan.value = prefs[KEY_LAST_MICRO_PLAN] ?: ""
             }
         }
     }
@@ -160,6 +203,32 @@ object SettingsStore {
         scope.launch {
             appContext.dataStore.edit { prefs ->
                 prefs[KEY_GENERAL_MODE] = mode.name
+            }
+        }
+    }
+
+    /**
+     * Genel modu seçer ve TÜM bölgeleri "Genel moda uy" (FOLLOW_GLOBAL) yapar.
+     * Böylece kullanıcının Korumalar ekranında seçtiği mod her bölgede gerçekten uygulanır.
+     * Bölge bazlı istisnalar daha sonra Bölgeler sekmesinden yeniden tanımlanabilir.
+     */
+    fun applyGeneralModeToAllRegions(context: Context, mode: DmReelMode) {
+        val follow = DmReelMode.FOLLOW_GLOBAL
+        _generalMode.value = mode
+        _dmReelMode.value = follow
+        _exploreReelMode.value = follow
+        _feedReelMode.value = follow
+        _profileReelMode.value = follow
+        _reelsTabMode.value = follow
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_GENERAL_MODE] = mode.name
+                prefs[KEY_DM_REEL_MODE] = follow.name
+                prefs[KEY_EXPLORE_REEL_MODE] = follow.name
+                prefs[KEY_FEED_REEL_MODE] = follow.name
+                prefs[KEY_PROFILE_REEL_MODE] = follow.name
+                prefs[KEY_REELS_TAB_MODE] = follow.name
             }
         }
     }
@@ -367,6 +436,148 @@ object SettingsStore {
             appContext.dataStore.edit { prefs ->
                 prefs[KEY_PUNCH_HOLE_ALERT_ENABLED] = enabled
             }
+        }
+    }
+
+    fun setMindfulGatewayEnabled(context: Context, enabled: Boolean) {
+        _mindfulGatewayEnabled.value = enabled
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_MINDFUL_GATEWAY_ENABLED] = enabled
+            }
+        }
+    }
+
+    fun setMindfulBarrierType(context: Context, type: MindfulBarrierType) {
+        _mindfulBarrierType.value = type
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_MINDFUL_BARRIER_TYPE] = type.code
+            }
+        }
+    }
+
+    fun setNightCompassionEnabled(context: Context, enabled: Boolean) {
+        _nightCompassionEnabled.value = enabled
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_NIGHT_COMPASSION_ENABLED] = enabled
+            }
+        }
+    }
+
+    fun setLastMicroPlan(context: Context, plan: String) {
+        _lastMicroPlan.value = plan
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_LAST_MICRO_PLAN] = plan
+            }
+        }
+    }
+
+    fun consumeLastMicroPlan(context: Context): String {
+        val plan = _lastMicroPlan.value
+        if (plan.isNotEmpty()) {
+            setLastMicroPlan(context, "")
+        }
+        return plan
+    }
+
+    // --- Süreli Gevşetme (Mola Modu / Snooze) ---
+
+    fun isSnoozeActiveNow(nowMs: Long = System.currentTimeMillis()): Boolean {
+        return _snoozeEndTimeMs.value > nowMs
+    }
+
+    fun getSnoozeRemainingMinutes(nowMs: Long = System.currentTimeMillis()): Int {
+        val diff = _snoozeEndTimeMs.value - nowMs
+        return if (diff > 0) ((diff + 59_999L) / 60_000L).toInt() else 0
+    }
+
+    /**
+     * Kullanıcıya geçici mola (örn. 5, 10, 15, 30 dk) veya Bilinçli Pencere verir.
+     * Mevcut koruma seviyesi kaydedilir ve süre bitince otomatik olarak geri yüklenir.
+     */
+    fun startSnooze(
+        context: Context,
+        durationMinutes: Int,
+        temporaryMode: DmReelMode = DmReelMode.FREE,
+        microPlan: String = ""
+    ) {
+        val now = System.currentTimeMillis()
+        val endTime = now + (durationMinutes * 60_000L)
+        val savedGeneral = _generalMode.value
+        val savedDm = _dmReelMode.value
+        val savedExplore = _exploreReelMode.value
+        val savedFeed = _feedReelMode.value
+        val savedProfile = _profileReelMode.value
+        val savedTab = _reelsTabMode.value
+
+        _snoozeEndTimeMs.value = endTime
+        _generalMode.value = temporaryMode
+        _lastMicroPlan.value = microPlan
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_SNOOZE_END_TIME_MS] = endTime
+                prefs[KEY_SNOOZE_SAVED_GENERAL_MODE] = savedGeneral.name
+                prefs[KEY_SNOOZE_SAVED_DM_MODE] = savedDm.name
+                prefs[KEY_SNOOZE_SAVED_EXPLORE_MODE] = savedExplore.name
+                prefs[KEY_SNOOZE_SAVED_FEED_MODE] = savedFeed.name
+                prefs[KEY_SNOOZE_SAVED_PROFILE_MODE] = savedProfile.name
+                prefs[KEY_SNOOZE_SAVED_REELS_TAB_MODE] = savedTab.name
+                prefs[KEY_GENERAL_MODE] = temporaryMode.name
+                prefs[KEY_LAST_MICRO_PLAN] = microPlan
+            }
+            com.nomorereels.app.widget.QuotaAppWidgetProvider.updateAllWidgets(appContext)
+        }
+    }
+
+    /**
+     * Molayı sonlandırır ve kaydedilmiş önceki koruma ayarlarını geri yükler.
+     */
+    fun stopSnooze(context: Context) {
+        _snoozeEndTimeMs.value = 0L
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                val prevGen = DmReelMode.fromName(prefs[KEY_SNOOZE_SAVED_GENERAL_MODE], DmReelMode.SINGLE_REEL)
+                val prevDm = DmReelMode.fromName(prefs[KEY_SNOOZE_SAVED_DM_MODE], DmReelMode.SINGLE_REEL)
+                val prevExp = DmReelMode.fromName(prefs[KEY_SNOOZE_SAVED_EXPLORE_MODE], DmReelMode.FOLLOW_GLOBAL)
+                val prevFeed = DmReelMode.fromName(prefs[KEY_SNOOZE_SAVED_FEED_MODE], DmReelMode.BLOCK_ALL)
+                val prevProf = DmReelMode.fromName(prefs[KEY_SNOOZE_SAVED_PROFILE_MODE], DmReelMode.FOLLOW_GLOBAL)
+                val prevTab = DmReelMode.fromName(prefs[KEY_SNOOZE_SAVED_REELS_TAB_MODE], DmReelMode.BLOCK_ALL)
+
+                _generalMode.value = prevGen
+                _dmReelMode.value = prevDm
+                _exploreReelMode.value = prevExp
+                _feedReelMode.value = prevFeed
+                _profileReelMode.value = prevProf
+                _reelsTabMode.value = prevTab
+
+                prefs[KEY_SNOOZE_END_TIME_MS] = 0L
+                prefs[KEY_GENERAL_MODE] = prevGen.name
+                prefs[KEY_DM_REEL_MODE] = prevDm.name
+                prefs[KEY_EXPLORE_REEL_MODE] = prevExp.name
+                prefs[KEY_FEED_REEL_MODE] = prevFeed.name
+                prefs[KEY_PROFILE_REEL_MODE] = prevProf.name
+                prefs[KEY_REELS_TAB_MODE] = prevTab.name
+            }
+            com.nomorereels.app.widget.QuotaAppWidgetProvider.updateAllWidgets(appContext)
+        }
+    }
+
+    /**
+     * Servis ve UI döngüsünde mola süresi doldu mu kontrol eder; dolduysa otomatik sonlandırır.
+     */
+    fun checkSnoozeExpiration(context: Context, nowMs: Long = System.currentTimeMillis()) {
+        val end = _snoozeEndTimeMs.value
+        if (end in 1..nowMs) {
+            stopSnooze(context)
         }
     }
 }

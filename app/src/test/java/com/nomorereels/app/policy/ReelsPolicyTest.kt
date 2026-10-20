@@ -594,4 +594,53 @@ class ReelsPolicyTest {
         )
         assertEquals(PolicyDecision.BLOCK_AFTER_TIMEOUT, expiredDecision)
     }
+
+    @Test
+    fun `resolveActiveMode should properly cascade FOLLOW_GLOBAL to generalMode`() {
+        // Alt sekme FOLLOW_GLOBAL ise genel mod BLOCK_ALL'a çözülmeli
+        val tabResolved = ReelsPolicy.resolveActiveMode(
+            detectedScreen = ScreenType.REELS_TAB,
+            originScreen = null,
+            dmMode = DmReelMode.FOLLOW_GLOBAL,
+            exploreMode = DmReelMode.FOLLOW_GLOBAL,
+            feedMode = DmReelMode.FOLLOW_GLOBAL,
+            profileMode = DmReelMode.FOLLOW_GLOBAL,
+            reelsTabMode = DmReelMode.FOLLOW_GLOBAL,
+            generalMode = DmReelMode.BLOCK_ALL
+        )
+        assertEquals(DmReelMode.BLOCK_ALL, tabResolved)
+
+        // DM kökenli video için dmMode COUNT_QUOTA ise genel modu ezmeli
+        val dmResolved = ReelsPolicy.resolveActiveMode(
+            detectedScreen = ScreenType.REELS_VIEWER,
+            originScreen = ScreenType.DIRECT_MESSAGES,
+            dmMode = DmReelMode.COUNT_QUOTA,
+            exploreMode = DmReelMode.FOLLOW_GLOBAL,
+            feedMode = DmReelMode.FOLLOW_GLOBAL,
+            profileMode = DmReelMode.FOLLOW_GLOBAL,
+            reelsTabMode = DmReelMode.FOLLOW_GLOBAL,
+            generalMode = DmReelMode.BLOCK_ALL
+        )
+        assertEquals(DmReelMode.COUNT_QUOTA, dmResolved)
+    }
+
+    @Test
+    fun `strictnessRank and isLoosening should correctly detect willpower downgrade`() {
+        assertTrue(ReelsPolicy.strictnessRank(DmReelMode.FREE) > ReelsPolicy.strictnessRank(DmReelMode.SINGLE_REEL))
+        assertTrue(ReelsPolicy.strictnessRank(DmReelMode.SINGLE_REEL) > ReelsPolicy.strictnessRank(DmReelMode.BLOCK_ALL))
+
+        // BLOCK_ALL'dan SINGLE_REEL'e geçmek bir gevşemedir (loosening)
+        val isLoosened = ReelsPolicy.isLoosening(
+            oldModes = listOf(DmReelMode.BLOCK_ALL),
+            newModes = listOf(DmReelMode.SINGLE_REEL)
+        )
+        assertTrue(isLoosened)
+
+        // SINGLE_REEL'den BLOCK_ALL'a geçmek sıkılaştırmadır (loosening DEĞİL)
+        val isTightened = ReelsPolicy.isLoosening(
+            oldModes = listOf(DmReelMode.SINGLE_REEL),
+            newModes = listOf(DmReelMode.BLOCK_ALL)
+        )
+        assertFalse(isTightened)
+    }
 }

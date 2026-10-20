@@ -38,6 +38,18 @@ enum class DmReelMode(
         description = "Bu bölgeden açılan Reels oynatıcısına müdahale etmez."
     );
 
+    /** Arayüzde çip / etiket olarak kullanılacak kısa ad. */
+    val shortTitle: String
+        get() = when (this) {
+            FOLLOW_GLOBAL -> "Genel moda uy"
+            BLOCK_ALL -> "Komple Yasak"
+            SINGLE_REEL -> "Sadece Bir Tane"
+            COUNT_QUOTA -> "X Tane"
+            TIME_QUOTA -> "X Dakika"
+            ASK_WITH_FRICTION -> "5 sn Onaylı"
+            FREE -> "Serbest"
+        }
+
     companion object {
         fun fromName(name: String?, defaultMode: DmReelMode = SINGLE_REEL): DmReelMode {
             return entries.firstOrNull { it.name == name } ?: defaultMode
@@ -106,19 +118,16 @@ class ReelsPolicy(
         }
 
         // 2. Ekran türüne (REELS_TAB veya REELS_VIEWER kökenine) göre aktif modu seç:
-        val rawMode = if (detectedScreen == ScreenType.REELS_TAB) {
-            reelsTabMode
-        } else {
-            when (tracker.reelOriginScreen) {
-                ScreenType.DIRECT_MESSAGES -> dmMode
-                ScreenType.EXPLORE -> exploreMode
-                ScreenType.MAIN_FEED -> feedMode
-                ScreenType.PROFILE -> profileMode
-                else -> reelsTabMode
-            }
-        }
-
-        val activeMode = if (rawMode == DmReelMode.FOLLOW_GLOBAL) generalMode else rawMode
+        val activeMode = resolveActiveMode(
+            detectedScreen = detectedScreen,
+            originScreen = tracker.reelOriginScreen,
+            dmMode = dmMode,
+            exploreMode = exploreMode,
+            feedMode = feedMode,
+            profileMode = profileMode,
+            reelsTabMode = reelsTabMode,
+            generalMode = generalMode
+        )
 
         val effectiveSingleReelDuration = customSingleReelMaxDurationMs ?: singleReelMaxDurationMs
 
@@ -132,6 +141,62 @@ class ReelsPolicy(
             nowMs = nowMs
         )
     }
+
+    companion object {
+        /**
+         * Reels ekranı ve köken ekranına göre uygulanacak nihai modu döndürür.
+         * FOLLOW_GLOBAL burada genel moda çözülür; dönen değer asla FOLLOW_GLOBAL olmaz
+         * (genel mod da FOLLOW_GLOBAL ise SINGLE_REEL'e düşer).
+         */
+        fun resolveActiveMode(
+            detectedScreen: ScreenType,
+            originScreen: ScreenType?,
+            dmMode: DmReelMode,
+            exploreMode: DmReelMode,
+            feedMode: DmReelMode,
+            profileMode: DmReelMode,
+            reelsTabMode: DmReelMode,
+            generalMode: DmReelMode
+        ): DmReelMode {
+            val rawMode = if (detectedScreen == ScreenType.REELS_TAB) {
+                reelsTabMode
+            } else {
+                when (originScreen) {
+                    ScreenType.DIRECT_MESSAGES -> dmMode
+                    ScreenType.EXPLORE -> exploreMode
+                    ScreenType.MAIN_FEED -> feedMode
+                    ScreenType.PROFILE -> profileMode
+                    else -> reelsTabMode
+                }
+            }
+            return resolveFollowGlobal(rawMode, generalMode)
+        }
+
+        fun resolveFollowGlobal(mode: DmReelMode, generalMode: DmReelMode): DmReelMode {
+            if (mode != DmReelMode.FOLLOW_GLOBAL) return mode
+            return if (generalMode == DmReelMode.FOLLOW_GLOBAL) DmReelMode.SINGLE_REEL else generalMode
+        }
+
+        /**
+         * Modların sertlik sırası (küçük = daha sıkı). İrade Kilidi, bir değişikliğin korumayı
+         * gevşetip gevşetmediğine bu sıralamaya bakarak karar verir.
+         */
+        fun strictnessRank(mode: DmReelMode): Int = when (mode) {
+            DmReelMode.BLOCK_ALL -> 0
+            DmReelMode.ASK_WITH_FRICTION -> 1
+            DmReelMode.SINGLE_REEL -> 2
+            DmReelMode.COUNT_QUOTA -> 3
+            DmReelMode.TIME_QUOTA -> 3
+            DmReelMode.FOLLOW_GLOBAL -> 2
+            DmReelMode.FREE -> 5
+        }
+
+        /** Eski ve yeni (çözülmüş) bölge modları arasında herhangi bir bölge gevşedi mi? */
+        fun isLoosening(oldModes: List<DmReelMode>, newModes: List<DmReelMode>): Boolean {
+            return oldModes.zip(newModes).any { (old, new) -> strictnessRank(new) > strictnessRank(old) }
+        }
+    }
+
 
     private fun evaluateMode(
         mode: DmReelMode,
