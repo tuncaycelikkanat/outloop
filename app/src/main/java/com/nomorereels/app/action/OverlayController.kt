@@ -50,6 +50,24 @@ private fun getSansRegular(context: Context): Typeface =
     try { ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_regular) ?: Typeface.DEFAULT }
     catch (_: Exception) { Typeface.DEFAULT }
 
+// Design System Color Tokens (Quiet Sage & Midnight Forest)
+private const val COLOR_LIGHT_CANVAS = "#F7F7F2"
+private const val COLOR_LIGHT_SURFACE = "#FFFFFF"
+private const val COLOR_LIGHT_PRIMARY = "#52745D"
+private const val COLOR_LIGHT_PRESSED = "#3F5D49"
+private const val COLOR_LIGHT_ACCENT = "#DCE9DF"
+private const val COLOR_LIGHT_TEXT = "#24332A"
+private const val COLOR_LIGHT_MUTED = "#707A71"
+private const val COLOR_LIGHT_BORDER = "#E4E7DE"
+
+private const val COLOR_DARK_CANVAS = "#000000"
+private const val COLOR_DARK_SURFACE = "#101310"
+private const val COLOR_DARK_PRIMARY = "#A5C6A9"
+private const val COLOR_DARK_ACCENT = "#273B2D"
+private const val COLOR_DARK_TEXT = "#F0F3ED"
+private const val COLOR_DARK_MUTED = "#A3ADA3"
+private const val COLOR_DARK_BORDER = "#2B322C"
+
 /**
  * Erişilebilirlik katmanı (TYPE_ACCESSIBILITY_OVERLAY) veya uygulama katmanı
  * (TYPE_APPLICATION_OVERLAY) üzerinden:
@@ -438,29 +456,29 @@ class OverlayController(
         onCancel: () -> Unit
     ): View {
         val root = FrameLayout(context).apply {
-            setBackgroundColor(Color.parseColor("#EE16221D"))
-            setPadding(dp(context, 24), dp(context, 24), dp(context, 24), dp(context, 24))
+            setBackgroundColor(Color.parseColor("#E6000000"))
+            setPadding(dp(context, 20), dp(context, 24), dp(context, 20), dp(context, 24))
         }
 
         val card = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#FFFFFF"))
-                cornerRadius = dp(context, 28).toFloat()
-                setStroke(dp(context, 1), Color.parseColor("#ECE7DE"))
+                setColor(Color.parseColor(COLOR_LIGHT_SURFACE))
+                cornerRadius = dp(context, 22).toFloat()
+                setStroke(dp(context, 1), Color.parseColor(COLOR_LIGHT_BORDER))
             }
             setPadding(dp(context, 24), dp(context, 28), dp(context, 24), dp(context, 24))
         }
 
         val badge = TextView(context).apply {
             text = "FARKINDALIK KAPISI · DM REEL"
-            setTextColor(Color.parseColor("#274D3E"))
+            setTextColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             typeface = getSansBold(context)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#E5ECE7"))
-                cornerRadius = dp(context, 32).toFloat()
+                setColor(Color.parseColor(COLOR_LIGHT_ACCENT))
+                cornerRadius = dp(context, 16).toFloat()
             }
             setPadding(dp(context, 12), dp(context, 6), dp(context, 12), dp(context, 6))
         }
@@ -471,8 +489,8 @@ class OverlayController(
 
         val title = TextView(context).apply {
             text = "Nefes Al. Otomatik Pilotta mısın?"
-            setTextColor(Color.parseColor("#1C2520"))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f)
+            setTextColor(Color.parseColor(COLOR_LIGHT_TEXT))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
             typeface = getSerifBold(context)
             gravity = Gravity.CENTER
             setPadding(0, dp(context, 16), 0, dp(context, 8))
@@ -489,7 +507,7 @@ class OverlayController(
 
         val subtitle = TextView(context).apply {
             text = subtitleText
-            setTextColor(Color.parseColor("#747E77"))
+            setTextColor(Color.parseColor(COLOR_LIGHT_MUTED))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             typeface = getSansRegular(context)
             gravity = Gravity.CENTER
@@ -503,11 +521,11 @@ class OverlayController(
             max = 1000
             progress = 0
             val bgDrawable = GradientDrawable().apply {
-                setColor(Color.parseColor("#F7F5F0"))
+                setColor(Color.parseColor(COLOR_LIGHT_CANVAS))
                 cornerRadius = dp(context, 8).toFloat()
             }
             val fgShape = GradientDrawable().apply {
-                setColor(Color.parseColor("#274D3E"))
+                setColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
                 cornerRadius = dp(context, 8).toFloat()
             }
             val clip = ClipDrawable(fgShape, Gravity.START, ClipDrawable.HORIZONTAL)
@@ -527,13 +545,13 @@ class OverlayController(
         val holdButton = Button(context).apply {
             text = "İzlemek İçin 5 Saniye Basılı Tut"
             isAllCaps = false
-            setTextColor(Color.parseColor("#274D3E"))
+            setTextColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
             typeface = getSansBold(context)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#E5ECE7"))
-                cornerRadius = dp(context, 32).toFloat()
-                setStroke(dp(context, 1), Color.parseColor("#CCD8D0"))
+                setColor(Color.parseColor(COLOR_LIGHT_ACCENT))
+                cornerRadius = dp(context, 22).toFloat()
+                setStroke(dp(context, 1), Color.parseColor(COLOR_LIGHT_ACCENT))
             }
             setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
         }
@@ -547,7 +565,7 @@ class OverlayController(
                     isHolding = true
                     holdStartTime = System.currentTimeMillis()
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                    (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor("#274D3E"))
+                    (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
                     holdButton.setTextColor(Color.WHITE)
 
                     val tick = object : Runnable {
@@ -581,8 +599,8 @@ class OverlayController(
                         holdTickRunnable = null
                         progressBar.progress = 0
                         holdButton.text = "Yarıda Bırakıldı · 5 Sn Basılı Tut"
-                        (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor("#E5ECE7"))
-                        holdButton.setTextColor(Color.parseColor("#274D3E"))
+                        (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor(COLOR_LIGHT_ACCENT))
+                        holdButton.setTextColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
                     }
                     true
                 }
@@ -606,8 +624,8 @@ class OverlayController(
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
             typeface = getSansBold(context)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#274D3E"))
-                cornerRadius = dp(context, 32).toFloat()
+                setColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
+                cornerRadius = dp(context, 22).toFloat()
             }
             setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
             setOnClickListener {
@@ -640,8 +658,21 @@ class OverlayController(
     ): View {
         val strings = AppStrings.get(if (isEnglish) AppLanguage.EN else AppLanguage.TR)
 
+        val cardBg = if (isNightMode) COLOR_DARK_SURFACE else COLOR_LIGHT_SURFACE
+        val cardBorder = if (isNightMode) COLOR_DARK_BORDER else COLOR_LIGHT_BORDER
+        val titleColor = if (isNightMode) COLOR_DARK_TEXT else COLOR_LIGHT_TEXT
+        val textColor = if (isNightMode) COLOR_DARK_MUTED else COLOR_LIGHT_MUTED
+        val badgeBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
+        val badgeText = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+        val primaryBtnBg = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+        val primaryBtnText = if (isNightMode) Color.parseColor(COLOR_DARK_SURFACE) else Color.WHITE
+        val secondaryBtnBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
+        val secondaryBtnText = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+        val breathingCircleBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
+        val breathingCircleStroke = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+
         val root = FrameLayout(context).apply {
-            setBackgroundColor(Color.parseColor("#EE16221D"))
+            setBackgroundColor(Color.parseColor("#E6000000"))
             setPadding(dp(context, 20), dp(context, 24), dp(context, 20), dp(context, 24))
         }
 
@@ -653,8 +684,9 @@ class OverlayController(
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             background = GradientDrawable().apply {
-                setColor(Color.WHITE)
-                cornerRadius = dp(context, 28).toFloat()
+                setColor(Color.parseColor(cardBg))
+                cornerRadius = dp(context, 22).toFloat()
+                setStroke(dp(context, 1), Color.parseColor(cardBorder))
             }
             setPadding(dp(context, 24), dp(context, 26), dp(context, 24), dp(context, 26))
         }
@@ -662,11 +694,11 @@ class OverlayController(
         // 1. Badge
         val badge = TextView(context).apply {
             text = if (isNightMode) "GECE KORUMA · NIGHT REST" else strings.mindfulGatewayHeader
-            setTextColor(Color.parseColor("#274D3E"))
+            setTextColor(Color.parseColor(badgeText))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             typeface = getSansBold(context)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#E5ECE7"))
+                setColor(Color.parseColor(badgeBg))
                 cornerRadius = dp(context, 16).toFloat()
             }
             setPadding(dp(context, 12), dp(context, 6), dp(context, 12), dp(context, 6))
@@ -678,7 +710,7 @@ class OverlayController(
 
         // 2. Title View
         val titleView = TextView(context).apply {
-            setTextColor(Color.parseColor("#1C2520"))
+            setTextColor(Color.parseColor(titleColor))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
             typeface = getSerifBold(context)
             gravity = Gravity.CENTER
@@ -688,7 +720,7 @@ class OverlayController(
 
         // 3. Subtitle View
         val subtitleView = TextView(context).apply {
-            setTextColor(Color.parseColor("#747E77"))
+            setTextColor(Color.parseColor(textColor))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             typeface = getSansRegular(context)
             gravity = Gravity.CENTER
@@ -721,12 +753,12 @@ class OverlayController(
                 val putDownButton = Button(context).apply {
                     text = "📱 ${strings.gatewayPutPhoneDown}"
                     isAllCaps = false
-                    setTextColor(Color.WHITE)
+                    setTextColor(primaryBtnText)
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
                     typeface = getSansBold(context)
                     background = GradientDrawable().apply {
-                        setColor(Color.parseColor("#274D3E"))
-                        cornerRadius = dp(context, 32).toFloat()
+                        setColor(Color.parseColor(primaryBtnBg))
+                        cornerRadius = dp(context, 22).toFloat()
                     }
                     setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
                     setOnClickListener { onCancel() }
@@ -743,12 +775,12 @@ class OverlayController(
                 val btn5Min = Button(context).apply {
                     text = "⏱️ ${strings.gatewayMindful5Min}"
                     isAllCaps = false
-                    setTextColor(Color.parseColor("#274D3E"))
+                    setTextColor(Color.parseColor(secondaryBtnText))
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
                     typeface = getSansBold(context)
                     background = GradientDrawable().apply {
-                        setColor(Color.parseColor("#E5ECE7"))
-                        cornerRadius = dp(context, 32).toFloat()
+                        setColor(Color.parseColor(secondaryBtnBg))
+                        cornerRadius = dp(context, 22).toFloat()
                     }
                     setOnClickListener { showWindowSelection(5) }
                 }
@@ -756,12 +788,12 @@ class OverlayController(
                 val btn10Min = Button(context).apply {
                     text = "⏱️ ${strings.gatewayMindful10Min}"
                     isAllCaps = false
-                    setTextColor(Color.parseColor("#274D3E"))
+                    setTextColor(Color.parseColor(secondaryBtnText))
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
                     typeface = getSansBold(context)
                     background = GradientDrawable().apply {
-                        setColor(Color.parseColor("#E5ECE7"))
-                        cornerRadius = dp(context, 32).toFloat()
+                        setColor(Color.parseColor(secondaryBtnBg))
+                        cornerRadius = dp(context, 22).toFloat()
                     }
                     setOnClickListener { showWindowSelection(10) }
                 }
@@ -793,12 +825,12 @@ class OverlayController(
                     val planBtn = Button(context).apply {
                         text = plan
                         isAllCaps = false
-                        setTextColor(Color.parseColor("#274D3E"))
+                        setTextColor(Color.parseColor(secondaryBtnText))
                         setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                         typeface = getSansBold(context)
                         background = GradientDrawable().apply {
-                            setColor(Color.parseColor("#E5ECE7"))
-                            cornerRadius = dp(context, 32).toFloat()
+                            setColor(Color.parseColor(secondaryBtnBg))
+                            cornerRadius = dp(context, 22).toFloat()
                         }
                         setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
                         setOnClickListener {
@@ -816,7 +848,7 @@ class OverlayController(
             // Quick Exit
             val exitBtn = TextView(context).apply {
                 text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor("#747E77"))
+                setTextColor(Color.parseColor(textColor))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
                 typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
@@ -836,12 +868,12 @@ class OverlayController(
             val btnAutopilot = Button(context).apply {
                 text = "🍃 ${strings.gatewayIntentAutopilot}"
                 isAllCaps = false
-                setTextColor(Color.parseColor("#274D3E"))
+                setTextColor(Color.parseColor(secondaryBtnText))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 typeface = getSansBold(context)
                 background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#E5ECE7"))
-                    cornerRadius = dp(context, 32).toFloat()
+                    setColor(Color.parseColor(secondaryBtnBg))
+                    cornerRadius = dp(context, 22).toFloat()
                 }
                 setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
                 setOnClickListener {
@@ -860,12 +892,12 @@ class OverlayController(
             val btnBreak = Button(context).apply {
                 text = "☕ ${strings.gatewayIntentBreak}"
                 isAllCaps = false
-                setTextColor(Color.parseColor("#274D3E"))
+                setTextColor(Color.parseColor(secondaryBtnText))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 typeface = getSansBold(context)
                 background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#E5ECE7"))
-                    cornerRadius = dp(context, 32).toFloat()
+                    setColor(Color.parseColor(secondaryBtnBg))
+                    cornerRadius = dp(context, 22).toFloat()
                 }
                 setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
                 setOnClickListener { showWindowSelection() }
@@ -879,12 +911,12 @@ class OverlayController(
             val btnSpecific = Button(context).apply {
                 text = "🔍 ${strings.gatewayIntentSpecific}"
                 isAllCaps = false
-                setTextColor(Color.parseColor("#274D3E"))
+                setTextColor(Color.parseColor(secondaryBtnText))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 typeface = getSansBold(context)
                 background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#E5ECE7"))
-                    cornerRadius = dp(context, 32).toFloat()
+                    setColor(Color.parseColor(secondaryBtnBg))
+                    cornerRadius = dp(context, 22).toFloat()
                 }
                 setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
                 setOnClickListener { showWindowSelection() }
@@ -897,8 +929,9 @@ class OverlayController(
             // Exit
             val exitBtn = TextView(context).apply {
                 text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor("#747E77"))
+                setTextColor(Color.parseColor(textColor))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
                 setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
                 setOnClickListener { onCancel() }
@@ -914,12 +947,12 @@ class OverlayController(
             val sleepBtn = Button(context).apply {
                 text = strings.gatewayNightSleep
                 isAllCaps = false
-                setTextColor(Color.WHITE)
+                setTextColor(primaryBtnText)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
                 typeface = getSansBold(context)
                 background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#274D3E"))
-                    cornerRadius = dp(context, 32).toFloat()
+                    setColor(Color.parseColor(primaryBtnBg))
+                    cornerRadius = dp(context, 22).toFloat()
                 }
                 setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
                 setOnClickListener { onCancel() }
@@ -932,13 +965,12 @@ class OverlayController(
             val watch5MinBtn = Button(context).apply {
                 text = strings.gatewayNight5Min
                 isAllCaps = false
-                setTextColor(Color.parseColor("#274D3E"))
+                setTextColor(Color.parseColor(secondaryBtnText))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 typeface = getSansBold(context)
                 background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#E5ECE7"))
-                    cornerRadius = dp(context, 32).toFloat()
-                    setStroke(dp(context, 1), Color.parseColor("#CCD8D0"))
+                    setColor(Color.parseColor(secondaryBtnBg))
+                    cornerRadius = dp(context, 22).toFloat()
                 }
                 setPadding(dp(context, 14), dp(context, 12), dp(context, 14), dp(context, 12))
                 setOnClickListener { onApproved(5, strings.gatewayMicroPlanSleep) }
@@ -950,7 +982,7 @@ class OverlayController(
 
             val exitBtn = TextView(context).apply {
                 text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor("#747E77"))
+                setTextColor(Color.parseColor(textColor))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
                 typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
@@ -965,7 +997,7 @@ class OverlayController(
 
             val qText = TextView(context).apply {
                 text = "14 + 19 = ?"
-                setTextColor(Color.parseColor("#274D3E"))
+                setTextColor(Color.parseColor(primaryBtnBg))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
                 typeface = getSerifBold(context)
                 gravity = Gravity.CENTER
@@ -979,13 +1011,12 @@ class OverlayController(
                 val optBtn = Button(context).apply {
                     text = "$num"
                     isAllCaps = false
-                    setTextColor(Color.parseColor("#274D3E"))
+                    setTextColor(Color.parseColor(secondaryBtnText))
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
                     typeface = getSansBold(context)
                     background = GradientDrawable().apply {
-                        setColor(Color.parseColor("#E5ECE7"))
-                        cornerRadius = dp(context, 32).toFloat()
-                        setStroke(dp(context, 1), Color.parseColor("#CCD8D0"))
+                        setColor(Color.parseColor(secondaryBtnBg))
+                        cornerRadius = dp(context, 22).toFloat()
                     }
                     setOnClickListener {
                         if (isCorrect) {
@@ -1008,7 +1039,7 @@ class OverlayController(
 
             val exitBtn = TextView(context).apply {
                 text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor("#747E77"))
+                setTextColor(Color.parseColor(textColor))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
                 typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
@@ -1024,7 +1055,7 @@ class OverlayController(
             val targetSentence = strings.gatewayTypingSentence
             val quoteView = TextView(context).apply {
                 text = "\"$targetSentence\""
-                setTextColor(Color.parseColor("#274D3E"))
+                setTextColor(Color.parseColor(primaryBtnBg))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                 typeface = try { ResourcesCompat.getFont(context, R.font.cormorant_garamond_italic) ?: Typeface.SERIF } catch (_: Exception) { Typeface.SERIF }
                 gravity = Gravity.CENTER
@@ -1034,14 +1065,14 @@ class OverlayController(
 
             val input = EditText(context).apply {
                 hint = if (isEnglish) "Type sentence here..." else "Cümleyi buraya yaz..."
-                setHintTextColor(Color.parseColor("#8E9A92"))
-                setTextColor(Color.parseColor("#1C2520"))
+                setHintTextColor(Color.parseColor(textColor))
+                setTextColor(Color.parseColor(titleColor))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 typeface = getSansRegular(context)
                 background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#F7F5F0"))
+                    setColor(Color.parseColor(if (isNightMode) COLOR_DARK_SURFACE else COLOR_LIGHT_CANVAS))
                     cornerRadius = dp(context, 16).toFloat()
-                    setStroke(dp(context, 1), Color.parseColor("#ECE7DE"))
+                    setStroke(dp(context, 1), Color.parseColor(cardBorder))
                 }
                 setPadding(dp(context, 14), dp(context, 12), dp(context, 14), dp(context, 12))
             }
@@ -1054,11 +1085,11 @@ class OverlayController(
                 text = if (isEnglish) "Continue" else "Devam Et"
                 isAllCaps = false
                 isEnabled = false
-                setTextColor(Color.parseColor("#8E9A92"))
+                setTextColor(Color.parseColor(textColor))
                 typeface = getSansBold(context)
                 background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#E5ECE7"))
-                    cornerRadius = dp(context, 32).toFloat()
+                    setColor(Color.parseColor(secondaryBtnBg))
+                    cornerRadius = dp(context, 22).toFloat()
                 }
                 setOnClickListener { showWindowSelection() }
             }
@@ -1074,11 +1105,11 @@ class OverlayController(
                     val isMatch = typed.equals(targetSentence.trim(), ignoreCase = true)
                     continueBtn.isEnabled = isMatch
                     if (isMatch) {
-                        continueBtn.setTextColor(Color.WHITE)
-                        (continueBtn.background as? GradientDrawable)?.setColor(Color.parseColor("#274D3E"))
+                        continueBtn.setTextColor(primaryBtnText)
+                        (continueBtn.background as? GradientDrawable)?.setColor(Color.parseColor(primaryBtnBg))
                     } else {
-                        continueBtn.setTextColor(Color.parseColor("#8E9A92"))
-                        (continueBtn.background as? GradientDrawable)?.setColor(Color.parseColor("#E5ECE7"))
+                        continueBtn.setTextColor(Color.parseColor(textColor))
+                        (continueBtn.background as? GradientDrawable)?.setColor(Color.parseColor(secondaryBtnBg))
                     }
                 }
                 override fun afterTextChanged(s: Editable?) {}
@@ -1086,7 +1117,7 @@ class OverlayController(
 
             val exitBtn = TextView(context).apply {
                 text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor("#747E77"))
+                setTextColor(Color.parseColor(textColor))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
                 typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
@@ -1105,8 +1136,8 @@ class OverlayController(
             val circleView = View(context).apply {
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.OVAL
-                    setColor(Color.parseColor("#E5ECE7"))
-                    setStroke(dp(context, 3), Color.parseColor("#274D3E"))
+                    setColor(Color.parseColor(breathingCircleBg))
+                    setStroke(dp(context, 3), Color.parseColor(breathingCircleStroke))
                 }
             }
             dynamicArea.addView(circleView, LinearLayout.LayoutParams(circleSize, circleSize).apply {
@@ -1131,12 +1162,12 @@ class OverlayController(
             val proceedBtn = Button(context).apply {
                 text = if (isEnglish) "Notice My Intention ➔" else "Niyetimi Fark Et ➔"
                 isAllCaps = false
-                setTextColor(Color.WHITE)
+                setTextColor(primaryBtnText)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
                 typeface = getSansBold(context)
                 background = GradientDrawable().apply {
-                    setColor(Color.parseColor("#274D3E"))
-                    cornerRadius = dp(context, 32).toFloat()
+                    setColor(Color.parseColor(primaryBtnBg))
+                    cornerRadius = dp(context, 22).toFloat()
                 }
                 setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
                 setOnClickListener {
@@ -1152,7 +1183,7 @@ class OverlayController(
             // Instant Exit
             val exitBtn = TextView(context).apply {
                 text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor("#747E77"))
+                setTextColor(Color.parseColor(textColor))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
                 typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
@@ -1176,36 +1207,37 @@ class OverlayController(
     }
 
     fun getBannerStringsAndColor(decision: PolicyDecision): Triple<String, String, Int> {
+        val calmSage = Color.parseColor(COLOR_LIGHT_PRIMARY)
         return when (decision) {
             PolicyDecision.BLOCK_AFTER_SWIPE -> Triple(
                 "Tek Reel İznin Bitti",
                 "2. videoya kaydırıldı",
-                Color.parseColor("#D4973B")
+                calmSage
             )
             PolicyDecision.BLOCK_AFTER_TIMEOUT -> Triple(
                 "Süre Sınırı Doldu",
                 "Tek Reel süresi aşıldı",
-                Color.parseColor("#D4973B")
+                calmSage
             )
             PolicyDecision.BLOCK_BEDTIME -> Triple(
                 "Gece Odak Saati 🌙",
                 "Uyku vakti kilidi devrede",
-                Color.parseColor("#5B756C")
+                Color.parseColor(COLOR_DARK_PRIMARY)
             )
             PolicyDecision.BLOCK_DAILY_COUNT_LIMIT -> Triple(
                 "Reel Kotan Doldu 🎯",
                 "Günlük limitine ulaştın",
-                Color.parseColor("#A84838")
+                calmSage
             )
             PolicyDecision.BLOCK_DAILY_TIME_LIMIT -> Triple(
                 "Günlük Süren Doldu ⏱️",
                 "Reels hedef süren tamamlandı",
-                Color.parseColor("#A84838")
+                calmSage
             )
             else -> Triple(
                 "Reels Engellendi 🛑",
                 "Odağın korundu",
-                Color.parseColor("#274D3E")
+                calmSage
             )
         }
     }
@@ -1220,9 +1252,9 @@ class OverlayController(
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#F2101311"))
+                setColor(Color.parseColor("#F2101310"))
                 cornerRadius = dp(context, 999).toFloat()
-                setStroke(dp(context, 2), accentColor)
+                setStroke(dp(context, 1), Color.parseColor(COLOR_DARK_BORDER))
             }
             setPadding(dp(context, 12), dp(context, 7), dp(context, 16), dp(context, 7))
 
@@ -1252,7 +1284,7 @@ class OverlayController(
             if (!subtitle.isNullOrBlank()) {
                 val subtitleView = TextView(context).apply {
                     text = " · $subtitle"
-                    setTextColor(Color.parseColor("#919C94"))
+                    setTextColor(Color.parseColor(COLOR_DARK_MUTED))
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
                     typeface = getSansRegular(context)
                 }
@@ -1273,9 +1305,9 @@ class OverlayController(
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#EE181D1A"))
+                setColor(Color.parseColor("#F2101310"))
                 cornerRadius = dp(context, 16).toFloat()
-                setStroke(dp(context, 2), accentColor)
+                setStroke(dp(context, 1), Color.parseColor(COLOR_DARK_BORDER))
             }
             setPadding(dp(context, 20), dp(context, 12), dp(context, 20), dp(context, 12))
 
@@ -1289,7 +1321,7 @@ class OverlayController(
 
             addView(TextView(context).apply {
                 text = subText
-                setTextColor(Color.parseColor("#919C94"))
+                setTextColor(Color.parseColor(COLOR_DARK_MUTED))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
                 typeface = getSansRegular(context)
                 gravity = Gravity.CENTER

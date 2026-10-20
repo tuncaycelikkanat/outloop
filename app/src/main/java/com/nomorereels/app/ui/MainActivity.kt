@@ -4336,15 +4336,36 @@ fun MindfulGatewayDialog(
 ) {
     val strings = LocalAppStrings.current
 
+    val isDark = isNightMode || (MaterialTheme.colorScheme.background == AmoledCanvas)
+
+    val cardBg = if (isDark) AmoledSurface else LightSurface
+    val cardBorder = if (isDark) AmoledBorder else LightBorder
+    val titleColor = if (isDark) AmoledTextPrimary else LightTextPrimary
+    val textColor = if (isDark) AmoledTextMuted else LightTextMuted
+    val badgeBg = if (isDark) AmoledAccent else LightAccent
+    val badgeText = if (isDark) AmoledPrimary else LightPrimary
+    val primaryBtnBg = if (isDark) AmoledPrimary else LightPrimary
+    val primaryBtnText = if (isDark) AmoledSurface else Color.White
+    val secondaryBtnBg = if (isDark) AmoledAccent else LightAccent
+    val secondaryBtnText = if (isDark) AmoledPrimary else LightPrimary
+
     var step by remember { mutableIntStateOf(if (isNightMode) 99 else 0) }
     var selectedWindowMinutes by remember { mutableIntStateOf(5) }
     var autopilotNoticed by remember { mutableStateOf(false) }
 
+    val editorialTitleStyle = MaterialTheme.typography.headlineMedium.copy(
+        fontFamily = SerifFontFamily,
+        fontStyle = FontStyle.Italic,
+        fontWeight = FontWeight.Normal,
+        fontSize = 24.sp,
+        lineHeight = 28.sp
+    )
+
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(28.dp),
-            color = Color.White,
-            border = BorderStroke(0.5.dp, Color(0xFFE8E5DD)),
+            shape = RoundedCornerShape(22.dp),
+            color = cardBg,
+            border = BorderStroke(1.dp, cardBorder),
             shadowElevation = 8.dp,
             modifier = Modifier.fillMaxWidth().padding(16.dp)
         ) {
@@ -4356,13 +4377,13 @@ fun MindfulGatewayDialog(
             ) {
                 // Rozet
                 Surface(
-                    shape = CircleShape,
-                    color = Color(0xFFE5ECE7)
+                    shape = RoundedCornerShape(16.dp),
+                    color = badgeBg
                 ) {
                     Text(
                         text = if (isNightMode) "GECE KORUMA · NIGHT REST" else strings.mindfulGatewayHeader,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color(0xFF274D3E),
+                        color = badgeText,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
@@ -4372,53 +4393,53 @@ fun MindfulGatewayDialog(
                 if (isNightMode) {
                     Text(
                         text = strings.gatewayNightTitle,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFF1C2520),
+                        style = editorialTitleStyle,
+                        color = titleColor,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = strings.gatewayNightSub,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF747E77),
+                        color = textColor,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF274D3E)),
-                        shape = CircleShape
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryBtnBg),
+                        shape = RoundedCornerShape(22.dp)
                     ) {
-                        Text(strings.gatewayNightSleep, color = Color.White)
+                        Text(strings.gatewayNightSleep, color = primaryBtnText, fontWeight = FontWeight.SemiBold)
                     }
                     Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedButton(
+                    Button(
                         onClick = { onApproved(5, strings.gatewayMicroPlanSleep) },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                        shape = CircleShape,
-                        border = BorderStroke(1.dp, Color(0xFF274D3E))
+                        shape = RoundedCornerShape(22.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnBg)
                     ) {
-                        Text(strings.gatewayNight5Min, color = Color(0xFF274D3E))
+                        Text(strings.gatewayNight5Min, color = secondaryBtnText, fontWeight = FontWeight.SemiBold)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     TextButton(onClick = onDismiss) {
-                        Text(strings.gatewayExitImmediate, color = Color(0xFF747E77))
+                        Text(strings.gatewayExitImmediate, color = textColor)
                     }
                 } else if (step == 0) {
                     when (barrierType) {
                         MindfulBarrierType.BREATH_AND_INTENT -> {
                             Text(
                                 text = strings.gatewayPauseTitle,
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = Color(0xFF1C2520),
+                                style = editorialTitleStyle,
+                                color = titleColor,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = strings.gatewayBreathPrompt,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF747E77),
+                                color = textColor,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(24.dp))
@@ -4439,14 +4460,14 @@ fun MindfulGatewayDialog(
                                 modifier = Modifier
                                     .size(80.dp)
                                     .scale(scale)
-                                    .background(Color(0xFFE5ECE7), CircleShape)
-                                    .border(3.dp, Color(0xFF274D3E), CircleShape),
+                                    .background(secondaryBtnBg, CircleShape)
+                                    .border(3.dp, primaryBtnBg, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .size(44.dp)
-                                        .background(Color(0xFF274D3E), CircleShape)
+                                        .background(primaryBtnBg, CircleShape)
                                 )
                             }
 
@@ -4455,39 +4476,40 @@ fun MindfulGatewayDialog(
                             Button(
                                 onClick = { step = 1 },
                                 modifier = Modifier.fillMaxWidth().height(52.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF274D3E)),
-                                shape = CircleShape
+                                colors = ButtonDefaults.buttonColors(containerColor = primaryBtnBg),
+                                shape = RoundedCornerShape(22.dp)
                             ) {
                                 Text(
                                     if (strings is TurkishStrings) "Niyetimi Fark Et ➔" else "Notice My Intention ➔",
-                                    color = Color.White
+                                    color = primaryBtnText,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             TextButton(onClick = onDismiss) {
-                                Text(strings.gatewayExitImmediate, color = Color(0xFF747E77))
+                                Text(strings.gatewayExitImmediate, color = textColor)
                             }
                         }
 
                         MindfulBarrierType.COGNITIVE_MATH -> {
                             Text(
                                 text = strings.barrierTypeMath,
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = Color(0xFF1C2520),
+                                style = editorialTitleStyle,
+                                color = titleColor,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = strings.gatewayMathPrompt,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF747E77),
+                                color = textColor,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "14 + 19 = ?",
                                 style = MaterialTheme.typography.headlineMedium,
-                                color = Color(0xFF274D3E),
+                                color = primaryBtnBg,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(16.dp))
@@ -4499,31 +4521,31 @@ fun MindfulGatewayDialog(
                                     Button(
                                         onClick = { if (isCorrect) step = 2 },
                                         modifier = Modifier.weight(1f).height(48.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5ECE7)),
-                                        shape = CircleShape
+                                        colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnBg),
+                                        shape = RoundedCornerShape(22.dp)
                                     ) {
-                                        Text("$num", color = Color(0xFF274D3E), fontWeight = FontWeight.SemiBold)
+                                        Text("$num", color = secondaryBtnText, fontWeight = FontWeight.SemiBold)
                                     }
                                 }
                             }
                             Spacer(modifier = Modifier.height(12.dp))
                             TextButton(onClick = onDismiss) {
-                                Text(strings.gatewayExitImmediate, color = Color(0xFF747E77))
+                                Text(strings.gatewayExitImmediate, color = textColor)
                             }
                         }
 
                         MindfulBarrierType.MINDFUL_TYPING -> {
                             Text(
                                 text = strings.barrierTypeTyping,
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = Color(0xFF1C2520),
+                                style = editorialTitleStyle,
+                                color = titleColor,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = strings.gatewayTypingPrompt,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF747E77),
+                                color = textColor,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -4531,7 +4553,7 @@ fun MindfulGatewayDialog(
                             Text(
                                 text = "\"$target\"",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF274D3E),
+                                color = primaryBtnBg,
                                 fontStyle = FontStyle.Italic,
                                 textAlign = TextAlign.Center
                             )
@@ -4540,14 +4562,14 @@ fun MindfulGatewayDialog(
                             OutlinedTextField(
                                 value = typedText,
                                 onValueChange = { typedText = it },
-                                placeholder = { Text(if (strings is TurkishStrings) "Cümleyi buraya yaz..." else "Type sentence here...", color = Color(0xFF919C94)) },
+                                placeholder = { Text(if (strings is TurkishStrings) "Cümleyi buraya yaz..." else "Type sentence here...", color = textColor) },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedTextColor = Color(0xFF1C2520),
-                                    unfocusedTextColor = Color(0xFF1C2520),
-                                    focusedBorderColor = Color(0xFF274D3E),
-                                    unfocusedBorderColor = Color(0xFFECE7DE)
+                                    focusedTextColor = titleColor,
+                                    unfocusedTextColor = titleColor,
+                                    focusedBorderColor = primaryBtnBg,
+                                    unfocusedBorderColor = cardBorder
                                 )
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -4557,107 +4579,107 @@ fun MindfulGatewayDialog(
                                 enabled = isMatch,
                                 modifier = Modifier.fillMaxWidth().height(52.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF274D3E),
-                                    disabledContainerColor = Color(0xFFE5ECE7)
+                                    containerColor = primaryBtnBg,
+                                    disabledContainerColor = secondaryBtnBg
                                 ),
-                                shape = CircleShape
+                                shape = RoundedCornerShape(22.dp)
                             ) {
                                 Text(
                                     if (strings is TurkishStrings) "Devam Et" else "Continue",
-                                    color = if (isMatch) Color.White else Color(0xFF919C94)
+                                    color = if (isMatch) primaryBtnText else textColor
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             TextButton(onClick = onDismiss) {
-                                Text(strings.gatewayExitImmediate, color = Color(0xFF747E77))
+                                Text(strings.gatewayExitImmediate, color = textColor)
                             }
                         }
                     }
                 } else if (step == 1) {
-                    // Niyet Seçimi (Matching Screen 03)
+                    // Niyet Seçimi
                     if (autopilotNoticed) {
                         Text(
                             text = if (strings is TurkishStrings) "Farkındalık" else "Awareness",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = Color(0xFF1C2520),
+                            style = editorialTitleStyle,
+                            color = titleColor,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = strings.gatewayAutopilotAck,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF274D3E),
+                            color = primaryBtnBg,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Button(
                             onClick = onDismiss,
                             modifier = Modifier.fillMaxWidth().height(52.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF274D3E)),
-                            shape = CircleShape
+                            colors = ButtonDefaults.buttonColors(containerColor = primaryBtnBg),
+                            shape = RoundedCornerShape(22.dp)
                         ) {
-                            Text(strings.gatewayPutPhoneDown, color = Color.White)
+                            Text(strings.gatewayPutPhoneDown, color = primaryBtnText, fontWeight = FontWeight.SemiBold)
                         }
                     } else {
                         Text(
                             text = strings.gatewayIntentQuestion,
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = Color(0xFF1C2520),
+                            style = editorialTitleStyle,
+                            color = titleColor,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = if (strings is TurkishStrings) "Yargılamadan sadece fark et." else "Notice your state without judgment.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF747E77),
+                            color = textColor,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(18.dp))
 
                         Button(
                             onClick = { autopilotNoticed = true },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5ECE7))
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            shape = RoundedCornerShape(22.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnBg)
                         ) {
-                            Text("🍃 " + strings.gatewayIntentAutopilot, color = Color(0xFF274D3E), fontWeight = FontWeight.SemiBold)
+                            Text("🍃 " + strings.gatewayIntentAutopilot, color = secondaryBtnText, fontWeight = FontWeight.SemiBold)
                         }
                         Spacer(modifier = Modifier.height(10.dp))
                         Button(
                             onClick = { step = 2 },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5ECE7))
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            shape = RoundedCornerShape(22.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnBg)
                         ) {
-                            Text("☕ " + strings.gatewayIntentBreak, color = Color(0xFF274D3E), fontWeight = FontWeight.SemiBold)
+                            Text("☕ " + strings.gatewayIntentBreak, color = secondaryBtnText, fontWeight = FontWeight.SemiBold)
                         }
                         Spacer(modifier = Modifier.height(10.dp))
                         Button(
                             onClick = { step = 2 },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5ECE7))
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            shape = RoundedCornerShape(22.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnBg)
                         ) {
-                            Text("🔍 " + strings.gatewayIntentSpecific, color = Color(0xFF274D3E), fontWeight = FontWeight.SemiBold)
+                            Text("🔍 " + strings.gatewayIntentSpecific, color = secondaryBtnText, fontWeight = FontWeight.SemiBold)
                         }
                         Spacer(modifier = Modifier.height(14.dp))
                         TextButton(onClick = onDismiss) {
-                            Text(strings.gatewayExitImmediate, color = Color(0xFF747E77))
+                            Text(strings.gatewayExitImmediate, color = textColor)
                         }
                     }
                 } else if (step == 2) {
-                    // Bilinçli Pencere Seçimi (Matching Screen 04)
+                    // Bilinçli Pencere Seçimi
                     Text(
                         text = if (strings is TurkishStrings) "Seçim Senin" else "Set a Mindful Window",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFF1C2520),
+                        style = editorialTitleStyle,
+                        color = titleColor,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = if (strings is TurkishStrings) "Şu an nasıl devam etmek istersin?" else "How would you like to continue right now?",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF747E77),
+                        color = textColor,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(18.dp))
@@ -4665,10 +4687,10 @@ fun MindfulGatewayDialog(
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF274D3E)),
-                        shape = CircleShape
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryBtnBg),
+                        shape = RoundedCornerShape(22.dp)
                     ) {
-                        Text("📱 " + strings.gatewayPutPhoneDown, color = Color.White)
+                        Text("📱 " + strings.gatewayPutPhoneDown, color = primaryBtnText, fontWeight = FontWeight.SemiBold)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -4681,41 +4703,41 @@ fun MindfulGatewayDialog(
                                 selectedWindowMinutes = 5
                                 step = 3
                             },
-                            modifier = Modifier.weight(1f).height(48.dp),
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5ECE7))
+                            modifier = Modifier.weight(1f).height(50.dp),
+                            shape = RoundedCornerShape(22.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnBg)
                         ) {
-                            Text("⏱️ " + strings.gatewayMindful5Min, color = Color(0xFF274D3E), fontWeight = FontWeight.SemiBold)
+                            Text("⏱️ " + strings.gatewayMindful5Min, color = secondaryBtnText, fontWeight = FontWeight.SemiBold)
                         }
                         Button(
                             onClick = {
                                 selectedWindowMinutes = 10
                                 step = 3
                             },
-                            modifier = Modifier.weight(1f).height(48.dp),
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5ECE7))
+                            modifier = Modifier.weight(1f).height(50.dp),
+                            shape = RoundedCornerShape(22.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnBg)
                         ) {
-                            Text("⏱️ " + strings.gatewayMindful10Min, color = Color(0xFF274D3E), fontWeight = FontWeight.SemiBold)
+                            Text("⏱️ " + strings.gatewayMindful10Min, color = secondaryBtnText, fontWeight = FontWeight.SemiBold)
                         }
                     }
                     Spacer(modifier = Modifier.height(14.dp))
                     TextButton(onClick = onDismiss) {
-                        Text(strings.gatewayExitImmediate, color = Color(0xFF747E77))
+                        Text(strings.gatewayExitImmediate, color = textColor)
                     }
                 } else if (step == 3) {
-                    // Mikro-Plan Seçimi (Matching Screen 04 bottom)
+                    // Mikro-Plan Seçimi
                     Text(
                         text = "$selectedWindowMinutes " + (if (strings is TurkishStrings) "Dk Bilinçli Pencere" else "Min Mindful Window"),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFF1C2520),
+                        style = editorialTitleStyle,
+                        color = titleColor,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = strings.gatewayMicroPlanQuestion,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF747E77),
+                        color = textColor,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -4731,15 +4753,15 @@ fun MindfulGatewayDialog(
                                 onApproved(selectedWindowMinutes, plan)
                             },
                             modifier = Modifier.fillMaxWidth().height(48.dp).padding(vertical = 2.dp),
-                            shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5ECE7))
+                            shape = RoundedCornerShape(22.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnBg)
                         ) {
-                            Text(display, color = Color(0xFF274D3E), fontWeight = FontWeight.SemiBold)
+                            Text(display, color = secondaryBtnText, fontWeight = FontWeight.SemiBold)
                         }
                     }
                     Spacer(modifier = Modifier.height(14.dp))
                     TextButton(onClick = onDismiss) {
-                        Text(strings.gatewayExitImmediate, color = Color(0xFF747E77))
+                        Text(strings.gatewayExitImmediate, color = textColor)
                     }
                 }
             }
