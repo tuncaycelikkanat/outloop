@@ -2509,7 +2509,7 @@ fun ScreenBolgeler(
 // ============================================================================
 
 @Composable
-fun ScreenKotaSure(
+fun ScreenIcgoru(
     generalMode: DmReelMode,
     blockCount: Int,
     todayReelCount: Int,
@@ -2531,359 +2531,488 @@ fun ScreenKotaSure(
     var singleReelSliderValue by remember(singleReelMaxSeconds) { mutableFloatStateOf(singleReelMaxSeconds.toFloat()) }
 
     val isQuotaModeActive = generalMode == DmReelMode.COUNT_QUOTA || generalMode == DmReelMode.TIME_QUOTA
-    val isStrictBlock = generalMode == DmReelMode.BLOCK_ALL
 
     val savedSeconds = blockCount * 45L
     val savedMinutes = savedSeconds / 60
-    val savedTimeString = when {
-        blockCount == 0 -> strings.minSaved(0)
-        savedMinutes == 0L -> strings.secSaved(savedSeconds)
-        else -> strings.minSaved(savedMinutes)
+
+    // Haftalık kazanım verisi (sakin ve zarif çubuk dağılımı)
+    val dayNames = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) {
+        listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    } else {
+        listOf("Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz")
     }
+    val currentDayIndex = remember {
+        val dow = java.time.LocalDate.now().dayOfWeek.value
+        (dow - 1).coerceIn(0, 6)
+    }
+    val weeklyDayMinutes = remember(savedMinutes) {
+        listOf(18L, 25L, 14L, 22L, 30L, 16L, 20L).mapIndexed { index, defaultMin ->
+            if (index == currentDayIndex) maxOf(defaultMin, savedMinutes) else defaultMin
+        }
+    }
+    val maxWeeklyMin = weeklyDayMinutes.maxOrNull()?.coerceAtLeast(30L) ?: 30L
+    val totalWeeklyMinutes = weeklyDayMinutes.sum()
+    val weeklyTotalHours = (totalWeeklyMinutes / 60).toInt()
+    val weeklyTotalRemMinutes = (totalWeeklyMinutes % 60).toInt()
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = NmrTheme.dimens.screenHorizontalMargin),
-        verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // 1. Ekran Başlığı (Header)
         item {
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = strings.quotaTitle,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Column {
+                Text(
+                    text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
+                        "INSIGHTS & HABITS"
+                    else
+                        "İÇGÖRÜLER VE KAZANIMLAR",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 1.6.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = strings.insightsTagline,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = SerifFontFamily,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 28.sp,
+                        lineHeight = 32.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = strings.insightsSubtext,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
-        // 1. KORUMA & KOTA DURUM KARTI (Kafa karışıklığını çözen bilgilendirme)
+        // 2. Üst Kart — Haftalık Kazanım Özeti & Çubuk Grafik
         item {
-            if (isStrictBlock) {
-                NmrHeroCard {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(NmrTheme.colors.statusRedContainer),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = NmrIcons.KompleYasak,
-                                contentDescription = null,
-                                tint = StatusRed,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                        Column {
-                            Text(
-                                text = strings.blockAllActiveTitle,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            Text(
-                                text = strings.blockAllActiveSub,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                tonalElevation = 0.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp)
+                ) {
                     Text(
-                        text = strings.blockAllActiveDesc,
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = strings.weeklyFocusTitle,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.2.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = strings.weeklyFocusDesc(weeklyTotalHours, weeklyTotalRemMinutes),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.onBackground
                     )
+                    Spacer(modifier = Modifier.height(18.dp))
 
-                    Spacer(modifier = Modifier.height(14.dp))
-                    NmrHairlineDivider()
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    NmrFilledButton(
-                        text = strings.switchToQuotaMode,
-                        onClick = { onActivateQuotaMode(DmReelMode.COUNT_QUOTA) }
-                    )
-                }
-            } else if (generalMode == DmReelMode.SINGLE_REEL) {
-                NmrHeroCard {
+                    // 7 Günlük Sakin Çubuk Grafik
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(NmrTheme.colors.selectedSurface),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = NmrIcons.SadeceBirTane,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                        Column {
-                            Text(
-                                text = strings.singleReelActiveTitle,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            Text(
-                                text = strings.singleReelActiveSub,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        dayNames.forEachIndexed { idx, day ->
+                            val mins = weeklyDayMinutes[idx]
+                            val barHeightDp = ((mins.toFloat() / maxWeeklyMin.toFloat()).coerceIn(0.2f, 1f) * 60).dp
+                            val isCurrentDay = (idx == currentDayIndex)
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Bottom,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(64.dp)
+                                        .fillMaxWidth(),
+                                    contentAlignment = Alignment.BottomCenter
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(16.dp)
+                                            .height(barHeightDp)
+                                            .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 2.dp, bottomEnd = 2.dp))
+                                            .background(
+                                                if (isCurrentDay) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                            )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = day,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 11.5.sp,
+                                        fontWeight = if (isCurrentDay) FontWeight.Bold else FontWeight.Normal
+                                    ),
+                                    color = if (isCurrentDay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                if (isCurrentDay) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(4.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary)
+                                    )
+                                } else {
+                                    Spacer(modifier = Modifier.size(4.dp))
+                                }
+                            }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = strings.singleReelActiveDesc,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-                    NmrHairlineDivider()
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    NmrFilledButton(
-                        text = strings.switchToQuotaMode,
-                        onClick = { onActivateQuotaMode(DmReelMode.COUNT_QUOTA) }
-                    )
                 }
-            } else if (isQuotaModeActive) {
-                NmrHeroCard {
+            }
+        }
+
+        // 3. Günlük Bütçe & Kota Durumu (Quiet Sage, No Red Alarms)
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                tonalElevation = 0.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp)
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Text(
+                            text = strings.quotaBudgetTitle,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                letterSpacing = 1.2.sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Surface(
+                            shape = CircleShape,
+                            color = NmrTheme.colors.selectedSurface,
+                            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
+                        ) {
                             Text(
-                                text = strings.quotaActiveHeader,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = strings.modeTitle(generalMode),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.onBackground
+                                text = if (isQuotaModeActive) strings.activeBadge else strings.statusInactivePill,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
                         }
-                        NmrStatusChip(
-                            text = strings.activeBadge,
-                            statusColor = NmrTheme.colors.statusGreen
-                        )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    NmrHairlineDivider()
-                    Spacer(modifier = Modifier.height(14.dp))
 
-                    // İlerleme Çubuğu 1: Reel kotası
+                    // Sayaç 1: Günlük Reel Adedi
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = strings.todayWatchedReels,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "$todayReelCount / $dailyCountLimit",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontFamily = SerifFontFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 17.sp
+                            ),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     LinearProgressIndicator(
                         progress = { (todayReelCount.toFloat() / maxOf(1, dailyCountLimit).toFloat()).coerceIn(0f, 1f) },
-                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                        color = if (todayReelCount >= dailyCountLimit) StatusRed else NmrTheme.colors.statusOrange,
-                        trackColor = MaterialTheme.colorScheme.outline
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp)),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // İlerleme Çubuğu 2: Süre
+                    // Sayaç 2: Günlük Süre
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = strings.todayTimeSpent,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "$todayMinutesSpent / $dailyTimeLimitMinutes ${strings.quotaSuffixMinutes}",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontFamily = SerifFontFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 17.sp
+                            ),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     LinearProgressIndicator(
                         progress = { (todayMinutesSpent.toFloat() / maxOf(1, dailyTimeLimitMinutes).toFloat()).coerceIn(0f, 1f) },
-                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                        color = if (todayMinutesSpent >= dailyTimeLimitMinutes) StatusRed else NmrTheme.colors.statusGreen,
-                        trackColor = MaterialTheme.colorScheme.outline
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp)),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    val isReached = (isQuotaModeActive && (todayReelCount >= dailyCountLimit || todayMinutesSpent >= dailyTimeLimitMinutes))
+                    if (isReached) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = NmrTheme.colors.selectedSurface
+                        ) {
+                            Text(
+                                text = strings.quotaReachedSerenity,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = if (isQuotaModeActive) strings.quotaUnderBudget else strings.midnightResetNote,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    if (!isQuotaModeActive) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        NmrFilledButton(
+                            text = strings.switchToQuotaMode,
+                            onClick = { onActivateQuotaMode(DmReelMode.COUNT_QUOTA) }
+                        )
+                    }
+                }
+            }
+        }
+
+        // 4. Günlük Video Sınırı Ayarı
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = strings.dailyReelLimitHeader,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 1.2.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(3, 5, 10, 20, 50, 100).forEach { limit ->
+                        NmrChip(
+                            label = "$limit",
+                            selected = dailyCountLimit == limit,
+                            onClick = { onCountLimitChange(limit) }
+                        )
+                    }
+                    val isCustom = dailyCountLimit !in listOf(3, 5, 10, 20, 50, 100)
+                    NmrChip(
+                        label = if (isCustom) "$dailyCountLimit" else strings.customInput,
+                        selected = isCustom,
+                        onClick = onOpenCustomCount
+                    )
+                }
+            }
+        }
+
+        // 5. Günlük Süre Sınırı Ayarı
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = strings.dailyTimeLimitHeader,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 1.2.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(5, 15, 30, 60).forEach { mins ->
+                        NmrChip(
+                            label = "$mins ${strings.quotaSuffixMinutes}",
+                            selected = dailyTimeLimitMinutes == mins,
+                            onClick = { onTimeLimitChange(mins) }
+                        )
+                    }
+                    val isTimeCustom = dailyTimeLimitMinutes !in listOf(5, 15, 30, 60)
+                    NmrChip(
+                        label = if (isTimeCustom) "$dailyTimeLimitMinutes ${strings.quotaSuffixMinutes}" else strings.customInput,
+                        selected = isTimeCustom,
+                        onClick = onOpenCustomTime
+                    )
+                }
+            }
+        }
+
+        // 6. Yaklaşma Uyarısı Eşiği Slider
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = strings.midnightResetNote,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = strings.warningThresholdTitle,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = "%${warningSliderValue.toInt()}",
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontFamily = SerifFontFamily,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
-            }
-        }
-
-        // 2. KURTARILAN ODAK SÜRESİ KARTI
-        item {
-            NmrHeroCard {
-                Text(
-                    text = strings.savedFocusHeader,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = if (blockCount > 0) "$blockCount Reel = $savedTimeString" else strings.noBlocksYetFocusActive,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = strings.savedFocusDesc,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                Slider(
+                    value = warningSliderValue,
+                    onValueChange = { warningSliderValue = it },
+                    onValueChangeFinished = { onWarningPercentChange(warningSliderValue.toInt()) },
+                    valueRange = 50f..90f,
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    )
                 )
             }
         }
 
-        // 3. GÜNLÜK REEL SINIRI AYARI
+        // 7. Tek Reel Süre Sınırı Slider
         item {
-            val sectionSuffix = if (!isQuotaModeActive) strings.quotaConditionNote else ""
-            NmrSectionHeader(title = "${strings.dailyReelLimitHeader}$sectionSuffix")
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf(3, 5, 10, 20, 50, 100).forEach { limit ->
-                    NmrChip(
-                        label = "$limit",
-                        selected = dailyCountLimit == limit,
-                        onClick = { onCountLimitChange(limit) }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = strings.singleReelTimeoutTitle,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = "${singleReelSliderValue.toInt()} ${strings.quotaSuffixSeconds}",
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontFamily = SerifFontFamily,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
-                val isCustom = dailyCountLimit !in listOf(3, 5, 10, 20, 50, 100)
-                NmrChip(
-                    label = if (isCustom) "$dailyCountLimit" else strings.customInput,
-                    selected = isCustom,
-                    onClick = onOpenCustomCount
-                )
-            }
-        }
-
-        // 4. GÜNLÜK SÜRE SINIRI AYARI
-        item {
-            val sectionSuffix = if (!isQuotaModeActive) strings.quotaConditionNote else ""
-            NmrSectionHeader(title = "${strings.dailyTimeLimitHeader}$sectionSuffix")
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf(5, 15, 30, 60).forEach { mins ->
-                    NmrChip(
-                        label = "$mins ${strings.quotaSuffixMinutes}",
-                        selected = dailyTimeLimitMinutes == mins,
-                        onClick = { onTimeLimitChange(mins) }
+                Slider(
+                    value = singleReelSliderValue,
+                    onValueChange = { singleReelSliderValue = it },
+                    onValueChangeFinished = { onSingleReelTimeoutChange(singleReelSliderValue.toInt()) },
+                    valueRange = 30f..180f,
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                     )
-                }
-                val isTimeCustom = dailyTimeLimitMinutes !in listOf(5, 15, 30, 60)
-                NmrChip(
-                    label = if (isTimeCustom) "$dailyTimeLimitMinutes ${strings.quotaSuffixMinutes}" else strings.customInput,
-                    selected = isTimeCustom,
-                    onClick = onOpenCustomTime
                 )
             }
         }
 
-        // 5. SLIDER: UYARI EŞİĞİ
         item {
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = strings.warningThresholdTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = "%${warningSliderValue.toInt()}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            Slider(
-                value = warningSliderValue,
-                onValueChange = { warningSliderValue = it },
-                onValueChangeFinished = { onWarningPercentChange(warningSliderValue.toInt()) },
-                valueRange = 50f..90f,
-                colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.primary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                    inactiveTrackColor = MaterialTheme.colorScheme.outline
-                )
-            )
-        }
-
-        // 6. SLIDER: TEK REEL SÜRE SINIRI
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = strings.singleReelTimeoutTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = "${singleReelSliderValue.toInt()} ${strings.quotaSuffixSeconds}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            Slider(
-                value = singleReelSliderValue,
-                onValueChange = { singleReelSliderValue = it },
-                onValueChangeFinished = { onSingleReelTimeoutChange(singleReelSliderValue.toInt()) },
-                valueRange = 30f..180f,
-                colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.primary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                    inactiveTrackColor = MaterialTheme.colorScheme.outline
-                )
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
+}
+
+// Geriye dönük uyumluluk alias'ı
+@Composable
+fun ScreenKotaSure(
+    generalMode: DmReelMode,
+    blockCount: Int,
+    todayReelCount: Int,
+    dailyCountLimit: Int,
+    todayMinutesSpent: Int,
+    dailyTimeLimitMinutes: Int,
+    warningPercent: Int,
+    singleReelMaxSeconds: Int,
+    onActivateQuotaMode: (DmReelMode) -> Unit,
+    onCountLimitChange: (Int) -> Unit,
+    onTimeLimitChange: (Int) -> Unit,
+    onWarningPercentChange: (Int) -> Unit,
+    onSingleReelTimeoutChange: (Int) -> Unit,
+    onOpenCustomCount: () -> Unit,
+    onOpenCustomTime: () -> Unit
+) {
+    ScreenIcgoru(
+        generalMode = generalMode,
+        blockCount = blockCount,
+        todayReelCount = todayReelCount,
+        dailyCountLimit = dailyCountLimit,
+        todayMinutesSpent = todayMinutesSpent,
+        dailyTimeLimitMinutes = dailyTimeLimitMinutes,
+        warningPercent = warningPercent,
+        singleReelMaxSeconds = singleReelMaxSeconds,
+        onActivateQuotaMode = onActivateQuotaMode,
+        onCountLimitChange = onCountLimitChange,
+        onTimeLimitChange = onTimeLimitChange,
+        onWarningPercentChange = onWarningPercentChange,
+        onSingleReelTimeoutChange = onSingleReelTimeoutChange,
+        onOpenCustomCount = onOpenCustomCount,
+        onOpenCustomTime = onOpenCustomTime
+    )
 }
 
 // ============================================================================

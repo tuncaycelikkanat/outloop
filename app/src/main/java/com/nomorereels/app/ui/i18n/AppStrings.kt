@@ -108,7 +108,15 @@ interface Strings {
     val modeSelectTitle: String
     val modeFollowGlobal: String
 
-    // Quota Screen
+    // Quota & Insights Screen
+    val insightsTagline: String
+    val insightsSubtext: String
+    val weeklyFocusTitle: String
+    fun weeklyFocusDesc(hours: Int, minutes: Int): String
+    val quotaBudgetTitle: String
+    val quotaReachedSerenity: String
+    val quotaUnderBudget: String
+
     val quotaTitle: String
     val blockAllActiveTitle: String
     val blockAllActiveSub: String
@@ -367,6 +375,16 @@ object TurkishStrings : Strings {
     override val modeSelectTitle = "Mod seç"
     override val modeFollowGlobal = "Genel moda uy"
 
+    // Quota & Insights Screen
+    override val insightsTagline = "Zamanın sana ait."
+    override val insightsSubtext = "Kazanılan odak anları ve bilinçli kullanım bütçeleri."
+    override val weeklyFocusTitle = "Haftalık Kazanım Özeti"
+    override fun weeklyFocusDesc(hours: Int, minutes: Int) =
+        "Bu hafta $hours saat $minutes dakika kendine kaldı."
+    override val quotaBudgetTitle = "GÜNLÜK BÜTÇE DURUMU"
+    override val quotaReachedSerenity = "Bugünkü niyetine ulaştın 🍃"
+    override val quotaUnderBudget = "Sakin ve dengeli bir akıştasın."
+
     override val quotaTitle = "Kota & Süre"
     override val blockAllActiveTitle = "KOMPLE YASAK DEVREDE"
     override val blockAllActiveSub = "Sıfır video politikası aktif"
@@ -621,6 +639,16 @@ object EnglishStrings : Strings {
     override val reelsTabSub = "Tapping the bottom navigation Reels tab"
     override val modeSelectTitle = "Select Mode"
     override val modeFollowGlobal = "Follow general mode"
+
+    // Quota & Insights Screen
+    override val insightsTagline = "Your time belongs to you."
+    override val insightsSubtext = "Recovered focus moments and mindful budgets."
+    override val weeklyFocusTitle = "Weekly Recovered Summary"
+    override fun weeklyFocusDesc(hours: Int, minutes: Int) =
+        "You kept $hours hours $minutes minutes to yourself this week."
+    override val quotaBudgetTitle = "DAILY BUDGET STATUS"
+    override val quotaReachedSerenity = "You've fulfilled today's intention 🍃"
+    override val quotaUnderBudget = "You are in a calm and balanced flow."
 
     override val quotaTitle = "Quota & Time"
     override val blockAllActiveTitle = "BLOCK ALL ACTIVE"
