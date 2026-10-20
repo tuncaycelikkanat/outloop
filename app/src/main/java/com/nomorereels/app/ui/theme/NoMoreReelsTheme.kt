@@ -41,28 +41,28 @@ import androidx.core.view.WindowCompat
 // 1. RENK PALETİ (COLOR TOKENS) - Light & AMOLED Dark + Status Colors
 // ============================================================================
 
-// Light Theme Tokens (Warm Linen & Forest Sage)
-val LightBackground = Color(0xFFFAF8F5)
-val LightSurface = Color(0xFFFFFFFF)
-val LightOutline = Color(0xFFE8E5DD)
-val LightTextPrimary = Color(0xFF1A221E)
-val LightTextSecondary = Color(0xFF607067)
-val LightAccent = Color(0xFF25473A)
-val LightAccentContainer = Color(0xFFE2ECE5) // Pastel Matcha / Adaçayı seçili yüzey tonu
+// Light Theme Tokens (Wabi-Sabi & Kinfolk Linen)
+val LightBackground = Color(0xFFF7F5F0) // Sıcak yulaf & ham keten kağıdı
+val LightSurface = Color(0xFFFFFFFF) // Saf seramik süt beyazı
+val LightOutline = Color(0xFFECE7DE) // Dingin taş derz çizgisi
+val LightTextPrimary = Color(0xFF1C2520) // Doğal koyu ardıç kömürü
+val LightTextSecondary = Color(0xFF747E77) // Dinlendirici adaçayı grisi
+val LightAccent = Color(0xFF274D3E) // Derin orman sediri & zeytin
+val LightAccentContainer = Color(0xFFE5ECE7) // Matcha sisi & adaçayı köpüğü
 
-// AMOLED Dark Theme Tokens (Velvet Charcoal & Mint)
-val AmoledBackground = Color(0xFF131615)
-val AmoledSurface = Color(0xFF1C221F)
-val AmoledOutline = Color(0xFF2B3631)
-val AmoledTextPrimary = Color(0xFFE8EDE9)
-val AmoledTextSecondary = Color(0xFF96A39B)
-val AmoledAccent = Color(0xFF6CC5A2)
-val AmoledAccentContainer = Color(0xFF1A3328) // Kadife gece modu seçili yüzey tonu
+// AMOLED Dark Theme Tokens (Wabi-Sabi Charred Cedar & Sage)
+val AmoledBackground = Color(0xFF101311) // Yanık sedir kömürü
+val AmoledSurface = Color(0xFF181D1A) // Koyu yosun taşı
+val AmoledOutline = Color(0xFF263029) // Derin toprak derzi
+val AmoledTextPrimary = Color(0xFFECEAE5) // Ham keten beyazı
+val AmoledTextSecondary = Color(0xFF919C94) // Taş tozu grisi
+val AmoledAccent = Color(0xFF6EBE9B) // Gece adaçayı filizi
+val AmoledAccentContainer = Color(0xFF162E22)
 
-// Status Colors (Şefkatli & Dinlendirici)
-val StatusGreen = Color(0xFF388E67)
-val StatusOrange = Color(0xFFD98A36) // Sıcak Kehribar
-val StatusRed = Color(0xFFC94A4A) // Yumuşak Pişmiş Toprak / Terracotta
+// Status Colors (Wabi-Sabi Toprak & Bitki Tonları)
+val StatusGreen = Color(0xFF2F6B55) // Doğal orman yeşili
+val StatusOrange = Color(0xFFD4973B) // Sıcak petek kehribarı
+val StatusRed = Color(0xFFA84838) // Mat pişmiş toprak / Terracotta kiremit
 
 // Özel Semantik Renkler (MaterialTheme dışındaki özel token'lar)
 @Immutable
@@ -129,6 +129,7 @@ private val AmoledDarkColorScheme = darkColorScheme(
 // ============================================================================
 
 val InterFontFamily = FontFamily.SansSerif
+val SerifFontFamily = FontFamily.Serif
 val JetBrainsMonoFontFamily = FontFamily.Monospace
 
 private const val TABULAR_NUMS = "tnum"
@@ -214,7 +215,7 @@ data class NmrDimens(
     val screenHorizontalMargin: Dp = 20.dp,
     val gridUnit: Dp = 8.dp,
     val minTouchTarget: Dp = 48.dp,
-    val cardRadius: Dp = 24.dp,
+    val cardRadius: Dp = 28.dp,
     val chipRadius: Dp = 32.dp,
     val dialogRadius: Dp = 28.dp,
     val iconSize: Dp = 24.dp,
@@ -351,14 +352,14 @@ fun NmrHeroCard(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 4.dp,
+                elevation = 3.dp,
                 shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                ambientColor = Color(0x0F000000),
-                spotColor = Color(0x0A000000)
+                ambientColor = Color(0x0E2D3430),
+                spotColor = Color(0x062D3430)
             ),
         shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
         color = containerColor,
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
@@ -732,12 +733,12 @@ fun NmrBottomNavigationBar(
                 .shadow(
                     elevation = 6.dp,
                     shape = CircleShape,
-                    spotColor = Color(0x14000000),
-                    ambientColor = Color(0x0C000000)
+                    spotColor = Color(0x102D3430),
+                    ambientColor = Color(0x0A2D3430)
                 ),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+            border = BorderStroke(1.dp, Color(0xFFE5DFD4)),
             tonalElevation = 0.dp
         ) {
             Row(
@@ -757,12 +758,12 @@ fun NmrBottomNavigationBar(
                     }
 
                     val containerColor by animateColorAsState(
-                        targetValue = if (selected) NmrTheme.colors.selectedSurface else Color.Transparent,
+                        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
                         animationSpec = tween(220),
                         label = "tabContainerColor"
                     )
                     val contentColor by animateColorAsState(
-                        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        targetValue = if (selected) Color.White else Color(0xFF7C8880),
                         animationSpec = tween(220),
                         label = "tabContentColor"
                     )
