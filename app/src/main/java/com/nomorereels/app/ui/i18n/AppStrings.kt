@@ -24,6 +24,22 @@ interface Strings {
     val tabRegions: String
     val tabQuota: String
 
+    // Dashboard (Bugün Ekranı)
+    val dashboardGreeting: String
+    val savedFocusTitle: String
+    val savedFocusPauseQuote: String
+    val savedFocusFootnote: String
+    val protectionActiveTitle: String
+    val protectionInactiveTitle: String
+    val protectionDescRulesApplied: String
+    val editProtectionButton: String
+    val loopsBrokenTitle: String
+    val mindfulBreakTitle: String
+    val todayReminderTitle: String
+    val todayReminderQuote: String
+    val statusActivePill: String
+    val statusInactivePill: String
+
     fun modeTitle(mode: DmReelMode): String
     fun modeSubtitle(mode: DmReelMode): String
     fun themeLabel(theme: NmrThemeMode): String
@@ -237,6 +253,22 @@ object TurkishStrings : Strings {
     override val tabSettings = "Ayarlar"
     override val tabRegions = "Bölgeler"
     override val tabQuota = "Kota & Süre"
+
+    // Dashboard
+    override val dashboardGreeting = "Bugün kendine alan aç."
+    override val savedFocusTitle = "Bugün kurtarılan odak"
+    override val savedFocusPauseQuote = "Küçük duraklamalar, anlamlı bir fark yaratabilir."
+    override val savedFocusFootnote = "Kişisel bir referans, hedef veya başarı puanı değil."
+    override val protectionActiveTitle = "Koruman aktif"
+    override val protectionInactiveTitle = "Koruma duraklatıldı"
+    override val protectionDescRulesApplied = "Diğer bölgelerde seçtiğin kurallar uygulanıyor."
+    override val editProtectionButton = "Koruma ayarlarını düzenle"
+    override val loopsBrokenTitle = "Döngü kırıldı"
+    override val mindfulBreakTitle = "Bilinçli mola"
+    override val todayReminderTitle = "Bugünün hatırlatması"
+    override val todayReminderQuote = "“Her dürtüyü takip etmek zorunda değilsin.”"
+    override val statusActivePill = "Açık"
+    override val statusInactivePill = "Kapalı"
 
     override fun modeTitle(mode: DmReelMode) = when (mode) {
         DmReelMode.FOLLOW_GLOBAL -> modeFollowGlobal
@@ -463,6 +495,22 @@ object EnglishStrings : Strings {
     override val tabSettings = "Settings"
     override val tabRegions = "Regions"
     override val tabQuota = "Quota & Time"
+
+    // Dashboard
+    override val dashboardGreeting = "Make space for yourself today."
+    override val savedFocusTitle = "Today's recovered focus"
+    override val savedFocusPauseQuote = "Small pauses can make a meaningful difference."
+    override val savedFocusFootnote = "A personal reference, not a goal or score."
+    override val protectionActiveTitle = "Protection is active"
+    override val protectionInactiveTitle = "Protection paused"
+    override val protectionDescRulesApplied = "Your chosen rules are applied in other regions."
+    override val editProtectionButton = "Edit protection settings"
+    override val loopsBrokenTitle = "Loops broken"
+    override val mindfulBreakTitle = "Mindful break"
+    override val todayReminderTitle = "Today's reminder"
+    override val todayReminderQuote = "“You don't have to follow every impulse.”"
+    override val statusActivePill = "Active"
+    override val statusInactivePill = "Off"
 
     override fun modeTitle(mode: DmReelMode) = when (mode) {
         DmReelMode.FOLLOW_GLOBAL -> modeFollowGlobal

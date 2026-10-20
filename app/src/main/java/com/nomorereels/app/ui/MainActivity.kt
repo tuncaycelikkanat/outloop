@@ -422,36 +422,18 @@ fun NoMoreReelsAppRoot() {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     when (currentTab) {
                         NmrBottomTab.BUGUN -> {
-                            ScreenKorumalar(
+                            ScreenBugun(
                                 isServiceActive = isServiceActive,
                                 generalMode = generalMode,
                                 blockCount = blockCount,
-                                strictModeEnabled = strictModeEnabled,
                                 policySummary = policySummary,
                                 isSnoozeActive = isSnoozeActive,
                                 snoozeRemainingMinutes = snoozeRemainingMinutes,
                                 onOpenAccessibilitySettings = {
                                     context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                                 },
-                                onGeneralModeChange = { newMode ->
-                                    requestModeChange(newMode, generalMode) {
-                                        SettingsStore.applyGeneralModeToAllRegions(context, newMode)
-                                        if (newMode == DmReelMode.COUNT_QUOTA) QuotaStore.setDailyCountLimitEnabled(context, true)
-                                        if (newMode == DmReelMode.TIME_QUOTA) QuotaStore.setDailyTimeLimitEnabled(context, true)
-                                    }
-                                },
-                                onApplyProfile = { profile ->
-                                    val currentPreset = ProtectionLevel.findMatchingLevel(dmMode, exploreMode, feedMode, profileMode, reelsTabMode)
-                                    val isLoosening = if (currentPreset != null) {
-                                        ReelsPolicy.strictnessRank(profile.reelsTabMode) > ReelsPolicy.strictnessRank(currentPreset.reelsTabMode)
-                                    } else false
-
-                                    if (strictModeEnabled && isLoosening) {
-                                        pendingLoosenAction = { SettingsStore.applyProtectionLevel(context, profile) }
-                                        showWillpowerDialog = true
-                                    } else {
-                                        SettingsStore.applyProtectionLevel(context, profile)
-                                    }
+                                onNavigateToProtection = {
+                                    currentTab = NmrBottomTab.KORUMA
                                 },
                                 onStartSnoozeClick = { showMindfulGatewayDialog = true },
                                 onEndSnoozeClick = { SettingsStore.stopSnooze(context) }
@@ -1009,7 +991,509 @@ fun OnboardingStepProfile(
 }
 
 // ============================================================================
-// EKRAN 4: SEKME 1 — "KORUMALAR"
+// EKRAN 4: SEKME 1 — "BUGÜN" (DASHBOARD)
+// ============================================================================
+
+@Composable
+fun ScreenBugun(
+    isServiceActive: Boolean,
+    generalMode: DmReelMode,
+    blockCount: Int,
+    policySummary: String,
+    isSnoozeActive: Boolean,
+    snoozeRemainingMinutes: Int,
+    onOpenAccessibilitySettings: () -> Unit,
+    onNavigateToProtection: () -> Unit,
+    onStartSnoozeClick: () -> Unit,
+    onEndSnoozeClick: () -> Unit
+) {
+    val strings = LocalAppStrings.current
+    val savedSeconds = blockCount * 45L
+    val savedMinutes = savedSeconds / 60
+
+    val todayDateFormatted = remember {
+        try {
+            val now = java.time.LocalDate.now()
+            val formatter = java.time.format.DateTimeFormatter.ofPattern(
+                "EEEE, d MMMM",
+                if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) java.util.Locale.ENGLISH else java.util.Locale("tr")
+            )
+            now.format(formatter).uppercase()
+        } catch (_: Exception) {
+            "SALI, 20 EKİM"
+        }
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = NmrTheme.dimens.screenHorizontalMargin),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // Üst Alan: Tarih + Selamlama + Switch
+        item {
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = todayDateFormatted,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.4.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = strings.dashboardGreeting,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = SerifFontFamily,
+                            fontStyle = FontStyle.Italic,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 25.sp,
+                            lineHeight = 31.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
+                Switch(
+                    checked = isServiceActive,
+                    onCheckedChange = { onOpenAccessibilitySettings() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = MaterialTheme.colorScheme.primary,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.outline
+                    )
+                )
+            }
+        }
+
+        // 1. Erişilebilirlik Servisi Kapalı Uyarısı (Eğer kapalıysa)
+        if (!isServiceActive) {
+            item {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius))
+                        .clickable(onClick = onOpenAccessibilitySettings),
+                    shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.08f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Security,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = strings.serviceInactiveTitle,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = strings.serviceInactiveDesc,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                        Text(
+                            text = strings.openButton,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        }
+
+        // 2. Mola Devrede Banner'ı (Eğer mola aktifse)
+        if (isSnoozeActive) {
+            item {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                    color = StatusOrange.copy(alpha = 0.10f),
+                    border = BorderStroke(1.dp, StatusOrange.copy(alpha = 0.4f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.size(7.dp).clip(CircleShape).background(StatusOrange)
+                                )
+                                Text(
+                                    text = strings.snoozeBannerTitle,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = StatusOrange
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = strings.snoozeBannerDesc(snoozeRemainingMinutes),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                        TextButton(onClick = onEndSnoozeClick) {
+                            Text(
+                                text = strings.endSnoozeButton,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = StatusOrange
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. KURTARILAN ODAK KARTI (Blueprint Bölüm 3)
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 2.dp,
+                        shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                        spotColor = Color(0x0A24332A),
+                        ambientColor = Color(0x0424332A)
+                    ),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = strings.savedFocusTitle.uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.3.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = if (savedMinutes > 0) "$savedMinutes" else "$savedSeconds",
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontFamily = SerifFontFamily,
+                                fontSize = 48.sp,
+                                fontWeight = FontWeight.Bold,
+                                lineHeight = 50.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = if (savedMinutes > 0) {
+                                if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "min" else "dk"
+                            } else {
+                                if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "sec" else "sn"
+                            },
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontFamily = SerifFontFamily,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 7.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = strings.savedFocusPauseQuote,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = strings.savedFocusFootnote,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 11.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
+            }
+        }
+
+        // 4. KORUMAN AKTİF KARTI (Blueprint Bölüm 3)
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 2.dp,
+                        shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                        spotColor = Color(0x0A24332A),
+                        ambientColor = Color(0x0424332A)
+                    ),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isServiceActive && !isSnoozeActive) strings.protectionActiveTitle else strings.protectionInactiveTitle,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 17.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+
+                        val isEffectiveActive = isServiceActive && !isSnoozeActive
+                        Surface(
+                            shape = CircleShape,
+                            color = if (isEffectiveActive) NmrTheme.colors.selectedSurface else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(if (isEffectiveActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                )
+                                Text(
+                                    text = if (isEffectiveActive) strings.statusActivePill else strings.statusInactivePill,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 0.sp
+                                    ),
+                                    color = if (isEffectiveActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = policySummary,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = strings.protectionDescRulesApplied,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = onNavigateToProtection,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(NmrTheme.dimens.buttonHeight),
+                        shape = RoundedCornerShape(NmrTheme.dimens.buttonRadius),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text(
+                            text = strings.editProtectionButton,
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.sp
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        // 5. İKİ KÜÇÜK METRİK YAN YANA (Kırılan Döngü & Bilinçli Mola)
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Sol Kart: Kırılan Döngü
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .shadow(
+                            elevation = 2.dp,
+                            shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                            spotColor = Color(0x0A24332A),
+                            ambientColor = Color(0x0424332A)
+                        ),
+                    shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "$blockCount",
+                            style = MaterialTheme.typography.displayMedium.copy(
+                                fontFamily = SerifFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 34.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = strings.loopsBrokenTitle,
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Autopilot stopped" else "Otopilot durduruldu",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Sağ Kart: Bilinçli Mola
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .shadow(
+                            elevation = 2.dp,
+                            shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                            spotColor = Color(0x0A24332A),
+                            ambientColor = Color(0x0424332A)
+                        )
+                        .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius))
+                        .clickable(onClick = if (isSnoozeActive) onEndSnoozeClick else onStartSnoozeClick),
+                    shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = if (isSnoozeActive) "${snoozeRemainingMinutes} dk" else "10 dk",
+                            style = MaterialTheme.typography.displayMedium.copy(
+                                fontFamily = SerifFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 34.sp
+                            ),
+                            color = if (isSnoozeActive) StatusOrange else MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = strings.mindfulBreakTitle,
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (isSnoozeActive) {
+                                if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Tap to end" else "Bitirmek için tıkla"
+                            } else {
+                                if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Start break →" else "Mola başlat →"
+                            },
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = if (isSnoozeActive) StatusOrange else MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+
+        // 6. GÜNÜN HATIRLATMASI (Blueprint Bölüm 3)
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = NmrTheme.colors.mistBlue.copy(alpha = 0.45f),
+                border = BorderStroke(1.dp, NmrTheme.colors.mistBlue)
+            ) {
+                Row(
+                    modifier = Modifier.padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🌿", fontSize = 18.sp)
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = strings.todayReminderTitle.uppercase(),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                letterSpacing = 1.3.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = strings.todayReminderQuote,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontFamily = SerifFontFamily,
+                                fontStyle = FontStyle.Italic,
+                                fontSize = 16.5.sp,
+                                lineHeight = 23.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+    }
+}
+
+// ============================================================================
+// EKRAN 4.1: SEKME 2 — "KORUMA MERKEZİ" (4 Mod & Profiller)
 // ============================================================================
 
 @Composable
