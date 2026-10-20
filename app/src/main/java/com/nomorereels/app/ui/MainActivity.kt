@@ -415,7 +415,7 @@ fun NoMoreReelsAppRoot() {
         } else if (showLiveLogsScreen) {
             // CANLI OLAY GÜNLÜĞÜ (Ekran 8)
             BackHandler { showLiveLogsScreen = false }
-            LiveLogsScreen(onBack = { showLiveLogsScreen = false })
+            LiveLogsScreen(onBack = { showLiveLogsScreen = false }, showBackButton = true)
         } else {
             // 4 ANA SEKME AKIŞI (Ekran 4, 5, 6, 7)
             Column(modifier = Modifier.fillMaxSize()) {
@@ -3086,16 +3086,47 @@ fun ScreenAyarlar(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = NmrTheme.dimens.screenHorizontalMargin),
-        verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = strings.settingsTitle,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Column {
+                Text(
+                    text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
+                        "PERSONAL PREFERENCES"
+                    else
+                        "KİŞİSEL TERCİHLER",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 1.6.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
+                        "A serene experience."
+                    else
+                        "Huzurlu bir deneyim.",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = SerifFontFamily,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 28.sp,
+                        lineHeight = 32.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
+                        "Appearance, mindful gateways, willpower lock and battery health."
+                    else
+                        "Görünüm, dil, farkındalık kapısı, irade kilidi ve pil sağlığı.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
         // BÖLÜM: GÖRÜNÜM
@@ -3601,7 +3632,8 @@ fun ScreenAyarlar(
 
 @Composable
 fun LiveLogsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    showBackButton: Boolean = false
 ) {
     val rawLogs by DetectionLogStore.logs.collectAsState()
     var isPaused by remember { mutableStateOf(false) }
@@ -3629,7 +3661,7 @@ fun LiveLogsScreen(
             .fillMaxSize()
             .padding(horizontal = NmrTheme.dimens.screenHorizontalMargin, vertical = 12.dp)
     ) {
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         // Üst Bar: Geri oku, başlık, sağda duraklat ve temizle ikonları
         Row(
             modifier = Modifier
@@ -3640,23 +3672,51 @@ fun LiveLogsScreen(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.weight(1f)
             ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Geri",
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
+                if (showBackButton) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Geri",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
                 }
                 Column {
                     Text(
-                        text = "Canlı Olay Günlüğü",
-                        style = MaterialTheme.typography.titleLarge,
+                        text = if (LocalAppStrings.current is com.nomorereels.app.ui.i18n.EnglishStrings)
+                            "SYSTEM TRANSPARENCY"
+                        else
+                            "SİSTEM ŞEFFAFLIĞI",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.6.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = if (LocalAppStrings.current is com.nomorereels.app.ui.i18n.EnglishStrings)
+                            "Live Diagnostics"
+                        else
+                            "Canlı Teşhis",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = SerifFontFamily,
+                            fontStyle = FontStyle.Italic,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 28.sp,
+                            lineHeight = 32.sp
+                        ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = if (isPaused) "Durduruldu · Akış donduruldu" else "Canlı akış devrede (${filteredLogs.size} olay)",
+                        text = if (isPaused)
+                            (if (LocalAppStrings.current is com.nomorereels.app.ui.i18n.EnglishStrings) "Paused · Stream frozen" else "Donduruldu · Akış duraklatıldı")
+                        else
+                            (if (LocalAppStrings.current is com.nomorereels.app.ui.i18n.EnglishStrings) "Live monitoring active (${filteredLogs.size} events)" else "Canlı akış devrede (${filteredLogs.size} olay)"),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (isPaused) NmrTheme.colors.statusOrange else MaterialTheme.colorScheme.onSurfaceVariant
                     )
