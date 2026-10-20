@@ -7,9 +7,11 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -200,6 +202,38 @@ class MainActivity : ComponentActivity() {
                 AppThemeMode.LIGHT -> NmrThemeMode.LIGHT
                 AppThemeMode.DARK -> NmrThemeMode.AMOLED
                 AppThemeMode.SYSTEM -> NmrThemeMode.SYSTEM
+            }
+
+            val isDark = when (nmrThemeMode) {
+                NmrThemeMode.LIGHT -> false
+                NmrThemeMode.AMOLED -> true
+                NmrThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+
+            DisposableEffect(isDark) {
+                enableEdgeToEdge(
+                    statusBarStyle = if (!isDark) {
+                        SystemBarStyle.light(
+                            android.graphics.Color.TRANSPARENT,
+                            android.graphics.Color.TRANSPARENT
+                        )
+                    } else {
+                        SystemBarStyle.dark(
+                            android.graphics.Color.TRANSPARENT
+                        )
+                    },
+                    navigationBarStyle = if (!isDark) {
+                        SystemBarStyle.light(
+                            android.graphics.Color.TRANSPARENT,
+                            android.graphics.Color.TRANSPARENT
+                        )
+                    } else {
+                        SystemBarStyle.dark(
+                            android.graphics.Color.TRANSPARENT
+                        )
+                    }
+                )
+                onDispose {}
             }
 
             NoMoreReelsTheme(themeMode = nmrThemeMode) {
