@@ -1072,11 +1072,10 @@ fun ScreenBugun(
                     Text(
                         text = strings.dashboardGreeting,
                         style = MaterialTheme.typography.headlineMedium.copy(
-                            fontFamily = SerifFontFamily,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Bold,
                             fontSize = 25.sp,
-                            lineHeight = 31.sp
+                            lineHeight = 31.sp,
+                            letterSpacing = (-0.4).sp
                         ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -1228,7 +1227,6 @@ fun ScreenBugun(
                         Text(
                             text = if (savedMinutes > 0) "$savedMinutes" else "$savedSeconds",
                             style = MaterialTheme.typography.displayLarge.copy(
-                                fontFamily = SerifFontFamily,
                                 fontSize = 48.sp,
                                 fontWeight = FontWeight.Bold,
                                 lineHeight = 50.sp
@@ -1242,7 +1240,6 @@ fun ScreenBugun(
                                 if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "sec" else "sn"
                             },
                             style = MaterialTheme.typography.headlineSmall.copy(
-                                fontFamily = SerifFontFamily,
                                 fontWeight = FontWeight.SemiBold
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1389,7 +1386,6 @@ fun ScreenBugun(
                         Text(
                             text = "$blockCount",
                             style = MaterialTheme.typography.displayMedium.copy(
-                                fontFamily = SerifFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 34.sp
                             ),
@@ -1430,7 +1426,6 @@ fun ScreenBugun(
                         Text(
                             text = if (isSnoozeActive) "${snoozeRemainingMinutes} dk" else "10 dk",
                             style = MaterialTheme.typography.displayMedium.copy(
-                                fontFamily = SerifFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 34.sp
                             ),
@@ -1498,10 +1493,8 @@ fun ScreenBugun(
                         Text(
                             text = strings.todayReminderQuote,
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontFamily = SerifFontFamily,
-                                fontStyle = FontStyle.Italic,
-                                fontSize = 16.5.sp,
-                                lineHeight = 23.sp
+                                fontSize = 15.sp,
+                                lineHeight = 22.sp
                             ),
                             color = MaterialTheme.colorScheme.onBackground
                         )
@@ -1573,11 +1566,10 @@ fun ScreenKorumalar(
                         else
                             "Zamanın kıymetini yeniden hatırla.",
                         style = MaterialTheme.typography.headlineMedium.copy(
-                            fontFamily = SerifFontFamily,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 26.sp,
-                            lineHeight = 32.sp
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 25.sp,
+                            lineHeight = 31.sp,
+                            letterSpacing = (-0.4).sp
                         ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -1723,7 +1715,6 @@ fun ScreenKorumalar(
                             Text(
                                 text = "$savedMinutes",
                                 style = MaterialTheme.typography.displayLarge.copy(
-                                    fontFamily = SerifFontFamily,
                                     fontSize = 46.sp,
                                     fontWeight = FontWeight.Bold,
                                     lineHeight = 48.sp
@@ -1734,7 +1725,6 @@ fun ScreenKorumalar(
                             Text(
                                 text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "min" else "dk",
                                 style = MaterialTheme.typography.titleMedium.copy(
-                                    fontFamily = SerifFontFamily,
                                     fontWeight = FontWeight.SemiBold
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1775,7 +1765,6 @@ fun ScreenKorumalar(
                             Text(
                                 text = "$blockCount",
                                 style = MaterialTheme.typography.displayLarge.copy(
-                                    fontFamily = SerifFontFamily,
                                     fontSize = 46.sp,
                                     fontWeight = FontWeight.Bold,
                                     lineHeight = 48.sp
@@ -1786,7 +1775,6 @@ fun ScreenKorumalar(
                             Text(
                                 text = "Reel",
                                 style = MaterialTheme.typography.titleMedium.copy(
-                                    fontFamily = SerifFontFamily,
                                     fontWeight = FontWeight.SemiBold
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1861,10 +1849,8 @@ fun ScreenKorumalar(
                             else
                                 "\"Hayat, birbiri ardına kaydırdığın 15 saniyelerde değil; bu anı fark ettiğin nefeste akıyor.\"",
                             style = MaterialTheme.typography.bodyLarge.copy(
-                                fontFamily = SerifFontFamily,
-                                fontStyle = FontStyle.Italic,
-                                fontSize = 17.5.sp,
-                                lineHeight = 26.sp,
+                                fontSize = 16.sp,
+                                lineHeight = 24.sp,
                                 fontWeight = FontWeight.Normal
                             ),
                             color = MaterialTheme.colorScheme.onBackground
@@ -2081,11 +2067,10 @@ fun ScreenKorumaMerkezi(
                 Text(
                     text = strings.protectionCenterTagline,
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = SerifFontFamily,
-                        fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 28.sp,
-                        lineHeight = 32.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        lineHeight = 31.sp,
+                        letterSpacing = (-0.4).sp
                     ),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -2580,11 +2565,10 @@ fun ScreenIcgoru(
                 Text(
                     text = strings.insightsTagline,
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = SerifFontFamily,
-                        fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 28.sp,
-                        lineHeight = 32.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        lineHeight = 31.sp,
+                        letterSpacing = (-0.4).sp
                     ),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -2744,7 +2728,6 @@ fun ScreenIcgoru(
                         Text(
                             text = "$todayReelCount / $dailyCountLimit",
                             style = MaterialTheme.typography.titleSmall.copy(
-                                fontFamily = SerifFontFamily,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 17.sp
                             ),
@@ -2778,7 +2761,6 @@ fun ScreenIcgoru(
                         Text(
                             text = "$todayMinutesSpent / $dailyTimeLimitMinutes ${strings.quotaSuffixMinutes}",
                             style = MaterialTheme.typography.titleSmall.copy(
-                                fontFamily = SerifFontFamily,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 17.sp
                             ),
@@ -2915,7 +2897,6 @@ fun ScreenIcgoru(
                     Text(
                         text = "%${warningSliderValue.toInt()}",
                         style = MaterialTheme.typography.titleSmall.copy(
-                            fontFamily = SerifFontFamily,
                             fontWeight = FontWeight.Bold
                         ),
                         color = MaterialTheme.colorScheme.primary
@@ -2951,7 +2932,6 @@ fun ScreenIcgoru(
                     Text(
                         text = "${singleReelSliderValue.toInt()} ${strings.quotaSuffixSeconds}",
                         style = MaterialTheme.typography.titleSmall.copy(
-                            fontFamily = SerifFontFamily,
                             fontWeight = FontWeight.Bold
                         ),
                         color = MaterialTheme.colorScheme.primary
@@ -3109,11 +3089,10 @@ fun ScreenAyarlar(
                     else
                         "Huzurlu bir deneyim.",
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontFamily = SerifFontFamily,
-                        fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 28.sp,
-                        lineHeight = 32.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        lineHeight = 31.sp,
+                        letterSpacing = (-0.4).sp
                     ),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -3703,11 +3682,10 @@ fun LiveLogsScreen(
                         else
                             "Canlı Teşhis",
                         style = MaterialTheme.typography.headlineMedium.copy(
-                            fontFamily = SerifFontFamily,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 28.sp,
-                            lineHeight = 32.sp
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 25.sp,
+                            lineHeight = 31.sp,
+                            letterSpacing = (-0.4).sp
                         ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -4354,11 +4332,10 @@ fun MindfulGatewayDialog(
     var autopilotNoticed by remember { mutableStateOf(false) }
 
     val editorialTitleStyle = MaterialTheme.typography.headlineMedium.copy(
-        fontFamily = SerifFontFamily,
-        fontStyle = FontStyle.Italic,
-        fontWeight = FontWeight.Normal,
-        fontSize = 24.sp,
-        lineHeight = 28.sp
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = (-0.3).sp
     )
 
     Dialog(onDismissRequest = onDismiss) {
@@ -4552,9 +4529,8 @@ fun MindfulGatewayDialog(
                             val target = strings.gatewayTypingSentence
                             Text(
                                 text = "\"$target\"",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                                 color = primaryBtnBg,
-                                fontStyle = FontStyle.Italic,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(14.dp))

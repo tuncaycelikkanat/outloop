@@ -39,8 +39,8 @@ import com.nomorereels.app.policy.PolicyDecision
 import com.nomorereels.app.ui.i18n.AppStrings
 
 private fun getSerifBold(context: Context): Typeface =
-    try { ResourcesCompat.getFont(context, R.font.cormorant_garamond_bold) ?: Typeface.SERIF }
-    catch (_: Exception) { Typeface.SERIF }
+    try { ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_bold) ?: Typeface.DEFAULT_BOLD }
+    catch (_: Exception) { Typeface.DEFAULT_BOLD }
 
 private fun getSansBold(context: Context): Typeface =
     try { ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_bold) ?: Typeface.DEFAULT_BOLD }
@@ -1057,7 +1057,7 @@ class OverlayController(
                 text = "\"$targetSentence\""
                 setTextColor(Color.parseColor(primaryBtnBg))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                typeface = try { ResourcesCompat.getFont(context, R.font.cormorant_garamond_italic) ?: Typeface.SERIF } catch (_: Exception) { Typeface.SERIF }
+                typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
                 setPadding(dp(context, 8), dp(context, 4), dp(context, 8), dp(context, 12))
             }

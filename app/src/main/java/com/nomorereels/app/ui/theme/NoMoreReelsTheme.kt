@@ -148,16 +148,8 @@ private val AmoledDarkColorScheme = darkColorScheme(
 )
 
 // ============================================================================
-// 2. TİPOGRAFİ (TYPOGRAPHY) - Cormorant Garamond (Serif) & Plus Jakarta Sans
+// 2. TİPOGRAFİ (TYPOGRAPHY) - Modern Minimalist Sans (Plus Jakarta Sans)
 // ============================================================================
-
-val CormorantGaramondFontFamily = FontFamily(
-    Font(R.font.cormorant_garamond_regular, FontWeight.Normal),
-    Font(R.font.cormorant_garamond_medium, FontWeight.Medium),
-    Font(R.font.cormorant_garamond_semibold, FontWeight.SemiBold),
-    Font(R.font.cormorant_garamond_bold, FontWeight.Bold),
-    Font(R.font.cormorant_garamond_italic, FontWeight.Normal, FontStyle.Italic)
-)
 
 val PlusJakartaSansFontFamily = FontFamily(
     Font(R.font.plus_jakarta_sans_regular, FontWeight.Normal),
@@ -166,7 +158,8 @@ val PlusJakartaSansFontFamily = FontFamily(
     Font(R.font.plus_jakarta_sans_bold, FontWeight.Bold)
 )
 
-val SerifFontFamily = CormorantGaramondFontFamily
+val CormorantGaramondFontFamily = PlusJakartaSansFontFamily
+val SerifFontFamily = PlusJakartaSansFontFamily
 val InterFontFamily = PlusJakartaSansFontFamily
 val JetBrainsMonoFontFamily = FontFamily.Monospace
 
@@ -174,46 +167,48 @@ private const val TABULAR_NUMS = "tnum"
 
 val NmrTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = SerifFontFamily,
+        fontFamily = PlusJakartaSansFontFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 36.sp,
-        lineHeight = 42.sp,
-        letterSpacing = (-0.5).sp,
+        fontSize = 34.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-0.6).sp,
         fontFeatureSettings = TABULAR_NUMS
     ),
     displayMedium = TextStyle(
-        fontFamily = SerifFontFamily,
+        fontFamily = PlusJakartaSansFontFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 30.sp,
-        lineHeight = 36.sp,
-        letterSpacing = (-0.3).sp,
+        fontSize = 28.sp,
+        lineHeight = 34.sp,
+        letterSpacing = (-0.5).sp,
         fontFeatureSettings = TABULAR_NUMS
     ),
     headlineLarge = TextStyle(
-        fontFamily = SerifFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 26.sp,
-        lineHeight = 32.sp,
-        letterSpacing = (-0.2).sp
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        lineHeight = 30.sp,
+        letterSpacing = (-0.4).sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = SerifFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp
-    ),
-    headlineSmall = TextStyle(
-        fontFamily = SerifFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 19.sp,
-        lineHeight = 26.sp
-    ),
-    titleLarge = TextStyle(
-        fontFamily = SerifFontFamily,
+        fontFamily = PlusJakartaSansFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 21.sp,
-        lineHeight = 28.sp,
-        letterSpacing = (-0.1).sp
+        lineHeight = 27.sp,
+        letterSpacing = (-0.3).sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
+        letterSpacing = (-0.2).sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 19.sp,
+        lineHeight = 25.sp,
+        letterSpacing = (-0.2).sp
     ),
     titleMedium = TextStyle(
         fontFamily = PlusJakartaSansFontFamily,
