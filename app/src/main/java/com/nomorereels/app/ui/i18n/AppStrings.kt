@@ -78,6 +78,19 @@ interface Strings {
 
     val presetBalanced: String
     val presetMindful: String
+    val protectionCenterTagline: String
+    val protectionCenterSubtext: String
+    val generalPolicyHeader: String
+    val generalPolicySubtext: String
+    val surfacesHeader: String
+    val surfacesSubtext: String
+    val presetsHeaderTitle: String
+    val presetsSubtext: String
+    val presetLightTitle: String
+    val presetLightDesc: String
+    val presetBalancedDesc: String
+    val presetDeepFocusTitle: String
+    val presetDeepFocusDesc: String
 
     // Regions Screen
     val regionsTitle: String
@@ -325,6 +338,19 @@ object TurkishStrings : Strings {
 
     override val presetBalanced = "Dengeli"
     override val presetMindful = "Bilinçli"
+    override val protectionCenterTagline = "Kontrol etmek değil, fark etmek."
+    override val protectionCenterSubtext = "Reels akışına nerede ve nasıl izin vereceğini sen belirlersin."
+    override val generalPolicyHeader = "GENEL KORUMA MODU"
+    override val generalPolicySubtext = "Tüm yüzeyler için temel kural"
+    override val surfacesHeader = "INSTAGRAM YÜZEYLERİ"
+    override val surfacesSubtext = "5 farklı bölge için bağımsız kurallar belirle"
+    override val presetsHeaderTitle = "HAZIR SEVİYELER"
+    override val presetsSubtext = "Tek dokunuşla hazır bir koruma dengesi uygula"
+    override val presetLightTitle = "Hafif"
+    override val presetLightDesc = "Sadece Reels sekmesi kilitli, diğerleri serbest."
+    override val presetBalancedDesc = "Reels sekmesi kilitli, DM'de tek video serbest."
+    override val presetDeepFocusTitle = "Tam Odak"
+    override val presetDeepFocusDesc = "Bütün Reels girişleri tamamen engelli."
 
     override val regionsTitle = "Bölgeler"
     override val regionsDesc = "Her bölge için Instagram Reels davranışını özelleştirin."
@@ -567,6 +593,19 @@ object EnglishStrings : Strings {
 
     override val presetBalanced = "Balanced"
     override val presetMindful = "Mindful"
+    override val protectionCenterTagline = "Not control, but awareness."
+    override val protectionCenterSubtext = "You decide where and how Reels are permitted."
+    override val generalPolicyHeader = "GENERAL PROTECTION MODE"
+    override val generalPolicySubtext = "Default rule for all surfaces"
+    override val surfacesHeader = "INSTAGRAM SURFACES"
+    override val surfacesSubtext = "Set independent rules for 5 different surfaces"
+    override val presetsHeaderTitle = "PRESET LEVELS"
+    override val presetsSubtext = "Apply a balanced preset with a single tap"
+    override val presetLightTitle = "Light"
+    override val presetLightDesc = "Only Reels tab locked, other areas free."
+    override val presetBalancedDesc = "Reels tab locked, first video allowed in DMs."
+    override val presetDeepFocusTitle = "Deep Focus"
+    override val presetDeepFocusDesc = "All Reels entries completely blocked."
 
     override val regionsTitle = "Regions"
     override val regionsDesc = "Customize Instagram Reels behavior for each individual area."

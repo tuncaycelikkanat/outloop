@@ -440,12 +440,33 @@ fun NoMoreReelsAppRoot() {
                             )
                         }
                         NmrBottomTab.KORUMA -> {
-                            ScreenBolgeler(
+                            ScreenKorumaMerkezi(
+                                generalMode = generalMode,
                                 dmMode = dmMode,
                                 exploreMode = exploreMode,
                                 feedMode = feedMode,
                                 profileMode = profileMode,
                                 reelsTabMode = reelsTabMode,
+                                onGeneralModeChange = { newMode ->
+                                    requestModeChange(newMode, generalMode) {
+                                        SettingsStore.applyGeneralModeToAllRegions(context, newMode)
+                                        if (newMode == DmReelMode.COUNT_QUOTA) QuotaStore.setDailyCountLimitEnabled(context, true)
+                                        if (newMode == DmReelMode.TIME_QUOTA) QuotaStore.setDailyTimeLimitEnabled(context, true)
+                                    }
+                                },
+                                onApplyProfile = { profile ->
+                                    val currentPreset = ProtectionLevel.findMatchingLevel(dmMode, exploreMode, feedMode, profileMode, reelsTabMode)
+                                    val isLoosening = if (currentPreset != null) {
+                                        ReelsPolicy.strictnessRank(profile.reelsTabMode) > ReelsPolicy.strictnessRank(currentPreset.reelsTabMode)
+                                    } else false
+
+                                    if (strictModeEnabled && isLoosening) {
+                                        pendingLoosenAction = { SettingsStore.applyProtectionLevel(context, profile) }
+                                        showWillpowerDialog = true
+                                    } else {
+                                        SettingsStore.applyProtectionLevel(context, profile)
+                                    }
+                                },
                                 onSelectRegion = { regionKey -> regionBeingEdited = regionKey }
                             )
                         }
@@ -2015,96 +2036,372 @@ fun ScreenKorumalar(
 }
 
 // ============================================================================
-// EKRAN 5: SEKME 2 — "BÖLGELER"
+// EKRAN 5: SEKME 2 — "KORUMA MERKEZİ" (PROTECTION CENTER)
 // ============================================================================
 
 @Composable
-fun ScreenBolgeler(
+fun ScreenKorumaMerkezi(
+    generalMode: DmReelMode,
     dmMode: DmReelMode,
     exploreMode: DmReelMode,
     feedMode: DmReelMode,
     profileMode: DmReelMode,
     reelsTabMode: DmReelMode,
+    onGeneralModeChange: (DmReelMode) -> Unit,
+    onApplyProfile: (ProtectionLevel) -> Unit,
     onSelectRegion: (String) -> Unit
 ) {
     val strings = LocalAppStrings.current
+    val currentPreset = remember(dmMode, exploreMode, feedMode, profileMode, reelsTabMode) {
+        ProtectionLevel.findMatchingLevel(dmMode, exploreMode, feedMode, profileMode, reelsTabMode)
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = NmrTheme.dimens.screenHorizontalMargin),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // 1. Ekran Başlığı (Header)
         item {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Column {
+                Text(
+                    text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
+                        "PROTECTION CENTER"
+                    else
+                        "KORUMA MERKEZİ",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 1.6.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = strings.protectionCenterTagline,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = SerifFontFamily,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 28.sp,
+                        lineHeight = 32.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = strings.protectionCenterSubtext,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // 2. Üst Bölüm: Genel Koruma Modu (2x2 Grid)
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column {
+                    Text(
+                        text = strings.generalPolicyHeader,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.2.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = strings.generalPolicySubtext,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
+
+                // Satır 1
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    ProtectionCenterModeCard(
+                        title = strings.blockAllTitle,
+                        desc = strings.blockAllSub,
+                        icon = NmrIcons.KompleYasak,
+                        selected = generalMode == DmReelMode.BLOCK_ALL,
+                        onClick = { onGeneralModeChange(DmReelMode.BLOCK_ALL) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    ProtectionCenterModeCard(
+                        title = strings.countQuotaTitle,
+                        desc = strings.countQuotaSub,
+                        icon = NmrIcons.XTane,
+                        selected = generalMode == DmReelMode.COUNT_QUOTA,
+                        onClick = { onGeneralModeChange(DmReelMode.COUNT_QUOTA) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // Satır 2
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    ProtectionCenterModeCard(
+                        title = strings.modeTitle(DmReelMode.ASK_WITH_FRICTION),
+                        desc = strings.modeSubtitle(DmReelMode.ASK_WITH_FRICTION),
+                        icon = NmrIcons.Bilincli,
+                        selected = generalMode == DmReelMode.ASK_WITH_FRICTION,
+                        onClick = { onGeneralModeChange(DmReelMode.ASK_WITH_FRICTION) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    ProtectionCenterModeCard(
+                        title = strings.modeTitle(DmReelMode.FREE),
+                        desc = strings.modeSubtitle(DmReelMode.FREE),
+                        icon = NmrIcons.KameraKapsulu,
+                        selected = generalMode == DmReelMode.FREE,
+                        onClick = { onGeneralModeChange(DmReelMode.FREE) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
+        // 3. Orta Bölüm: Instagram Yüzeyleri (5 Bölge)
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column {
+                    Text(
+                        text = strings.surfacesHeader,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.2.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = strings.surfacesSubtext,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RegionSettingRow(
+                        title = strings.dmTitle,
+                        subtitle = strings.dmSub,
+                        icon = NmrIcons.Dm,
+                        modeLabel = strings.modeTitle(dmMode),
+                        onClick = { onSelectRegion("DM") }
+                    )
+                    RegionSettingRow(
+                        title = strings.exploreTitle,
+                        subtitle = strings.exploreSub,
+                        icon = NmrIcons.Kesfet,
+                        modeLabel = strings.modeTitle(exploreMode),
+                        onClick = { onSelectRegion("EXPLORE") }
+                    )
+                    RegionSettingRow(
+                        title = strings.feedTitle,
+                        subtitle = strings.feedSub,
+                        icon = NmrIcons.AnaSayfa,
+                        modeLabel = strings.modeTitle(feedMode),
+                        onClick = { onSelectRegion("FEED") }
+                    )
+                    RegionSettingRow(
+                        title = strings.profileTitle,
+                        subtitle = strings.profileSub,
+                        icon = NmrIcons.Profil,
+                        modeLabel = strings.modeTitle(profileMode),
+                        onClick = { onSelectRegion("PROFILE") }
+                    )
+                    RegionSettingRow(
+                        title = strings.reelsTabTitle,
+                        subtitle = strings.reelsTabSub,
+                        icon = NmrIcons.ReelsSekmesi,
+                        modeLabel = strings.modeTitle(reelsTabMode),
+                        onClick = { onSelectRegion("REELS_TAB") }
+                    )
+                }
+            }
+        }
+
+        // 4. Alt Bölüm: Hazır Seviyeler (Quick Presets)
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column {
+                    Text(
+                        text = strings.presetsHeaderTitle,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.2.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = strings.presetsSubtext,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ProtectionCenterPresetCard(
+                        title = "${strings.presetBalanced} (${if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Recommended" else "Önerilen"})",
+                        desc = strings.presetBalancedDesc,
+                        selected = currentPreset == ProtectionLevel.BALANCED,
+                        onClick = { onApplyProfile(ProtectionLevel.BALANCED) }
+                    )
+                    ProtectionCenterPresetCard(
+                        title = strings.presetDeepFocusTitle,
+                        desc = strings.presetDeepFocusDesc,
+                        selected = currentPreset == ProtectionLevel.STRICT,
+                        onClick = { onApplyProfile(ProtectionLevel.STRICT) }
+                    )
+                    ProtectionCenterPresetCard(
+                        title = strings.presetMindful,
+                        desc = strings.modeSubtitle(DmReelMode.ASK_WITH_FRICTION),
+                        selected = currentPreset == ProtectionLevel.MINDFUL,
+                        onClick = { onApplyProfile(ProtectionLevel.MINDFUL) }
+                    )
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+    }
+}
+
+@Composable
+fun ProtectionCenterModeCard(
+    title: String,
+    desc: String,
+    icon: ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        color = if (selected) NmrTheme.colors.selectedSurface else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            if (selected) 1.5.dp else 0.5.dp,
+            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+        ),
+        tonalElevation = 0.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(14.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                if (selected) {
+                    Box(
+                        modifier = Modifier
+                            .size(9.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = strings.regionsTitle,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.3).sp
-                ),
+                text = title,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
-                text = strings.regionsDesc,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-        }
-
-        item {
-            RegionSettingRow(
-                title = strings.dmTitle,
-                subtitle = strings.dmSub,
-                icon = NmrIcons.Dm,
-                modeLabel = strings.modeTitle(dmMode),
-                onClick = { onSelectRegion("DM") }
+                text = desc,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp, lineHeight = 15.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2
             )
         }
+    }
+}
 
-        item {
-            RegionSettingRow(
-                title = strings.exploreTitle,
-                subtitle = strings.exploreSub,
-                icon = NmrIcons.Kesfet,
-                modeLabel = strings.modeTitle(exploreMode),
-                onClick = { onSelectRegion("EXPLORE") }
-            )
-        }
-
-        item {
-            RegionSettingRow(
-                title = strings.feedTitle,
-                subtitle = strings.feedSub,
-                icon = NmrIcons.AnaSayfa,
-                modeLabel = strings.modeTitle(feedMode),
-                onClick = { onSelectRegion("FEED") }
-            )
-        }
-
-        item {
-            RegionSettingRow(
-                title = strings.profileTitle,
-                subtitle = strings.profileSub,
-                icon = NmrIcons.Profil,
-                modeLabel = strings.modeTitle(profileMode),
-                onClick = { onSelectRegion("PROFILE") }
-            )
-        }
-
-        item {
-            RegionSettingRow(
-                title = strings.reelsTabTitle,
-                subtitle = strings.reelsTabSub,
-                icon = NmrIcons.ReelsSekmesi,
-                modeLabel = strings.modeTitle(reelsTabMode),
-                onClick = { onSelectRegion("REELS_TAB") }
-            )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
+@Composable
+fun ProtectionCenterPresetCard(
+    title: String,
+    desc: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        color = if (selected) NmrTheme.colors.selectedSurface else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            if (selected) 1.5.dp else 0.5.dp,
+            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+        ),
+        tonalElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    if (selected) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "● Aktif",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -2120,12 +2417,6 @@ fun RegionSettingRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                ambientColor = Color(0x0C000000),
-                spotColor = Color(0x08000000)
-            )
             .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
@@ -2179,8 +2470,38 @@ fun RegionSettingRow(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
+}
+
+// Geriye dönük uyumluluk alias'ı
+@Composable
+fun ScreenBolgeler(
+    dmMode: DmReelMode,
+    exploreMode: DmReelMode,
+    feedMode: DmReelMode,
+    profileMode: DmReelMode,
+    reelsTabMode: DmReelMode,
+    onSelectRegion: (String) -> Unit
+) {
+    ScreenKorumaMerkezi(
+        generalMode = DmReelMode.BLOCK_ALL,
+        dmMode = dmMode,
+        exploreMode = exploreMode,
+        feedMode = feedMode,
+        profileMode = profileMode,
+        reelsTabMode = reelsTabMode,
+        onGeneralModeChange = {},
+        onApplyProfile = {},
+        onSelectRegion = onSelectRegion
+    )
 }
 
 // ============================================================================
