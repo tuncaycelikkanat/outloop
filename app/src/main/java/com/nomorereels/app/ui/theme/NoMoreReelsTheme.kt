@@ -30,12 +30,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import com.nomorereels.app.R
 
 // ============================================================================
 // 1. RENK PALETİ (COLOR TOKENS) - Light & AMOLED Dark + Status Colors
@@ -125,68 +128,125 @@ private val AmoledDarkColorScheme = darkColorScheme(
 )
 
 // ============================================================================
-// 2. TİPOGRAFİ (TYPOGRAPHY) - Inter & JetBrains Mono + Tabular Figures (tnum)
+// 2. TİPOGRAFİ (TYPOGRAPHY) - Cormorant Garamond (Serif) & Plus Jakarta Sans
 // ============================================================================
 
-val InterFontFamily = FontFamily.SansSerif
-val SerifFontFamily = FontFamily.Serif
+val CormorantGaramondFontFamily = FontFamily(
+    Font(R.font.cormorant_garamond_regular, FontWeight.Normal),
+    Font(R.font.cormorant_garamond_medium, FontWeight.Medium),
+    Font(R.font.cormorant_garamond_semibold, FontWeight.SemiBold),
+    Font(R.font.cormorant_garamond_bold, FontWeight.Bold),
+    Font(R.font.cormorant_garamond_italic, FontWeight.Normal, FontStyle.Italic)
+)
+
+val PlusJakartaSansFontFamily = FontFamily(
+    Font(R.font.plus_jakarta_sans_regular, FontWeight.Normal),
+    Font(R.font.plus_jakarta_sans_medium, FontWeight.Medium),
+    Font(R.font.plus_jakarta_sans_semibold, FontWeight.SemiBold),
+    Font(R.font.plus_jakarta_sans_bold, FontWeight.Bold)
+)
+
+val SerifFontFamily = CormorantGaramondFontFamily
+val InterFontFamily = PlusJakartaSansFontFamily
 val JetBrainsMonoFontFamily = FontFamily.Monospace
 
 private const val TABULAR_NUMS = "tnum"
 
 val NmrTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = InterFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 32.sp,
-        lineHeight = 38.sp,
+        fontFamily = SerifFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 36.sp,
+        lineHeight = 42.sp,
         letterSpacing = (-0.5).sp,
         fontFeatureSettings = TABULAR_NUMS
     ),
-    titleLarge = TextStyle(
-        fontFamily = InterFontFamily,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = 28.sp,
-        letterSpacing = (-0.2).sp,
+    displayMedium = TextStyle(
+        fontFamily = SerifFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 30.sp,
+        lineHeight = 36.sp,
+        letterSpacing = (-0.3).sp,
         fontFeatureSettings = TABULAR_NUMS
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = SerifFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 26.sp,
+        lineHeight = 32.sp,
+        letterSpacing = (-0.2).sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = SerifFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = SerifFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 19.sp,
+        lineHeight = 26.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = SerifFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 21.sp,
+        lineHeight = 28.sp,
+        letterSpacing = (-0.1).sp
     ),
     titleMedium = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp,
+        lineHeight = 22.sp,
+        fontFeatureSettings = TABULAR_NUMS
+    ),
+    titleSmall = TextStyle(
+        fontFamily = PlusJakartaSansFontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 15.sp,
-        lineHeight = 22.sp,
-        fontFeatureSettings = TABULAR_NUMS
-    ),
-    bodyLarge = TextStyle(
-        fontFamily = InterFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 15.sp,
-        lineHeight = 22.sp,
-        fontFeatureSettings = TABULAR_NUMS
-    ),
-    bodyMedium = TextStyle(
-        fontFamily = InterFontFamily,
-        fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontFeatureSettings = TABULAR_NUMS
     ),
+    bodyLarge = TextStyle(
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
+        lineHeight = 23.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.5.sp,
+        lineHeight = 20.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        lineHeight = 17.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = 0.5.sp
+    ),
     labelMedium = TextStyle(
-        fontFamily = InterFontFamily,
+        fontFamily = PlusJakartaSansFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.8.sp,
-        fontFeatureSettings = TABULAR_NUMS
+        letterSpacing = 0.8.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = InterFontFamily,
-        fontWeight = FontWeight.Medium,
+        fontFamily = PlusJakartaSansFontFamily,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 11.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.4.sp,
-        fontFeatureSettings = TABULAR_NUMS
+        letterSpacing = 1.0.sp
     )
 )
 

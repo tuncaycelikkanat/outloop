@@ -30,11 +30,25 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
+import com.nomorereels.app.R
 import com.nomorereels.app.data.AppLanguage
 import com.nomorereels.app.data.MindfulBarrierType
 import com.nomorereels.app.data.SettingsStore
 import com.nomorereels.app.policy.PolicyDecision
 import com.nomorereels.app.ui.i18n.AppStrings
+
+private fun getSerifBold(context: Context): Typeface =
+    try { ResourcesCompat.getFont(context, R.font.cormorant_garamond_bold) ?: Typeface.SERIF }
+    catch (_: Exception) { Typeface.SERIF }
+
+private fun getSansBold(context: Context): Typeface =
+    try { ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_bold) ?: Typeface.DEFAULT_BOLD }
+    catch (_: Exception) { Typeface.DEFAULT_BOLD }
+
+private fun getSansRegular(context: Context): Typeface =
+    try { ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_regular) ?: Typeface.DEFAULT }
+    catch (_: Exception) { Typeface.DEFAULT }
 
 /**
  * Erişilebilirlik katmanı (TYPE_ACCESSIBILITY_OVERLAY) veya uygulama katmanı
@@ -443,7 +457,7 @@ class OverlayController(
             text = "FARKINDALIK KAPISI · DM REEL"
             setTextColor(Color.parseColor("#274D3E"))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
-            typeface = Typeface.DEFAULT_BOLD
+            typeface = getSansBold(context)
             background = GradientDrawable().apply {
                 setColor(Color.parseColor("#E5ECE7"))
                 cornerRadius = dp(context, 32).toFloat()
@@ -458,8 +472,8 @@ class OverlayController(
         val title = TextView(context).apply {
             text = "Nefes Al. Otomatik Pilotta mısın?"
             setTextColor(Color.parseColor("#1C2520"))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-            typeface = Typeface.DEFAULT_BOLD
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f)
+            typeface = getSerifBold(context)
             gravity = Gravity.CENTER
             setPadding(0, dp(context, 16), 0, dp(context, 8))
         }
@@ -477,6 +491,7 @@ class OverlayController(
             text = subtitleText
             setTextColor(Color.parseColor("#747E77"))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            typeface = getSansRegular(context)
             gravity = Gravity.CENTER
             setLineSpacing(dp(context, 3).toFloat(), 1.0f)
             setPadding(0, 0, 0, dp(context, 20))
@@ -514,7 +529,7 @@ class OverlayController(
             isAllCaps = false
             setTextColor(Color.parseColor("#274D3E"))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-            typeface = Typeface.DEFAULT_BOLD
+            typeface = getSansBold(context)
             background = GradientDrawable().apply {
                 setColor(Color.parseColor("#E5ECE7"))
                 cornerRadius = dp(context, 32).toFloat()
@@ -589,7 +604,7 @@ class OverlayController(
             isAllCaps = false
             setTextColor(Color.WHITE)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-            typeface = Typeface.DEFAULT_BOLD
+            typeface = getSansBold(context)
             background = GradientDrawable().apply {
                 setColor(Color.parseColor("#274D3E"))
                 cornerRadius = dp(context, 32).toFloat()
@@ -649,7 +664,7 @@ class OverlayController(
             text = if (isNightMode) "GECE KORUMA · NIGHT REST" else strings.mindfulGatewayHeader
             setTextColor(Color.parseColor("#274D3E"))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
-            typeface = Typeface.DEFAULT_BOLD
+            typeface = getSansBold(context)
             background = GradientDrawable().apply {
                 setColor(Color.parseColor("#E5ECE7"))
                 cornerRadius = dp(context, 16).toFloat()
@@ -664,8 +679,8 @@ class OverlayController(
         // 2. Title View
         val titleView = TextView(context).apply {
             setTextColor(Color.parseColor("#1C2520"))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-            typeface = Typeface.DEFAULT_BOLD
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            typeface = getSerifBold(context)
             gravity = Gravity.CENTER
             setPadding(0, dp(context, 16), 0, dp(context, 8))
         }
@@ -675,6 +690,7 @@ class OverlayController(
         val subtitleView = TextView(context).apply {
             setTextColor(Color.parseColor("#747E77"))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            typeface = getSansRegular(context)
             gravity = Gravity.CENTER
             setLineSpacing(dp(context, 3).toFloat(), 1.0f)
             setPadding(0, 0, 0, dp(context, 20))
@@ -707,7 +723,7 @@ class OverlayController(
                     isAllCaps = false
                     setTextColor(Color.WHITE)
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                    typeface = Typeface.DEFAULT_BOLD
+                    typeface = getSansBold(context)
                     background = GradientDrawable().apply {
                         setColor(Color.parseColor("#274D3E"))
                         cornerRadius = dp(context, 32).toFloat()
@@ -729,7 +745,7 @@ class OverlayController(
                     isAllCaps = false
                     setTextColor(Color.parseColor("#274D3E"))
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                    typeface = Typeface.DEFAULT_BOLD
+                    typeface = getSansBold(context)
                     background = GradientDrawable().apply {
                         setColor(Color.parseColor("#E5ECE7"))
                         cornerRadius = dp(context, 32).toFloat()
@@ -742,7 +758,7 @@ class OverlayController(
                     isAllCaps = false
                     setTextColor(Color.parseColor("#274D3E"))
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                    typeface = Typeface.DEFAULT_BOLD
+                    typeface = getSansBold(context)
                     background = GradientDrawable().apply {
                         setColor(Color.parseColor("#E5ECE7"))
                         cornerRadius = dp(context, 32).toFloat()
@@ -779,7 +795,7 @@ class OverlayController(
                         isAllCaps = false
                         setTextColor(Color.parseColor("#274D3E"))
                         setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                        typeface = Typeface.DEFAULT_BOLD
+                        typeface = getSansBold(context)
                         background = GradientDrawable().apply {
                             setColor(Color.parseColor("#E5ECE7"))
                             cornerRadius = dp(context, 32).toFloat()
@@ -802,6 +818,7 @@ class OverlayController(
                 text = strings.gatewayExitImmediate
                 setTextColor(Color.parseColor("#747E77"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
                 setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10))
                 setOnClickListener { onCancel() }
@@ -821,7 +838,7 @@ class OverlayController(
                 isAllCaps = false
                 setTextColor(Color.parseColor("#274D3E"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
                 background = GradientDrawable().apply {
                     setColor(Color.parseColor("#E5ECE7"))
                     cornerRadius = dp(context, 32).toFloat()
@@ -845,7 +862,7 @@ class OverlayController(
                 isAllCaps = false
                 setTextColor(Color.parseColor("#274D3E"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
                 background = GradientDrawable().apply {
                     setColor(Color.parseColor("#E5ECE7"))
                     cornerRadius = dp(context, 32).toFloat()
@@ -864,7 +881,7 @@ class OverlayController(
                 isAllCaps = false
                 setTextColor(Color.parseColor("#274D3E"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
                 background = GradientDrawable().apply {
                     setColor(Color.parseColor("#E5ECE7"))
                     cornerRadius = dp(context, 32).toFloat()
@@ -899,7 +916,7 @@ class OverlayController(
                 isAllCaps = false
                 setTextColor(Color.WHITE)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
                 background = GradientDrawable().apply {
                     setColor(Color.parseColor("#274D3E"))
                     cornerRadius = dp(context, 32).toFloat()
@@ -917,7 +934,7 @@ class OverlayController(
                 isAllCaps = false
                 setTextColor(Color.parseColor("#274D3E"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
                 background = GradientDrawable().apply {
                     setColor(Color.parseColor("#E5ECE7"))
                     cornerRadius = dp(context, 32).toFloat()
@@ -935,6 +952,7 @@ class OverlayController(
                 text = strings.gatewayExitImmediate
                 setTextColor(Color.parseColor("#747E77"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
                 setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
                 setOnClickListener { onCancel() }
@@ -948,8 +966,8 @@ class OverlayController(
             val qText = TextView(context).apply {
                 text = "14 + 19 = ?"
                 setTextColor(Color.parseColor("#274D3E"))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
-                typeface = Typeface.DEFAULT_BOLD
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
+                typeface = getSerifBold(context)
                 gravity = Gravity.CENTER
                 setPadding(0, dp(context, 6), 0, dp(context, 16))
             }
@@ -963,7 +981,7 @@ class OverlayController(
                     isAllCaps = false
                     setTextColor(Color.parseColor("#274D3E"))
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                    typeface = Typeface.DEFAULT_BOLD
+                    typeface = getSansBold(context)
                     background = GradientDrawable().apply {
                         setColor(Color.parseColor("#E5ECE7"))
                         cornerRadius = dp(context, 32).toFloat()
@@ -992,6 +1010,7 @@ class OverlayController(
                 text = strings.gatewayExitImmediate
                 setTextColor(Color.parseColor("#747E77"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
                 setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
                 setOnClickListener { onCancel() }
@@ -1006,8 +1025,8 @@ class OverlayController(
             val quoteView = TextView(context).apply {
                 text = "\"$targetSentence\""
                 setTextColor(Color.parseColor("#274D3E"))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                setTypeface(null, Typeface.ITALIC)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                typeface = try { ResourcesCompat.getFont(context, R.font.cormorant_garamond_italic) ?: Typeface.SERIF } catch (_: Exception) { Typeface.SERIF }
                 gravity = Gravity.CENTER
                 setPadding(dp(context, 8), dp(context, 4), dp(context, 8), dp(context, 12))
             }
@@ -1018,6 +1037,7 @@ class OverlayController(
                 setHintTextColor(Color.parseColor("#8E9A92"))
                 setTextColor(Color.parseColor("#1C2520"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                typeface = getSansRegular(context)
                 background = GradientDrawable().apply {
                     setColor(Color.parseColor("#F7F5F0"))
                     cornerRadius = dp(context, 16).toFloat()
@@ -1035,7 +1055,7 @@ class OverlayController(
                 isAllCaps = false
                 isEnabled = false
                 setTextColor(Color.parseColor("#8E9A92"))
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
                 background = GradientDrawable().apply {
                     setColor(Color.parseColor("#E5ECE7"))
                     cornerRadius = dp(context, 32).toFloat()
@@ -1068,6 +1088,7 @@ class OverlayController(
                 text = strings.gatewayExitImmediate
                 setTextColor(Color.parseColor("#747E77"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
                 setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
                 setOnClickListener { onCancel() }
@@ -1112,7 +1133,7 @@ class OverlayController(
                 isAllCaps = false
                 setTextColor(Color.WHITE)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
                 background = GradientDrawable().apply {
                     setColor(Color.parseColor("#274D3E"))
                     cornerRadius = dp(context, 32).toFloat()
@@ -1133,6 +1154,7 @@ class OverlayController(
                 text = strings.gatewayExitImmediate
                 setTextColor(Color.parseColor("#747E77"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
                 setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
                 setOnClickListener {
@@ -1223,7 +1245,7 @@ class OverlayController(
                 text = title
                 setTextColor(Color.WHITE)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
             }
             textColumn.addView(titleView)
 
@@ -1232,6 +1254,7 @@ class OverlayController(
                     text = " · $subtitle"
                     setTextColor(Color.parseColor("#919C94"))
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                    typeface = getSansRegular(context)
                 }
                 textColumn.addView(subtitleView)
             }
@@ -1260,7 +1283,7 @@ class OverlayController(
                 text = titleText
                 setTextColor(Color.WHITE)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = Typeface.DEFAULT_BOLD
+                typeface = getSansBold(context)
                 gravity = Gravity.CENTER
             })
 
@@ -1268,6 +1291,7 @@ class OverlayController(
                 text = subText
                 setTextColor(Color.parseColor("#919C94"))
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                typeface = getSansRegular(context)
                 gravity = Gravity.CENTER
                 setPadding(0, dp(context, 2), 0, 0)
             })

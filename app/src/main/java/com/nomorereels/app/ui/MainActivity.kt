@@ -1058,18 +1058,18 @@ fun ScreenKorumalar(
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(3.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
                             "Remember the value of time."
                         else
                             "Zamanın kıymetini yeniden hatırla.",
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style = MaterialTheme.typography.headlineMedium.copy(
                             fontFamily = SerifFontFamily,
                             fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 23.sp,
-                            lineHeight = 29.sp
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 26.sp,
+                            lineHeight = 32.sp
                         ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -1216,9 +1216,9 @@ fun ScreenKorumalar(
                                 text = "$savedMinutes",
                                 style = MaterialTheme.typography.displayLarge.copy(
                                     fontFamily = SerifFontFamily,
-                                    fontSize = 42.sp,
+                                    fontSize = 46.sp,
                                     fontWeight = FontWeight.Bold,
-                                    lineHeight = 46.sp
+                                    lineHeight = 48.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onBackground
                             )
@@ -1268,9 +1268,9 @@ fun ScreenKorumalar(
                                 text = "$blockCount",
                                 style = MaterialTheme.typography.displayLarge.copy(
                                     fontFamily = SerifFontFamily,
-                                    fontSize = 42.sp,
+                                    fontSize = 46.sp,
                                     fontWeight = FontWeight.Bold,
-                                    lineHeight = 46.sp
+                                    lineHeight = 48.sp
                                 ),
                                 color = MaterialTheme.colorScheme.onBackground
                             )
@@ -1355,8 +1355,9 @@ fun ScreenKorumalar(
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontFamily = SerifFontFamily,
                                 fontStyle = FontStyle.Italic,
-                                fontSize = 14.5.sp,
-                                lineHeight = 22.sp
+                                fontSize = 17.5.sp,
+                                lineHeight = 26.sp,
+                                fontWeight = FontWeight.Normal
                             ),
                             color = MaterialTheme.colorScheme.onBackground
                         )
