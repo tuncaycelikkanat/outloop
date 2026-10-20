@@ -17,6 +17,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -1037,13 +1038,44 @@ fun ScreenKorumalar(
         verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
     ) {
         item {
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = strings.appName,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
             Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = strings.appName,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.3).sp
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
+                            "Good afternoon. Take a gentle breath."
+                        else
+                            "İyi günler. Derin bir nefes al.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Switch(
+                    checked = isServiceActive,
+                    onCheckedChange = { onOpenAccessibilitySettings() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = MaterialTheme.colorScheme.primary,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.outline
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
         // 1. Erişilebilirlik Servisi Kapalı Uyarısı (Eğer kapalıysa en tepede parlar)
@@ -1147,66 +1179,157 @@ fun ScreenKorumalar(
             }
         }
 
-        // 3. Hero Card
+        // 3. Bölünmüş İlerleme Kartı (Screen 01 Daily Progress)
         item {
             NmrHeroCard {
-                // Üst satır
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = if (isServiceActive) strings.protectionActive else strings.protectionInactive,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "${strings.generalModePrefix} ${strings.modeTitle(generalMode)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Switch(
-                        checked = isServiceActive,
-                        onCheckedChange = { onOpenAccessibilitySettings() },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            uncheckedThumbColor = Color.White,
-                            uncheckedTrackColor = MaterialTheme.colorScheme.outline
-                        )
+                    Text(
+                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Daily progress" else "Günlük ilerleme",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${strings.generalModePrefix} ${strings.modeTitle(generalMode)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-                NmrHairlineDivider()
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // Sayaç satırı
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "$blockCount",
-                        style = MaterialTheme.typography.displayLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Column {
+                    // Sol Sütun: Engellenen Reel
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text(
-                            text = strings.reelsBlockedToday,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Text(
-                            text = savedTimeDisplay,
-                            style = MaterialTheme.typography.bodyMedium,
+                            text = "$blockCount",
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontSize = 38.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
                             color = MaterialTheme.colorScheme.primary
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = strings.reelsBlockedToday,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    // Dikey Ayırıcı
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .height(50.dp)
+                            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
+                    )
+
+                    // Sağ Sütun: Kurtarılan Süre
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            Text(
+                                text = "$savedMinutes",
+                                style = MaterialTheme.typography.displayLarge.copy(
+                                    fontSize = 38.sp,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "min" else "dk",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 6.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "saved" else "kurtarıldı",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+
+        // 4. Mindful Pause Card (Farkındalık Molası Kartı - Koyu Zümrüt Yeşili)
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                        ambientColor = Color(0x14000000),
+                        spotColor = Color(0x0C000000)
+                    )
+                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius))
+                    .clickable(onClick = onStartSnoozeClick),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = MaterialTheme.colorScheme.primary,
+                tonalElevation = 0.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Take a Mindful Pause" else "Farkındalık Molası Ver",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Breathe · Reflect · 5 min" else "Nefes al · Fark et · 5 dk",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = NmrTheme.colors.selectedSurface
+                        )
+                    }
+
+                    // Concentric breathing rings icon
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.22f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = NmrIcons.Bilincli,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -1353,71 +1476,79 @@ fun ScreenBolgeler(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = NmrTheme.dimens.screenHorizontalMargin),
-        verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = strings.regionsTitle,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.3).sp
+                ),
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = strings.regionsDesc,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(6.dp))
         }
 
-        // 5 Bölge Satırı (NmrHairlineDivider ile ayrılmış düz yüzeyler)
         item {
-            Column {
-                RegionSettingRow(
-                    title = strings.dmTitle,
-                    subtitle = strings.dmSub,
-                    icon = NmrIcons.Dm,
-                    modeLabel = strings.modeTitle(dmMode),
-                    onClick = { onSelectRegion("DM") }
-                )
-                NmrHairlineDivider()
+            RegionSettingRow(
+                title = strings.dmTitle,
+                subtitle = strings.dmSub,
+                icon = NmrIcons.Dm,
+                modeLabel = strings.modeTitle(dmMode),
+                onClick = { onSelectRegion("DM") }
+            )
+        }
 
-                RegionSettingRow(
-                    title = strings.exploreTitle,
-                    subtitle = strings.exploreSub,
-                    icon = NmrIcons.Kesfet,
-                    modeLabel = strings.modeTitle(exploreMode),
-                    onClick = { onSelectRegion("EXPLORE") }
-                )
-                NmrHairlineDivider()
+        item {
+            RegionSettingRow(
+                title = strings.exploreTitle,
+                subtitle = strings.exploreSub,
+                icon = NmrIcons.Kesfet,
+                modeLabel = strings.modeTitle(exploreMode),
+                onClick = { onSelectRegion("EXPLORE") }
+            )
+        }
 
-                RegionSettingRow(
-                    title = strings.feedTitle,
-                    subtitle = strings.feedSub,
-                    icon = NmrIcons.AnaSayfa,
-                    modeLabel = strings.modeTitle(feedMode),
-                    onClick = { onSelectRegion("FEED") }
-                )
-                NmrHairlineDivider()
+        item {
+            RegionSettingRow(
+                title = strings.feedTitle,
+                subtitle = strings.feedSub,
+                icon = NmrIcons.AnaSayfa,
+                modeLabel = strings.modeTitle(feedMode),
+                onClick = { onSelectRegion("FEED") }
+            )
+        }
 
-                RegionSettingRow(
-                    title = strings.profileTitle,
-                    subtitle = strings.profileSub,
-                    icon = NmrIcons.Profil,
-                    modeLabel = strings.modeTitle(profileMode),
-                    onClick = { onSelectRegion("PROFILE") }
-                )
-                NmrHairlineDivider()
+        item {
+            RegionSettingRow(
+                title = strings.profileTitle,
+                subtitle = strings.profileSub,
+                icon = NmrIcons.Profil,
+                modeLabel = strings.modeTitle(profileMode),
+                onClick = { onSelectRegion("PROFILE") }
+            )
+        }
 
-                RegionSettingRow(
-                    title = strings.reelsTabTitle,
-                    subtitle = strings.reelsTabSub,
-                    icon = NmrIcons.ReelsSekmesi,
-                    modeLabel = strings.modeTitle(reelsTabMode),
-                    onClick = { onSelectRegion("REELS_TAB") }
-                )
-            }
+        item {
+            RegionSettingRow(
+                title = strings.reelsTabTitle,
+                subtitle = strings.reelsTabSub,
+                icon = NmrIcons.ReelsSekmesi,
+                modeLabel = strings.modeTitle(reelsTabMode),
+                onClick = { onSelectRegion("REELS_TAB") }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -1430,48 +1561,68 @@ fun RegionSettingRow(
     modeLabel: String,
     onClick: () -> Unit
 ) {
-    Row(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 64.dp)
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                ambientColor = Color(0x0C000000),
+                spotColor = Color(0x08000000)
+            )
+            .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+        tonalElevation = 0.dp
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.size(NmrTheme.dimens.iconSize)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        // Sağ etiket
-        Surface(
-            shape = RoundedCornerShape(NmrTheme.dimens.chipRadius),
-            color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-            tonalElevation = 0.dp
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = modeLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(NmrTheme.colors.selectedSurface),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Surface(
+                shape = CircleShape,
+                color = NmrTheme.colors.selectedSurface,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+                tonalElevation = 0.dp
+            ) {
+                Text(
+                    text = modeLabel,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
         }
     }
 }
@@ -3119,94 +3270,89 @@ fun MindfulGatewayDialog(
 ) {
     val strings = LocalAppStrings.current
 
-    // Adım makinesi:
-    // 0 = Başlangıç (Nefes / Matematik / Cümle / Gece)
-    // 1 = Niyet Seçimi
-    // 2 = Süre Penceresi Seçimi (5 vs 10 dk)
-    // 3 = Mikro-Plan Seçimi
     var step by remember { mutableIntStateOf(if (isNightMode) 99 else 0) }
     var selectedWindowMinutes by remember { mutableIntStateOf(5) }
     var autopilotNoticed by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF161F30),
-            border = BorderStroke(1.dp, Color(0xFF2D3B52)),
-            tonalElevation = 0.dp,
+            shape = RoundedCornerShape(28.dp),
+            color = Color.White,
+            border = BorderStroke(0.5.dp, Color(0xFFE8E5DD)),
+            shadowElevation = 8.dp,
             modifier = Modifier.fillMaxWidth().padding(16.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .padding(22.dp)
+                    .padding(24.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Rozet
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFF0C4A6E)
+                    shape = CircleShape,
+                    color = Color(0xFFE2ECE5)
                 ) {
                     Text(
                         text = if (isNightMode) "GECE KORUMA · NIGHT REST" else strings.mindfulGatewayHeader,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF38BDF8),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = Color(0xFF25473A),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 if (isNightMode) {
                     Text(
                         text = strings.gatewayNightTitle,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = Color(0xFF1A221E),
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = strings.gatewayNightSub,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFCBD5E1),
+                        color = Color(0xFF607067),
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = onDismiss,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7)),
-                        shape = RoundedCornerShape(14.dp)
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25473A)),
+                        shape = CircleShape
                     ) {
                         Text(strings.gatewayNightSleep, color = Color.White)
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     OutlinedButton(
                         onClick = { onApproved(5, strings.gatewayMicroPlanSleep) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, Color(0xFF334155))
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = CircleShape,
+                        border = BorderStroke(1.dp, Color(0xFF25473A))
                     ) {
-                        Text(strings.gatewayNight5Min, color = Color(0xFFE2E8F0))
+                        Text(strings.gatewayNight5Min, color = Color(0xFF25473A))
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     TextButton(onClick = onDismiss) {
-                        Text(strings.gatewayExitImmediate, color = Color(0xFF94A3B8))
+                        Text(strings.gatewayExitImmediate, color = Color(0xFF607067))
                     }
                 } else if (step == 0) {
                     when (barrierType) {
                         MindfulBarrierType.BREATH_AND_INTENT -> {
                             Text(
                                 text = strings.gatewayPauseTitle,
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.White,
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = Color(0xFF1A221E),
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = strings.gatewayBreathPrompt,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFCBD5E1),
+                                color = Color(0xFF607067),
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(24.dp))
@@ -3214,7 +3360,7 @@ fun MindfulGatewayDialog(
                             // Dalgalanan nefes halkası
                             val transition = rememberInfiniteTransition(label = "breath")
                             val scale by transition.animateFloat(
-                                initialValue = 0.75f,
+                                initialValue = 0.8f,
                                 targetValue = 1.15f,
                                 animationSpec = infiniteRepeatable(
                                     animation = tween(2200, easing = EaseInOut),
@@ -3225,19 +3371,26 @@ fun MindfulGatewayDialog(
 
                             Box(
                                 modifier = Modifier
-                                    .size(76.dp)
+                                    .size(80.dp)
                                     .scale(scale)
-                                    .background(Color(0xFF0284C7), CircleShape)
-                                    .border(3.dp, Color(0xFF38BDF8), CircleShape)
-                            )
+                                    .background(Color(0xFFE2ECE5), CircleShape)
+                                    .border(3.dp, Color(0xFF25473A), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .background(Color(0xFF25473A), CircleShape)
+                                )
+                            }
 
                             Spacer(modifier = Modifier.height(28.dp))
 
                             Button(
                                 onClick = { step = 1 },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7)),
-                                shape = RoundedCornerShape(14.dp)
+                                modifier = Modifier.fillMaxWidth().height(52.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25473A)),
+                                shape = CircleShape
                             ) {
                                 Text(
                                     if (strings is TurkishStrings) "Niyetimi Fark Et ➔" else "Notice My Intention ➔",
@@ -3246,29 +3399,29 @@ fun MindfulGatewayDialog(
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             TextButton(onClick = onDismiss) {
-                                Text(strings.gatewayExitImmediate, color = Color(0xFF94A3B8))
+                                Text(strings.gatewayExitImmediate, color = Color(0xFF607067))
                             }
                         }
 
                         MindfulBarrierType.COGNITIVE_MATH -> {
                             Text(
                                 text = strings.barrierTypeMath,
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.White,
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = Color(0xFF1A221E),
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = strings.gatewayMathPrompt,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFCBD5E1),
+                                color = Color(0xFF607067),
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "14 + 19 = ?",
                                 style = MaterialTheme.typography.headlineMedium,
-                                color = Color(0xFF38BDF8),
+                                color = Color(0xFF25473A),
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(16.dp))
@@ -3279,32 +3432,32 @@ fun MindfulGatewayDialog(
                                 listOf(23 to false, 33 to true, 35 to false).forEach { (num, isCorrect) ->
                                     Button(
                                         onClick = { if (isCorrect) step = 2 },
-                                        modifier = Modifier.weight(1f),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E293B)),
-                                        shape = RoundedCornerShape(12.dp)
+                                        modifier = Modifier.weight(1f).height(48.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE2ECE5)),
+                                        shape = CircleShape
                                     ) {
-                                        Text("$num", color = Color.White)
+                                        Text("$num", color = Color(0xFF25473A), fontWeight = FontWeight.SemiBold)
                                     }
                                 }
                             }
                             Spacer(modifier = Modifier.height(12.dp))
                             TextButton(onClick = onDismiss) {
-                                Text(strings.gatewayExitImmediate, color = Color(0xFF94A3B8))
+                                Text(strings.gatewayExitImmediate, color = Color(0xFF607067))
                             }
                         }
 
                         MindfulBarrierType.MINDFUL_TYPING -> {
                             Text(
                                 text = strings.barrierTypeTyping,
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.White,
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = Color(0xFF1A221E),
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = strings.gatewayTypingPrompt,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFCBD5E1),
+                                color = Color(0xFF607067),
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -3312,7 +3465,7 @@ fun MindfulGatewayDialog(
                             Text(
                                 text = "\"$target\"",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF38BDF8),
+                                color = Color(0xFF25473A),
                                 fontStyle = FontStyle.Italic,
                                 textAlign = TextAlign.Center
                             )
@@ -3321,14 +3474,14 @@ fun MindfulGatewayDialog(
                             OutlinedTextField(
                                 value = typedText,
                                 onValueChange = { typedText = it },
-                                placeholder = { Text(if (strings is TurkishStrings) "Cümleyi buraya yaz..." else "Type sentence here...", color = Color(0xFF64748B)) },
+                                placeholder = { Text(if (strings is TurkishStrings) "Cümleyi buraya yaz..." else "Type sentence here...", color = Color(0xFF9AA19C)) },
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(16.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White,
-                                    focusedBorderColor = Color(0xFF0284C7),
-                                    unfocusedBorderColor = Color(0xFF334155)
+                                    focusedTextColor = Color(0xFF1A221E),
+                                    unfocusedTextColor = Color(0xFF1A221E),
+                                    focusedBorderColor = Color(0xFF25473A),
+                                    unfocusedBorderColor = Color(0xFFE8E5DD)
                                 )
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -3336,118 +3489,118 @@ fun MindfulGatewayDialog(
                             Button(
                                 onClick = { step = 2 },
                                 enabled = isMatch,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().height(52.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF0284C7),
-                                    disabledContainerColor = Color(0xFF1E293B)
+                                    containerColor = Color(0xFF25473A),
+                                    disabledContainerColor = Color(0xFFE2ECE5)
                                 ),
-                                shape = RoundedCornerShape(14.dp)
+                                shape = CircleShape
                             ) {
                                 Text(
                                     if (strings is TurkishStrings) "Devam Et" else "Continue",
-                                    color = if (isMatch) Color.White else Color(0xFF94A3B8)
+                                    color = if (isMatch) Color.White else Color(0xFF9AA19C)
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             TextButton(onClick = onDismiss) {
-                                Text(strings.gatewayExitImmediate, color = Color(0xFF94A3B8))
+                                Text(strings.gatewayExitImmediate, color = Color(0xFF607067))
                             }
                         }
                     }
                 } else if (step == 1) {
-                    // Niyet Seçimi
+                    // Niyet Seçimi (Matching Screen 03)
                     if (autopilotNoticed) {
                         Text(
                             text = if (strings is TurkishStrings) "Farkındalık" else "Awareness",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.White,
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = Color(0xFF1A221E),
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = strings.gatewayAutopilotAck,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF38BDF8),
+                            color = Color(0xFF25473A),
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Button(
                             onClick = onDismiss,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7)),
-                            shape = RoundedCornerShape(14.dp)
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25473A)),
+                            shape = CircleShape
                         ) {
                             Text(strings.gatewayPutPhoneDown, color = Color.White)
                         }
                     } else {
                         Text(
                             text = strings.gatewayIntentQuestion,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.White,
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = Color(0xFF1A221E),
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = if (strings is TurkishStrings) "Yargılamadan sadece fark et." else "Notice your state without judgment.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFFCBD5E1),
+                            color = Color(0xFF607067),
                             textAlign = TextAlign.Center
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
 
-                        OutlinedButton(
+                        Button(
                             onClick = { autopilotNoticed = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color(0xFF334155))
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE2ECE5))
                         ) {
-                            Text("🍃 " + strings.gatewayIntentAutopilot, color = Color.White)
+                            Text("🍃 " + strings.gatewayIntentAutopilot, color = Color(0xFF25473A), fontWeight = FontWeight.SemiBold)
                         }
                         Spacer(modifier = Modifier.height(10.dp))
-                        OutlinedButton(
+                        Button(
                             onClick = { step = 2 },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color(0xFF334155))
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE2ECE5))
                         ) {
-                            Text("☕ " + strings.gatewayIntentBreak, color = Color.White)
+                            Text("☕ " + strings.gatewayIntentBreak, color = Color(0xFF25473A), fontWeight = FontWeight.SemiBold)
                         }
                         Spacer(modifier = Modifier.height(10.dp))
-                        OutlinedButton(
+                        Button(
                             onClick = { step = 2 },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color(0xFF334155))
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE2ECE5))
                         ) {
-                            Text("🔍 " + strings.gatewayIntentSpecific, color = Color.White)
+                            Text("🔍 " + strings.gatewayIntentSpecific, color = Color(0xFF25473A), fontWeight = FontWeight.SemiBold)
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
                         TextButton(onClick = onDismiss) {
-                            Text(strings.gatewayExitImmediate, color = Color(0xFF94A3B8))
+                            Text(strings.gatewayExitImmediate, color = Color(0xFF607067))
                         }
                     }
                 } else if (step == 2) {
-                    // Bilinçli Pencere Seçimi
+                    // Bilinçli Pencere Seçimi (Matching Screen 04)
                     Text(
-                        text = if (strings is TurkishStrings) "Seçim Senin" else "Choose Your Intention",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
+                        text = if (strings is TurkishStrings) "Seçim Senin" else "Set a Mindful Window",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = Color(0xFF1A221E),
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = if (strings is TurkishStrings) "Şu an nasıl devam etmek istersin?" else "How would you like to continue right now?",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFCBD5E1),
+                        color = Color(0xFF607067),
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(18.dp))
 
                     Button(
                         onClick = onDismiss,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7)),
-                        shape = RoundedCornerShape(14.dp)
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25473A)),
+                        shape = CircleShape
                     ) {
                         Text("📱 " + strings.gatewayPutPhoneDown, color = Color.White)
                     }
@@ -3455,48 +3608,48 @@ fun MindfulGatewayDialog(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        OutlinedButton(
+                        Button(
                             onClick = {
                                 selectedWindowMinutes = 5
                                 step = 3
                             },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color(0xFF334155))
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE2ECE5))
                         ) {
-                            Text("⏱️ " + strings.gatewayMindful5Min, color = Color.White)
+                            Text("⏱️ " + strings.gatewayMindful5Min, color = Color(0xFF25473A), fontWeight = FontWeight.SemiBold)
                         }
-                        OutlinedButton(
+                        Button(
                             onClick = {
                                 selectedWindowMinutes = 10
                                 step = 3
                             },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color(0xFF334155))
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE2ECE5))
                         ) {
-                            Text("⏱️ " + strings.gatewayMindful10Min, color = Color.White)
+                            Text("⏱️ " + strings.gatewayMindful10Min, color = Color(0xFF25473A), fontWeight = FontWeight.SemiBold)
                         }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
                     TextButton(onClick = onDismiss) {
-                        Text(strings.gatewayExitImmediate, color = Color(0xFF94A3B8))
+                        Text(strings.gatewayExitImmediate, color = Color(0xFF607067))
                     }
                 } else if (step == 3) {
-                    // Mikro-Plan Seçimi
+                    // Mikro-Plan Seçimi (Matching Screen 04 bottom)
                     Text(
                         text = "$selectedWindowMinutes " + (if (strings is TurkishStrings) "Dk Bilinçli Pencere" else "Min Mindful Window"),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = Color(0xFF1A221E),
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = strings.gatewayMicroPlanQuestion,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFCBD5E1),
+                        color = Color(0xFF607067),
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -3507,20 +3660,20 @@ fun MindfulGatewayDialog(
                         "🛌 " + strings.gatewayMicroPlanSleep to strings.gatewayMicroPlanSleep,
                         "🚶 " + strings.gatewayMicroPlanWalk to strings.gatewayMicroPlanWalk
                     ).forEach { (display, plan) ->
-                        OutlinedButton(
+                        Button(
                             onClick = {
                                 onApproved(selectedWindowMinutes, plan)
                             },
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color(0xFF334155))
+                            modifier = Modifier.fillMaxWidth().height(48.dp).padding(vertical = 2.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE2ECE5))
                         ) {
-                            Text(display, color = Color(0xFFE2E8F0))
+                            Text(display, color = Color(0xFF25473A), fontWeight = FontWeight.SemiBold)
                         }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
                     TextButton(onClick = onDismiss) {
-                        Text(strings.gatewayExitImmediate, color = Color(0xFF94A3B8))
+                        Text(strings.gatewayExitImmediate, color = Color(0xFF607067))
                     }
                 }
             }

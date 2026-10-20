@@ -2,12 +2,21 @@ package com.nomorereels.app.ui.theme
 
 import android.app.Activity
 import android.content.ContextWrapper
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,28 +41,28 @@ import androidx.core.view.WindowCompat
 // 1. RENK PALETİ (COLOR TOKENS) - Light & AMOLED Dark + Status Colors
 // ============================================================================
 
-// Light Theme Tokens
-val LightBackground = Color(0xFFFAFAF8)
-val LightSurface = Color(0xFFF1F1EE)
-val LightOutline = Color(0xFFDDDDD8)
-val LightTextPrimary = Color(0xFF171917)
-val LightTextSecondary = Color(0xFF5F645F)
-val LightAccent = Color(0xFF1E6B5C)
-val LightAccentContainer = Color(0xFFE6F0EE) // Seçili kart/chip yüzeyi için hafif yeşil tonu
+// Light Theme Tokens (Warm Linen & Forest Sage)
+val LightBackground = Color(0xFFFAF8F5)
+val LightSurface = Color(0xFFFFFFFF)
+val LightOutline = Color(0xFFE8E5DD)
+val LightTextPrimary = Color(0xFF1A221E)
+val LightTextSecondary = Color(0xFF607067)
+val LightAccent = Color(0xFF25473A)
+val LightAccentContainer = Color(0xFFE2ECE5) // Pastel Matcha / Adaçayı seçili yüzey tonu
 
-// AMOLED Dark Theme Tokens
-val AmoledBackground = Color(0xFF000000)
-val AmoledSurface = Color(0xFF101311)
-val AmoledOutline = Color(0xFF262B28)
-val AmoledTextPrimary = Color(0xFFE8ECE9)
-val AmoledTextSecondary = Color(0xFF9AA19C)
-val AmoledAccent = Color(0xFF5CC4AA)
-val AmoledAccentContainer = Color(0xFF11241F) // AMOLED seçili yüzey tonu
+// AMOLED Dark Theme Tokens (Velvet Charcoal & Mint)
+val AmoledBackground = Color(0xFF131615)
+val AmoledSurface = Color(0xFF1C221F)
+val AmoledOutline = Color(0xFF2B3631)
+val AmoledTextPrimary = Color(0xFFE8EDE9)
+val AmoledTextSecondary = Color(0xFF96A39B)
+val AmoledAccent = Color(0xFF6CC5A2)
+val AmoledAccentContainer = Color(0xFF1A3328) // Kadife gece modu seçili yüzey tonu
 
-// Status Colors (Yalnızca ilerleme çubukları ve durum çipleri için)
-val StatusGreen = Color(0xFF2E9E5B)
-val StatusOrange = Color(0xFFE08A1E)
-val StatusRed = Color(0xFFCF4040)
+// Status Colors (Şefkatli & Dinlendirici)
+val StatusGreen = Color(0xFF388E67)
+val StatusOrange = Color(0xFFD98A36) // Sıcak Kehribar
+val StatusRed = Color(0xFFC94A4A) // Yumuşak Pişmiş Toprak / Terracotta
 
 // Özel Semantik Renkler (MaterialTheme dışındaki özel token'lar)
 @Immutable
@@ -194,23 +203,23 @@ val NmrLogTextStyle = TextStyle(
 
 val NmrShapes = Shapes(
     extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(28.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(24.dp),
+    large = RoundedCornerShape(32.dp),
     extraLarge = CircleShape
 )
 
 @Immutable
 data class NmrDimens(
-    val screenHorizontalMargin: Dp = 16.dp,
+    val screenHorizontalMargin: Dp = 20.dp,
     val gridUnit: Dp = 8.dp,
     val minTouchTarget: Dp = 48.dp,
-    val cardRadius: Dp = 16.dp,
-    val chipRadius: Dp = 8.dp,
+    val cardRadius: Dp = 24.dp,
+    val chipRadius: Dp = 32.dp,
     val dialogRadius: Dp = 28.dp,
     val iconSize: Dp = 24.dp,
     val heroIconSize: Dp = 64.dp,
-    val dividerThickness: Dp = 1.dp,
+    val dividerThickness: Dp = 0.5.dp,
     val selectedBorderWidth: Dp = 1.5.dp,
     val statusDotSize: Dp = 6.dp
 )
@@ -334,14 +343,22 @@ object NmrTheme {
 @Composable
 fun NmrHeroCard(
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(16.dp),
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    contentPadding: PaddingValues = PaddingValues(20.dp),
     content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                ambientColor = Color(0x0F000000),
+                spotColor = Color(0x0A000000)
+            ),
         shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(NmrTheme.dimens.dividerThickness, MaterialTheme.colorScheme.outline),
+        color = containerColor,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
@@ -519,29 +536,45 @@ fun NmrChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val containerColor = if (selected) NmrTheme.colors.selectedSurface else MaterialTheme.colorScheme.surface
-    val borderColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-    val textColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+    val containerColor by animateColorAsState(
+        targetValue = if (selected) NmrTheme.colors.selectedSurface else MaterialTheme.colorScheme.surface,
+        animationSpec = tween(180),
+        label = "chipBg"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+        animationSpec = tween(180),
+        label = "chipBorder"
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+        animationSpec = tween(180),
+        label = "chipText"
+    )
 
     Surface(
         modifier = modifier
-            .heightIn(min = 36.dp)
+            .heightIn(min = 38.dp)
             .clip(RoundedCornerShape(NmrTheme.dimens.chipRadius))
-            .clickable(onClick = onClick),
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            ),
         shape = RoundedCornerShape(NmrTheme.dimens.chipRadius),
         color = containerColor,
-        border = BorderStroke(1.dp, borderColor),
+        border = BorderStroke(0.5.dp, borderColor),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
         Box(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
                 ),
                 color = textColor
             )
@@ -592,33 +625,47 @@ fun <T> NmrSegmentedControl(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(NmrTheme.dimens.chipRadius),
+        shape = CircleShape,
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
         tonalElevation = 0.dp
     ) {
         Row(
-            modifier = Modifier.padding(2.dp),
+            modifier = Modifier.padding(3.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             options.forEach { option ->
                 val isSelected = option == selectedOption
+                val segBgColor by animateColorAsState(
+                    targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    animationSpec = tween(180),
+                    label = "segBg"
+                )
+                val segTextColor by animateColorAsState(
+                    targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground,
+                    animationSpec = tween(180),
+                    label = "segText"
+                )
+
                 Surface(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(CircleShape)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) { onOptionSelected(option) },
-                    shape = RoundedCornerShape(6.dp),
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    shape = CircleShape,
+                    color = segBgColor,
                     tonalElevation = 0.dp
                 ) {
                     Text(
                         text = labelProvider(option),
-                        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.sp),
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            letterSpacing = 0.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                        ),
+                        color = segTextColor,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
             }
@@ -673,44 +720,94 @@ fun NmrBottomNavigationBar(
     modifier: Modifier = Modifier
 ) {
     val strings = com.nomorereels.app.ui.i18n.LocalAppStrings.current
-    Column(modifier = modifier.fillMaxWidth()) {
-        NmrHairlineDivider()
-        NavigationBar(
-            containerColor = MaterialTheme.colorScheme.background,
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 6.dp,
+                    shape = CircleShape,
+                    spotColor = Color(0x14000000),
+                    ambientColor = Color(0x0C000000)
+                ),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
             tonalElevation = 0.dp
         ) {
-            NmrBottomTab.entries.forEach { tab ->
-                val selected = tab == currentTab
-                val labelText = when (tab) {
-                    NmrBottomTab.KORUMALAR -> strings.tabProtection
-                    NmrBottomTab.BOLGELER -> strings.tabRegions
-                    NmrBottomTab.KOTA_SURE -> strings.tabQuota
-                    NmrBottomTab.AYARLAR -> strings.tabSettings
-                }
-                NavigationBarItem(
-                    selected = selected,
-                    onClick = { onTabSelected(tab) },
-                    icon = {
-                        Icon(
-                            imageVector = tab.icon,
-                            contentDescription = labelText,
-                            modifier = Modifier.size(NmrTheme.dimens.iconSize)
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = labelText,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = NmrTheme.colors.selectedSurface,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 6.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                NmrBottomTab.entries.forEach { tab ->
+                    val selected = tab == currentTab
+                    val labelText = when (tab) {
+                        NmrBottomTab.KORUMALAR -> strings.tabProtection
+                        NmrBottomTab.BOLGELER -> strings.tabRegions
+                        NmrBottomTab.KOTA_SURE -> strings.tabQuota
+                        NmrBottomTab.AYARLAR -> strings.tabSettings
+                    }
+
+                    val containerColor by animateColorAsState(
+                        targetValue = if (selected) NmrTheme.colors.selectedSurface else Color.Transparent,
+                        animationSpec = tween(220),
+                        label = "tabContainerColor"
                     )
-                )
+                    val contentColor by animateColorAsState(
+                        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        animationSpec = tween(220),
+                        label = "tabContentColor"
+                    )
+
+                    Surface(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { onTabSelected(tab) },
+                        shape = CircleShape,
+                        color = containerColor
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .animateContentSize(animationSpec = tween(220))
+                                .padding(horizontal = if (selected) 14.dp else 10.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = labelText,
+                                tint = contentColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            AnimatedVisibility(
+                                visible = selected,
+                                enter = fadeIn(animationSpec = tween(200)) + expandHorizontally(animationSpec = tween(200)),
+                                exit = fadeOut(animationSpec = tween(150)) + shrinkHorizontally(animationSpec = tween(150))
+                            ) {
+                                Text(
+                                    text = labelText,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 0.sp
+                                    ),
+                                    color = contentColor,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
