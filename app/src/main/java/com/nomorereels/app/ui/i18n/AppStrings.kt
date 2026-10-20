@@ -15,11 +15,14 @@ object AppStrings {
 }
 
 interface Strings {
-    // Navigation Tabs
+    // Navigation Tabs (5 Hedefli Mimari)
+    val tabToday: String
     val tabProtection: String
+    val tabInsights: String
+    val tabLog: String
+    val tabSettings: String
     val tabRegions: String
     val tabQuota: String
-    val tabSettings: String
 
     fun modeTitle(mode: DmReelMode): String
     fun modeSubtitle(mode: DmReelMode): String
@@ -227,10 +230,13 @@ interface Strings {
 }
 
 object TurkishStrings : Strings {
-    override val tabProtection = "Korumalar"
+    override val tabToday = "Bugün"
+    override val tabProtection = "Koruma"
+    override val tabInsights = "İçgörü"
+    override val tabLog = "Günlük"
+    override val tabSettings = "Ayarlar"
     override val tabRegions = "Bölgeler"
     override val tabQuota = "Kota & Süre"
-    override val tabSettings = "Ayarlar"
 
     override fun modeTitle(mode: DmReelMode) = when (mode) {
         DmReelMode.FOLLOW_GLOBAL -> modeFollowGlobal
@@ -450,10 +456,13 @@ object TurkishStrings : Strings {
 }
 
 object EnglishStrings : Strings {
+    override val tabToday = "Today"
     override val tabProtection = "Protection"
+    override val tabInsights = "Insights"
+    override val tabLog = "Log"
+    override val tabSettings = "Settings"
     override val tabRegions = "Regions"
     override val tabQuota = "Quota & Time"
-    override val tabSettings = "Settings"
 
     override fun modeTitle(mode: DmReelMode) = when (mode) {
         DmReelMode.FOLLOW_GLOBAL -> modeFollowGlobal

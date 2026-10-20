@@ -41,88 +41,108 @@ import androidx.core.view.WindowCompat
 import com.nomorereels.app.R
 
 // ============================================================================
-// 1. RENK PALETİ (COLOR TOKENS) - Light & AMOLED Dark + Status Colors
+// 1. RENK PALETİ (COLOR TOKENS) - Quiet Sage (Açık) & Midnight Forest (AMOLED)
 // ============================================================================
 
-// Light Theme Tokens (Wabi-Sabi & Kinfolk Linen)
-val LightBackground = Color(0xFFF7F5F0) // Sıcak yulaf & ham keten kağıdı
-val LightSurface = Color(0xFFFFFFFF) // Saf seramik süt beyazı
-val LightOutline = Color(0xFFECE7DE) // Dingin taş derz çizgisi
-val LightTextPrimary = Color(0xFF1C2520) // Doğal koyu ardıç kömürü
-val LightTextSecondary = Color(0xFF747E77) // Dinlendirici adaçayı grisi
-val LightAccent = Color(0xFF274D3E) // Derin orman sediri & zeytin
-val LightAccentContainer = Color(0xFFE5ECE7) // Matcha sisi & adaçayı köpüğü
+// Açık Tema — Quiet Sage
+val LightCanvas = Color(0xFFF7F7F2) // Ana arka plan
+val LightSurface = Color(0xFFFFFFFF) // Kartlar
+val LightPrimary = Color(0xFF52745D) // Adaçayı yeşili (Ana aksiyon)
+val LightPrimaryPressed = Color(0xFF3F5D49) // Basılı durum
+val LightAccent = Color(0xFFDCE9DF) // Vurgu yüzeyi
+val LightMistBlue = Color(0xFFDCE7F0) // Sis mavisi (Bilgi alanı)
+val LightTextPrimary = Color(0xFF24332A) // Başlık ve ana metin
+val LightTextMuted = Color(0xFF707A71) // İkincil metin
+val LightBorder = Color(0xFFE4E7DE) // Ayırıcılar ve sınırlar
 
-// AMOLED Dark Theme Tokens (Wabi-Sabi Charred Cedar & Sage)
-val AmoledBackground = Color(0xFF101311) // Yanık sedir kömürü
-val AmoledSurface = Color(0xFF181D1A) // Koyu yosun taşı
-val AmoledOutline = Color(0xFF263029) // Derin toprak derzi
-val AmoledTextPrimary = Color(0xFFECEAE5) // Ham keten beyazı
-val AmoledTextSecondary = Color(0xFF919C94) // Taş tozu grisi
-val AmoledAccent = Color(0xFF6EBE9B) // Gece adaçayı filizi
-val AmoledAccentContainer = Color(0xFF162E22)
+// Geriye uyumluluk için alias'lar
+val LightBackground = LightCanvas
+val LightOutline = LightBorder
+val LightTextSecondary = LightTextMuted
+val LightAccentContainer = LightAccent
 
-// Status Colors (Wabi-Sabi Toprak & Bitki Tonları)
-val StatusGreen = Color(0xFF2F6B55) // Doğal orman yeşili
+// AMOLED Koyu Tema — Midnight Forest
+val AmoledCanvas = Color(0xFF000000) // Gerçek siyah arka plan
+val AmoledSurface = Color(0xFF101310) // Kart yüzeyi
+val AmoledElevated = Color(0xFF1A201B) // Üst katman
+val AmoledPrimary = Color(0xFFA5C6A9) // Gece adaçayı filizi (Ana aksiyon)
+val AmoledAccent = Color(0xFF273B2D) // Seçili alan
+val AmoledMistBlue = Color(0xFF202E35) // Bilgi yüzeyi
+val AmoledTextPrimary = Color(0xFFF0F3ED) // Birincil metin
+val AmoledTextMuted = Color(0xFFA3ADA3) // İkincil metin
+val AmoledBorder = Color(0xFF2B322C) // Ayırıcılar
+
+// Geriye uyumluluk için alias'lar
+val AmoledBackground = AmoledCanvas
+val AmoledOutline = AmoledBorder
+val AmoledTextSecondary = AmoledTextMuted
+val AmoledAccentContainer = AmoledAccent
+
+// Status Colors (Nötr ve Şefkatli Bildirimler - Kırmızı yalnızca kritik hata için)
+val StatusGreen = Color(0xFF52745D) // Sakin adaçayı
 val StatusOrange = Color(0xFFD4973B) // Sıcak petek kehribarı
-val StatusRed = Color(0xFFA84838) // Mat pişmiş toprak / Terracotta kiremit
+val StatusRed = Color(0xFFA84838) // Mat pişmiş toprak
 
 // Özel Semantik Renkler (MaterialTheme dışındaki özel token'lar)
 @Immutable
 data class NmrExtendedColors(
+    val canvas: Color = LightCanvas,
+    val mistBlue: Color = LightMistBlue,
+    val mistBlueContainer: Color = LightMistBlue.copy(alpha = 0.5f),
+    val elevatedSurface: Color = LightSurface,
     val statusGreen: Color = StatusGreen,
     val statusGreenContainer: Color = StatusGreen.copy(alpha = 0.14f),
     val statusOrange: Color = StatusOrange,
     val statusOrangeContainer: Color = StatusOrange.copy(alpha = 0.14f),
     val statusRed: Color = StatusRed,
     val statusRedContainer: Color = StatusRed.copy(alpha = 0.14f),
-    val selectedSurface: Color = LightAccentContainer,
-    val selectedBorder: Color = LightAccent,
-    val divider: Color = LightOutline,
-    val capsuleBackground: Color = Color(0xFF000000),
+    val selectedSurface: Color = LightAccent,
+    val selectedBorder: Color = LightPrimary,
+    val divider: Color = LightBorder,
+    val capsuleBackground: Color = LightTextPrimary,
     val capsuleText: Color = Color(0xFFFFFFFF)
 )
 
 val LocalNmrColors = staticCompositionLocalOf { NmrExtendedColors() }
 
 private val LightColorScheme = lightColorScheme(
-    primary = LightAccent,
+    primary = LightPrimary,
     onPrimary = Color.White,
-    primaryContainer = LightAccentContainer,
-    onPrimaryContainer = LightAccent,
-    secondary = LightAccent,
+    primaryContainer = LightAccent,
+    onPrimaryContainer = LightPrimary,
+    secondary = LightPrimary,
     onSecondary = Color.White,
-    secondaryContainer = LightAccentContainer,
-    onSecondaryContainer = LightAccent,
-    background = LightBackground,
+    secondaryContainer = LightAccent,
+    onSecondaryContainer = LightPrimary,
+    background = LightCanvas,
     onBackground = LightTextPrimary,
     surface = LightSurface,
     onSurface = LightTextPrimary,
     surfaceVariant = LightSurface,
-    onSurfaceVariant = LightTextSecondary,
-    outline = LightOutline,
-    outlineVariant = LightOutline,
+    onSurfaceVariant = LightTextMuted,
+    outline = LightBorder,
+    outlineVariant = LightBorder,
     error = StatusRed,
     onError = Color.White
 )
 
 private val AmoledDarkColorScheme = darkColorScheme(
-    primary = AmoledAccent,
-    onPrimary = Color(0xFF062019),
-    primaryContainer = AmoledAccentContainer,
-    onPrimaryContainer = AmoledAccent,
-    secondary = AmoledAccent,
-    onSecondary = Color(0xFF062019),
-    secondaryContainer = AmoledAccentContainer,
-    onSecondaryContainer = AmoledAccent,
-    background = AmoledBackground,
+    primary = AmoledPrimary,
+    onPrimary = Color(0xFF101310),
+    primaryContainer = AmoledAccent,
+    onPrimaryContainer = AmoledPrimary,
+    secondary = AmoledPrimary,
+    onSecondary = Color(0xFF101310),
+    secondaryContainer = AmoledAccent,
+    onSecondaryContainer = AmoledPrimary,
+    background = AmoledCanvas,
     onBackground = AmoledTextPrimary,
     surface = AmoledSurface,
     onSurface = AmoledTextPrimary,
-    surfaceVariant = AmoledSurface,
-    onSurfaceVariant = AmoledTextSecondary,
-    outline = AmoledOutline,
-    outlineVariant = AmoledOutline,
+    surfaceVariant = AmoledElevated,
+    onSurfaceVariant = AmoledTextMuted,
+    outline = AmoledBorder,
+    outlineVariant = AmoledBorder,
     error = StatusRed,
     onError = Color.Black
 )
@@ -274,13 +294,15 @@ val NmrShapes = Shapes(
 data class NmrDimens(
     val screenHorizontalMargin: Dp = 20.dp,
     val gridUnit: Dp = 8.dp,
-    val minTouchTarget: Dp = 48.dp,
-    val cardRadius: Dp = 28.dp,
+    val minTouchTarget: Dp = 56.dp, // 56–72 dp erişilebilirlik standardı
+    val cardRadius: Dp = 22.dp, // 20–24 dp yumuşak köşe yarıçapı
+    val buttonRadius: Dp = 16.dp,
+    val buttonHeight: Dp = 54.dp, // 52–56 dp birincil buton
     val chipRadius: Dp = 32.dp,
-    val dialogRadius: Dp = 28.dp,
+    val dialogRadius: Dp = 24.dp,
     val iconSize: Dp = 24.dp,
     val heroIconSize: Dp = 64.dp,
-    val dividerThickness: Dp = 0.5.dp,
+    val dividerThickness: Dp = 1.dp,
     val selectedBorderWidth: Dp = 1.5.dp,
     val statusDotSize: Dp = 6.dp
 )
@@ -306,10 +328,18 @@ object NmrIcons {
     val GeceOdak: ImageVector = Icons.Outlined.Bedtime
     val IradeKilidi: ImageVector = Icons.Outlined.Lock
     val KameraKapsulu: ImageVector = Icons.Outlined.Visibility
-    val KorumalarNav: ImageVector = Icons.Outlined.Shield
+
+    // 5 Ana Navigasyon Hedefi
+    val BugunNav: ImageVector = Icons.Outlined.Spa
+    val KorumaNav: ImageVector = Icons.Outlined.Shield
+    val IcgoruNav: ImageVector = Icons.Outlined.Insights
+    val GunlukNav: ImageVector = Icons.Outlined.ReceiptLong
+    val AyarlarNav: ImageVector = Icons.Outlined.Tune
+
+    // Geriye dönük uyumluluk alias'ları
+    val KorumalarNav: ImageVector = KorumaNav
     val BolgelerNav: ImageVector = Icons.Outlined.GridView
     val KotaSureNav: ImageVector = Icons.Outlined.HourglassEmpty
-    val AyarlarNav: ImageVector = Icons.Outlined.Settings
 }
 
 // ============================================================================
@@ -768,10 +798,18 @@ fun NmrCameraCapsuleOverlay(
 }
 
 enum class NmrBottomTab(val label: String, val icon: ImageVector) {
-    KORUMALAR("Korumalar", NmrIcons.KorumalarNav),
-    BOLGELER("Bölgeler", NmrIcons.BolgelerNav),
-    KOTA_SURE("Kota & Süre", NmrIcons.KotaSureNav),
-    AYARLAR("Ayarlar", NmrIcons.AyarlarNav)
+    BUGUN("Bugün", NmrIcons.BugunNav),
+    KORUMA("Koruma", NmrIcons.KorumaNav),
+    ICGORU("İçgörü", NmrIcons.IcgoruNav),
+    GUNLUK("Günlük", NmrIcons.GunlukNav),
+    AYARLAR("Ayarlar", NmrIcons.AyarlarNav);
+
+    companion object {
+        // Geriye dönük uyumluluk alias'ları
+        val KORUMALAR get() = BUGUN
+        val BOLGELER get() = KORUMA
+        val KOTA_SURE get() = ICGORU
+    }
 }
 
 @Composable
@@ -784,47 +822,48 @@ fun NmrBottomNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = 6.dp,
+                    elevation = 4.dp,
                     shape = CircleShape,
-                    spotColor = Color(0x102D3430),
-                    ambientColor = Color(0x0A2D3430)
+                    spotColor = Color(0x0C24332A),
+                    ambientColor = Color(0x0624332A)
                 ),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, Color(0xFFE5DFD4)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             tonalElevation = 0.dp
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 6.dp, vertical = 6.dp),
+                    .padding(horizontal = 4.dp, vertical = 5.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 NmrBottomTab.entries.forEach { tab ->
                     val selected = tab == currentTab
                     val labelText = when (tab) {
-                        NmrBottomTab.KORUMALAR -> strings.tabProtection
-                        NmrBottomTab.BOLGELER -> strings.tabRegions
-                        NmrBottomTab.KOTA_SURE -> strings.tabQuota
+                        NmrBottomTab.BUGUN -> strings.tabToday
+                        NmrBottomTab.KORUMA -> strings.tabProtection
+                        NmrBottomTab.ICGORU -> strings.tabInsights
+                        NmrBottomTab.GUNLUK -> strings.tabLog
                         NmrBottomTab.AYARLAR -> strings.tabSettings
                     }
 
                     val containerColor by animateColorAsState(
                         targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                        animationSpec = tween(220),
+                        animationSpec = tween(180),
                         label = "tabContainerColor"
                     )
                     val contentColor by animateColorAsState(
-                        targetValue = if (selected) Color.White else Color(0xFF7C8880),
-                        animationSpec = tween(220),
+                        targetValue = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                        animationSpec = tween(180),
                         label = "tabContentColor"
                     )
 
@@ -840,21 +879,21 @@ fun NmrBottomNavigationBar(
                     ) {
                         Row(
                             modifier = Modifier
-                                .animateContentSize(animationSpec = tween(220))
-                                .padding(horizontal = if (selected) 14.dp else 10.dp, vertical = 8.dp),
+                                .animateContentSize(animationSpec = tween(180))
+                                .padding(horizontal = if (selected) 10.dp else 6.dp, vertical = 7.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Icon(
                                 imageVector = tab.icon,
                                 contentDescription = labelText,
                                 tint = contentColor,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(19.dp)
                             )
                             AnimatedVisibility(
                                 visible = selected,
-                                enter = fadeIn(animationSpec = tween(200)) + expandHorizontally(animationSpec = tween(200)),
-                                exit = fadeOut(animationSpec = tween(150)) + shrinkHorizontally(animationSpec = tween(150))
+                                enter = fadeIn(animationSpec = tween(160)) + expandHorizontally(animationSpec = tween(160)),
+                                exit = fadeOut(animationSpec = tween(100)) + shrinkHorizontally(animationSpec = tween(100))
                             ) {
                                 Text(
                                     text = labelText,

@@ -264,7 +264,7 @@ fun NoMoreReelsAppRoot() {
 
     val hasCompletedOnboarding by SettingsStore.hasCompletedOnboarding.collectAsState()
     var onboardingStep by remember { mutableIntStateOf(0) }
-    var currentTab by remember { mutableStateOf(NmrBottomTab.KORUMALAR) }
+    var currentTab by remember { mutableStateOf(NmrBottomTab.BUGUN) }
     var showLiveLogsScreen by remember { mutableStateOf(false) }
 
     val appThemeMode by SettingsStore.appThemeMode.collectAsState()
@@ -421,7 +421,7 @@ fun NoMoreReelsAppRoot() {
             Column(modifier = Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     when (currentTab) {
-                        NmrBottomTab.KORUMALAR -> {
+                        NmrBottomTab.BUGUN -> {
                             ScreenKorumalar(
                                 isServiceActive = isServiceActive,
                                 generalMode = generalMode,
@@ -457,7 +457,7 @@ fun NoMoreReelsAppRoot() {
                                 onEndSnoozeClick = { SettingsStore.stopSnooze(context) }
                             )
                         }
-                        NmrBottomTab.BOLGELER -> {
+                        NmrBottomTab.KORUMA -> {
                             ScreenBolgeler(
                                 dmMode = dmMode,
                                 exploreMode = exploreMode,
@@ -467,7 +467,7 @@ fun NoMoreReelsAppRoot() {
                                 onSelectRegion = { regionKey -> regionBeingEdited = regionKey }
                             )
                         }
-                        NmrBottomTab.KOTA_SURE -> {
+                        NmrBottomTab.ICGORU -> {
                             ScreenKotaSure(
                                 generalMode = generalMode,
                                 blockCount = blockCount,
@@ -491,6 +491,9 @@ fun NoMoreReelsAppRoot() {
                                 onOpenCustomCount = { showCustomCountDialog = true },
                                 onOpenCustomTime = { showCustomTimeDialog = true }
                             )
+                        }
+                        NmrBottomTab.GUNLUK -> {
+                            LiveLogsScreen(onBack = { currentTab = NmrBottomTab.BUGUN })
                         }
                         NmrBottomTab.AYARLAR -> {
                             ScreenAyarlar(
@@ -527,7 +530,7 @@ fun NoMoreReelsAppRoot() {
                                 onBedtimeToggle = { SettingsStore.setBedtimeModeEnabled(context, it) },
                                 onOpenBedtimePicker = { showBedtimePickerDialog = true },
                                 onStrictModeToggle = { SettingsStore.setStrictModeEnabled(context, it) },
-                                onOpenLiveLogs = { showLiveLogsScreen = true }
+                                onOpenLiveLogs = { currentTab = NmrBottomTab.GUNLUK }
                             )
                         }
                     }
