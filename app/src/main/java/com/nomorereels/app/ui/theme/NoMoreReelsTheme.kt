@@ -796,7 +796,6 @@ enum class NmrBottomTab(val label: String, val icon: ImageVector) {
     BUGUN("Bugün", NmrIcons.BugunNav),
     KORUMA("Koruma", NmrIcons.KorumaNav),
     ICGORU("İçgörü", NmrIcons.IcgoruNav),
-    GUNLUK("Günlük", NmrIcons.GunlukNav),
     AYARLAR("Ayarlar", NmrIcons.AyarlarNav);
 
     companion object {
@@ -804,6 +803,7 @@ enum class NmrBottomTab(val label: String, val icon: ImageVector) {
         val KORUMALAR get() = BUGUN
         val BOLGELER get() = KORUMA
         val KOTA_SURE get() = ICGORU
+        val GUNLUK get() = AYARLAR
     }
 }
 
@@ -847,7 +847,6 @@ fun NmrBottomNavigationBar(
                         NmrBottomTab.BUGUN -> strings.tabToday
                         NmrBottomTab.KORUMA -> strings.tabProtection
                         NmrBottomTab.ICGORU -> strings.tabInsights
-                        NmrBottomTab.GUNLUK -> strings.tabLog
                         NmrBottomTab.AYARLAR -> strings.tabSettings
                     }
 
