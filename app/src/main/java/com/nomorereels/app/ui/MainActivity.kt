@@ -1233,37 +1233,52 @@ fun ScreenBugun(
                     NmrHairlineDivider()
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Kart Altı: Kural Özeti & Dokunma Alanı (Kocaman kaba buton yerine sakin satır)
-                    Row(
+                    // Kart Altı: Kural Özeti & Dokunma Alanı (Sığacak şekilde ferah düzenleme)
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = NmrIcons.KorumaNav,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(7.dp)
+                            ) {
+                                Icon(
+                                    imageVector = NmrIcons.KorumaNav,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                                Text(
+                                    text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "PROTECTION SUMMARY" else "KORUMA ÖZETİ",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 1.1.sp,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             Text(
-                                text = policySummary.ifBlank { strings.protectionActiveTitle },
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                                color = MaterialTheme.colorScheme.onBackground,
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Edit →" else "Düzenle →",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                             )
                         }
                         Text(
-                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Edit →" else "Düzenle →",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            text = policySummary.ifBlank { strings.protectionActiveTitle },
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 13.5.sp,
+                                lineHeight = 19.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -1352,37 +1367,90 @@ fun ScreenBugun(
             }
         }
 
-        // 5. GÜNÜN HATIRLATMASI
+        // 5. KURTARILAN ZAMANLA NELER MÜMKÜN? (Seçenek A - İnsan Odaklı Anlam Kartı)
         item {
+            val isEnglish = strings is com.nomorereels.app.ui.i18n.EnglishStrings
+            val (meaningEmoji, meaningTitle, meaningDesc) = remember(savedMinutes, isEnglish) {
+                when {
+                    savedMinutes >= 45 -> Triple(
+                        "📖",
+                        if (isEnglish) "Time for a rich chapter" else "Kapsamlı bir kitap bölümü",
+                        if (isEnglish)
+                            "In $savedMinutes min, you could read ~20 pages, take a scenic walk, or dive deep into a creative project."
+                        else
+                            "$savedMinutes dakikada yaklaşık 20 sayfa kitap okuyabilir, uzun bir yürüyüşe çıkabilir veya yaratıcı bir projene odaklanabilirsin."
+                    )
+                    savedMinutes >= 20 -> Triple(
+                        "☕",
+                        if (isEnglish) "Time for mindful coffee & walk" else "Sakin bir kahve ve yürüyüş",
+                        if (isEnglish)
+                            "In $savedMinutes min, you could enjoy a peaceful cup of coffee without screens, or take a refreshing walk."
+                        else
+                            "$savedMinutes dakikada ekrandan uzak dingin bir kahve içebilir, temiz havada 1.5 km yürüyebilirsin."
+                    )
+                    savedMinutes >= 5 -> Triple(
+                        "🌿",
+                        if (isEnglish) "A peaceful breathing break" else "Huzurlu bir mola",
+                        if (isEnglish)
+                            "In $savedMinutes min, you can read 2-3 pages, stretch, or reconnect with someone you care about."
+                        else
+                            "$savedMinutes dakikada 2-3 sayfa kitap okuyabilir, esneyebilir ya da sevdiklerine kısa bir hatır sorabilirsin."
+                    )
+                    else -> Triple(
+                        "🌱",
+                        if (isEnglish) "A pause for presence" else "Farkındalık için bir an",
+                        if (isEnglish)
+                            "Every seconds of pause gives your nervous system a chance to rest and reset."
+                        else
+                            "Kazanılan her birkaç saniye bile sinir sistemine dinlenme ve ana dönme fırsatı verir."
+                    )
+                }
+            }
+
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
                 shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                color = NmrTheme.colors.mistBlue.copy(alpha = 0.35f),
-                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
                 tonalElevation = 0.dp
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Text(text = "🌿", fontSize = 22.sp)
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = strings.todayReminderQuote,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Medium,
-                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                            ),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(text = meaningEmoji, fontSize = 22.sp)
+                        Column {
+                            Text(
+                                text = if (isEnglish) "WHAT YOUR TIME IS WORTH" else "KURTARILAN ZAMANLA NELER MÜMKÜN?",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 1.1.sp,
+                                    fontSize = 11.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = meaningTitle,
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = meaningDesc,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            lineHeight = 21.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
+
     }
 }
 
@@ -1942,10 +2010,6 @@ fun RegionSettingRow(
 // EKRAN 6: SEKME 3 — "İÇGÖRÜ" (INSIGHTS & HABITS)
 // ============================================================================
 
-enum class InsightsChartMode {
-    HEATMAP, BARS
-}
-
 @Composable
 fun ScreenIcgoru(
     generalMode: DmReelMode,
@@ -1956,7 +2020,7 @@ fun ScreenIcgoru(
     dailyTimeLimitMinutes: Int
 ) {
     val strings = LocalAppStrings.current
-    var chartMode by remember { mutableStateOf(InsightsChartMode.HEATMAP) }
+    val isEnglish = strings is com.nomorereels.app.ui.i18n.EnglishStrings
 
     val isQuotaModeActive = generalMode == DmReelMode.COUNT_QUOTA || generalMode == DmReelMode.TIME_QUOTA
 
@@ -1966,7 +2030,7 @@ fun ScreenIcgoru(
     val matrix by HeatmapStore.matrix.collectAsState()
 
     // Haftalık kazanım verisi (HeatmapStore gerçek matris verisiyle)
-    val dayNames = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) {
+    val dayNames = if (isEnglish) {
         listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     } else {
         listOf("Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz")
@@ -1989,6 +2053,10 @@ fun ScreenIcgoru(
 
     val totalAttempts = remember(matrix) { matrix.sum() }
     val maxCellAttempts = remember(matrix) { matrix.maxOrNull()?.coerceAtLeast(1) ?: 1 }
+
+    // Alıntı döngüsü (dokununca bir sonraki alıntıya geçer)
+    var quoteIndex by remember { mutableIntStateOf(java.time.LocalDate.now().dayOfYear % MindfulQuotes.quotes.size) }
+    val currentQuote = MindfulQuotes.quotes[quoteIndex]
 
     LazyColumn(
         modifier = Modifier
@@ -2019,7 +2087,7 @@ fun ScreenIcgoru(
             }
         }
 
-        // 2. TEKİL GEÇİŞLİ KART: Haftalık Odak & Alışkanlık Ritmi (Isı Haritası <-> Çubuk)
+        // 2. KART 1 (YUKARIDA): Haftalık Kazanım Özeti & Çubuk Grafik
         item {
             Surface(
                 modifier = Modifier
@@ -2031,267 +2099,74 @@ fun ScreenIcgoru(
                 tonalElevation = 0.dp
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
-                    // Kart Başlığı ve Geçiş Segmenti
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = strings.weeklyFocusDesc(weeklyTotalHours, weeklyTotalRemMinutes),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = if (chartMode == InsightsChartMode.HEATMAP)
-                                    (if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "7x24 Habit Matrix" else "7x24 Alışkanlık Matrisi")
-                                else
-                                    (if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Daily Focus Distribution" else "Günlük Odak Dağılımı"),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        // Segment Kontrolü
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(3.dp),
-                                horizontalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = if (chartMode == InsightsChartMode.HEATMAP) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable { chartMode = InsightsChartMode.HEATMAP }
-                                ) {
-                                    Text(
-                                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Heatmap" else "Isı Haritası",
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = if (chartMode == InsightsChartMode.HEATMAP) FontWeight.Bold else FontWeight.Medium,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = if (chartMode == InsightsChartMode.HEATMAP) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
-                                    )
-                                }
-
-                                Surface(
-                                    shape = CircleShape,
-                                    color = if (chartMode == InsightsChartMode.BARS) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable { chartMode = InsightsChartMode.BARS }
-                                ) {
-                                    Text(
-                                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Bars" else "Çubuk",
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = if (chartMode == InsightsChartMode.BARS) FontWeight.Bold else FontWeight.Medium,
-                                            fontSize = 11.sp
-                                        ),
-                                        color = if (chartMode == InsightsChartMode.BARS) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    Text(
+                        text = strings.weeklyFocusDesc(weeklyTotalHours, weeklyTotalRemMinutes),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (isEnglish) "Daily Focus Distribution (Mon – Sun)" else "Günlük Odak Dağılımı (Pzt – Paz)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    AnimatedContent(
-                        targetState = chartMode,
-                        transitionSpec = { fadeIn(tween(200)) togetherWith fadeOut(tween(150)) },
-                        label = "insightsChartTransition"
-                    ) { mode ->
-                        when (mode) {
-                            InsightsChartMode.BARS -> {
-                                // 7 Günlük Sakin Çubuk Grafik
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().height(88.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.Bottom
+                    // 7 Günlük Çubuk Grafik
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(88.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        dayNames.forEachIndexed { idx, day ->
+                            val mins = weeklyDayMinutes[idx]
+                            val barHeightDp = ((mins.toFloat() / maxWeeklyMin.toFloat()).coerceIn(0.18f, 1f) * 60).dp
+                            val isCurrentDay = (idx == currentDayIndex)
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Bottom,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(64.dp)
+                                        .fillMaxWidth(),
+                                    contentAlignment = Alignment.BottomCenter
                                 ) {
-                                    dayNames.forEachIndexed { idx, day ->
-                                        val mins = weeklyDayMinutes[idx]
-                                        val barHeightDp = ((mins.toFloat() / maxWeeklyMin.toFloat()).coerceIn(0.18f, 1f) * 60).dp
-                                        val isCurrentDay = (idx == currentDayIndex)
-
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Bottom,
-                                            modifier = Modifier.weight(1f)
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .height(64.dp)
-                                                    .fillMaxWidth(),
-                                                contentAlignment = Alignment.BottomCenter
-                                            ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .width(16.dp)
-                                                        .height(barHeightDp)
-                                                        .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 2.dp, bottomEnd = 2.dp))
-                                                        .background(
-                                                            if (isCurrentDay) MaterialTheme.colorScheme.primary
-                                                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-                                                        )
-                                                )
-                                            }
-                                            Spacer(modifier = Modifier.height(6.dp))
-                                            Text(
-                                                text = day,
-                                                style = MaterialTheme.typography.labelSmall.copy(
-                                                    fontSize = 11.5.sp,
-                                                    fontWeight = if (isCurrentDay) FontWeight.Bold else FontWeight.Normal
-                                                ),
-                                                color = if (isCurrentDay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    Box(
+                                        modifier = Modifier
+                                            .width(16.dp)
+                                            .height(barHeightDp)
+                                            .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 2.dp, bottomEnd = 2.dp))
+                                            .background(
+                                                if (isCurrentDay) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
                                             )
-                                            Spacer(modifier = Modifier.height(2.dp))
-                                            if (isCurrentDay) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(4.dp)
-                                                        .clip(CircleShape)
-                                                        .background(MaterialTheme.colorScheme.primary)
-                                                )
-                                            } else {
-                                                Spacer(modifier = Modifier.size(4.dp))
-                                            }
-                                        }
-                                    }
+                                    )
                                 }
-                            }
-                            InsightsChartMode.HEATMAP -> {
-                                // 7x24 Saat Matrisi
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    // Saat işaretçileri (00, 06, 12, 18, 23)
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Spacer(modifier = Modifier.width(28.dp))
-                                        Row(
-                                            modifier = Modifier.weight(1f),
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            listOf("00", "06", "12", "18", "23").forEach { hr ->
-                                                Text(
-                                                    text = hr,
-                                                    style = MaterialTheme.typography.labelSmall.copy(
-                                                        fontSize = 10.sp,
-                                                        fontWeight = FontWeight.Normal
-                                                    ),
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                                                )
-                                            }
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(6.dp))
-
-                                    // 7 Gün x 24 Saat Hücreleri
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalArrangement = Arrangement.spacedBy(3.dp)
-                                    ) {
-                                        dayNames.forEachIndexed { dayIdx, dayName ->
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                            ) {
-                                                Text(
-                                                    text = dayName.take(3),
-                                                    style = MaterialTheme.typography.labelSmall.copy(
-                                                        fontSize = 10.sp,
-                                                        fontWeight = if (dayIdx == currentDayIndex) FontWeight.Bold else FontWeight.Normal
-                                                    ),
-                                                    color = if (dayIdx == currentDayIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    modifier = Modifier.width(28.dp)
-                                                )
-                                                for (hour in 0..23) {
-                                                    val cellAttempts = matrix[dayIdx * 24 + hour]
-                                                    val cellColor = if (cellAttempts == 0) {
-                                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                                                    } else {
-                                                        val intensity = (0.3f + (cellAttempts.toFloat() / maxCellAttempts.toFloat()) * 0.7f).coerceIn(0.3f, 1f)
-                                                        MaterialTheme.colorScheme.primary.copy(alpha = intensity)
-                                                    }
-
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .weight(1f)
-                                                            .height(9.dp)
-                                                            .clip(RoundedCornerShape(2.dp))
-                                                            .background(cellColor)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    Spacer(modifier = Modifier.height(14.dp))
-
-                                    // Lejant ve Bilgi
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        if (totalAttempts == 0) {
-                                            Text(
-                                                text = strings.habitHeatmapEmpty,
-                                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                                            )
-                                        } else {
-                                            Text(
-                                                text = "${totalAttempts} ${if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "total attempts" else "toplam yoklama"}",
-                                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Text(
-                                                text = strings.habitHeatmapLess,
-                                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(8.dp)
-                                                    .clip(RoundedCornerShape(2.dp))
-                                                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                            )
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(8.dp)
-                                                    .clip(RoundedCornerShape(2.dp))
-                                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
-                                            )
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(8.dp)
-                                                    .clip(RoundedCornerShape(2.dp))
-                                                    .background(MaterialTheme.colorScheme.primary)
-                                            )
-                                            Text(
-                                                text = strings.habitHeatmapMore,
-                                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = day,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 11.5.sp,
+                                        fontWeight = if (isCurrentDay) FontWeight.Bold else FontWeight.Normal
+                                    ),
+                                    color = if (isCurrentDay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                if (isCurrentDay) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(4.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary)
+                                    )
+                                } else {
+                                    Spacer(modifier = Modifier.size(4.dp))
                                 }
                             }
                         }
@@ -2300,7 +2175,158 @@ fun ScreenIcgoru(
             }
         }
 
-        // 3. Günlük Bütçe & Kota Durumu — SADECE KOTA MODU AKTİFSE GÖRÜNÜR
+        // 3. KART 2 (ALTTA): 7x24 Alışkanlık Isı Haritası
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                tonalElevation = 0.dp
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Text(
+                        text = strings.habitHeatmapTitle,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = strings.habitHeatmapSub,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Saat işaretçileri (00, 06, 12, 18, 23)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(28.dp))
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            listOf("00", "06", "12", "18", "23").forEach { hr ->
+                                Text(
+                                    text = hr,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Normal
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // 7 Gün x 24 Saat Hücreleri
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        dayNames.forEachIndexed { dayIdx, dayName ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = dayName.take(3),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
+                                        fontWeight = if (dayIdx == currentDayIndex) FontWeight.Bold else FontWeight.Normal
+                                    ),
+                                    color = if (dayIdx == currentDayIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.width(28.dp)
+                                )
+                                for (hour in 0..23) {
+                                    val cellAttempts = matrix[dayIdx * 24 + hour]
+                                    val cellColor = if (cellAttempts == 0) {
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                    } else {
+                                        val intensity = (0.3f + (cellAttempts.toFloat() / maxCellAttempts.toFloat()) * 0.7f).coerceIn(0.3f, 1f)
+                                        MaterialTheme.colorScheme.primary.copy(alpha = intensity)
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(9.dp)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(cellColor)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Lejant ve Bilgi
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (totalAttempts == 0) {
+                            Text(
+                                text = strings.habitHeatmapEmpty,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+                        } else {
+                            Text(
+                                text = "${totalAttempts} ${if (isEnglish) "total checks" else "toplam yoklama"}",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = strings.habitHeatmapLess,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+                            )
+                            Text(
+                                text = strings.habitHeatmapMore,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Günlük Bütçe & Kota Durumu — SADECE KOTA MODU AKTİFSE GÖRÜNÜR
         if (isQuotaModeActive) {
             item {
                 Surface(
@@ -2436,40 +2462,74 @@ fun ScreenIcgoru(
             }
         }
 
-        // 4. Farkındalık & Ritim Notu
+        // 5. EN ALTTA: ÖZLÜ SÖZ ALINTI KARTI (Mindful Quote)
         item {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
+                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius))
+                    .clickable {
+                        quoteIndex = (quoteIndex + 1) % MindfulQuotes.quotes.size
+                    },
                 shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
                 color = NmrTheme.colors.mistBlue.copy(alpha = 0.35f),
                 border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
                 tonalElevation = 0.dp
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "🌱", fontSize = 18.sp)
-                        Text(
-                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "AWARENESS RHYTHM" else "FARKINDALIK RİTMİ",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 1.1.sp
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(text = "🌿", fontSize = 18.sp)
+                            Text(
+                                text = if (isEnglish) "MINDFUL WISDOM" else "FARKINDALIK SÖZÜ",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 1.1.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                        ) {
+                            Text(
+                                text = if (isEnglish) "Tap ↻" else "Değiştir ↻",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                ),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "“${currentQuote.localized(isEnglish)}”",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            lineHeight = 22.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
-                            "Visualizing when you subconsciously open Reels helps transform reflex into conscious choice."
-                        else
-                            "Reels'e en çok günün hangi saatlerinde yöneldiğinizi görmek, otomatik davranışı fark edip bilinçli bir seçime dönüştürmenin ilk adımıdır.",
-                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 21.sp),
-                        color = MaterialTheme.colorScheme.onBackground
+                        text = "— ${currentQuote.author}",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier.align(Alignment.End)
                     )
                 }
             }
