@@ -529,6 +529,11 @@ object SettingsStore {
 
         _snoozeEndTimeMs.value = endTime
         _generalMode.value = temporaryMode
+        _dmReelMode.value = temporaryMode
+        _exploreReelMode.value = temporaryMode
+        _feedReelMode.value = temporaryMode
+        _profileReelMode.value = temporaryMode
+        _reelsTabMode.value = temporaryMode
         _lastMicroPlan.value = microPlan
         val appContext = context.applicationContext
         scope.launch {
@@ -543,6 +548,11 @@ object SettingsStore {
                     prefs[KEY_SNOOZE_SAVED_REELS_TAB_MODE] = savedTab.name
                 }
                 prefs[KEY_GENERAL_MODE] = temporaryMode.name
+                prefs[KEY_DM_REEL_MODE] = temporaryMode.name
+                prefs[KEY_EXPLORE_REEL_MODE] = temporaryMode.name
+                prefs[KEY_FEED_REEL_MODE] = temporaryMode.name
+                prefs[KEY_PROFILE_REEL_MODE] = temporaryMode.name
+                prefs[KEY_REELS_TAB_MODE] = temporaryMode.name
                 prefs[KEY_LAST_MICRO_PLAN] = microPlan
             }
             com.nomorereels.app.widget.QuotaAppWidgetProvider.updateAllWidgets(appContext)

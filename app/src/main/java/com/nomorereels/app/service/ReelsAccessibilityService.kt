@@ -244,6 +244,16 @@ class ReelsAccessibilityService : AccessibilityService() {
             generalMode = generalMode
         )
 
+        val isSnoozeActive = SettingsStore.isSnoozeActiveNow(now)
+        if (isSnoozeActive) {
+            _lastDetectedType.value = activeScreen
+            _lastOriginScreen.value = navigationTracker.reelOriginScreen
+            if (activeScreen.isReels) {
+                lastReelViewerActiveTimeMs = now
+            }
+            return
+        }
+
         // Politikayı çalıştır
         val decision = reelsPolicy.evaluate(
             detectedScreen = activeScreen,
@@ -339,12 +349,17 @@ class ReelsAccessibilityService : AccessibilityService() {
                                 )
                             },
                             onCancelAndGoBack = {
-                                actionExecutor.executeBlock(activeScreen, rootNode, force = true)
+                                val freshRoot = rootInActiveWindow
+                                try {
+                                    actionExecutor.executeBlock(activeScreen, freshRoot, force = true)
+                                } finally {
+                                    freshRoot?.let { com.nomorereels.app.detection.safeRecycle(it) }
+                                }
                                 DetectionLogStore.log(
                                     screenType = activeScreen,
                                     details = "Farkındalık Kapısı: Çıkış / Vazgeçme",
                                     actionTaken = "Geri Dönüldü",
-                                    keyNodes = keyNodes
+                                    keyNodes = emptyList()
                                 )
                             }
                         )

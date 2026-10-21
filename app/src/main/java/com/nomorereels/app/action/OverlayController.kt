@@ -105,15 +105,18 @@ class OverlayController(
 
     private var frictionView: View? = null
     private var frictionWindowManager: WindowManager? = null
+    @Volatile
+    private var isFrictionOverlayPending: Boolean = false
+    @Volatile
+    private var suppressionUntilMs: Long = 0L
 
     private var bannerView: View? = null
     private var bannerWindowManager: WindowManager? = null
     private var bannerDismissRunnable: Runnable? = null
-
     private var holdTickRunnable: Runnable? = null
 
     val isFrictionOverlayShowing: Boolean
-        get() = frictionView != null
+        get() = frictionView != null || isFrictionOverlayPending
 
     /**
      * DM'den açılan Reel için 5 saniye basılı tutma gerektiren "Bilinçli Sürtünme"
@@ -179,6 +182,8 @@ class OverlayController(
      * Açık olan Bilinçli Sürtünme ekranını kapatır.
      */
     fun dismissMindfulFrictionOverlay() {
+        suppressionUntilMs = System.currentTimeMillis() + 3000L
+        isFrictionOverlayPending = false
         mainHandler.post {
             holdTickRunnable?.let { mainHandler.removeCallbacks(it) }
             holdTickRunnable = null
@@ -200,7 +205,7 @@ class OverlayController(
 
     /**
      * Farkındalık Kapısı (Mindful Gateway):
-     * Otomatik kaydırmayı kesmek için nefes, niyet aynası veya zihin egzersizi sunan tam ekran katman.
+     * Otomatik kaydırmayı kesmek için sakin bir nefes ve 10 saniyelik duraklama sunan tam ekran katman.
      */
     fun showMindfulGatewayOverlay(
         fallbackContext: Context? = null,
@@ -210,15 +215,25 @@ class OverlayController(
         onApproved: (durationMinutes: Int, microPlan: String) -> Unit,
         onCancelAndGoBack: () -> Unit
     ): Boolean {
-        if (frictionView != null) return true
+        val now = System.currentTimeMillis()
+        if (now < suppressionUntilMs) {
+            Log.d(TAG, "Farkındalık Kapısı bastırıldı (cooldown aktif).")
+            return false
+        }
+        if (frictionView != null || isFrictionOverlayPending) return true
 
         val (targetContext, windowType) = resolveOverlayContextAndType(fallbackContext) ?: run {
             Log.w(TAG, "Overlay gösterilemedi: Uygun servis veya SYSTEM_ALERT_WINDOW izni yok.")
             return false
         }
 
+        isFrictionOverlayPending = true
+
         mainHandler.post {
-            if (frictionView != null) return@post
+            if (frictionView != null) {
+                isFrictionOverlayPending = false
+                return@post
+            }
             try {
                 val wm = targetContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
                 val view = buildMindfulGatewayView(
@@ -250,8 +265,10 @@ class OverlayController(
                 wm.addView(view, params)
                 frictionView = view
                 frictionWindowManager = wm
+                isFrictionOverlayPending = false
                 Log.i(TAG, "Farkındalık Kapısı (Mindful Gateway) ekranı gösterildi.")
             } catch (e: Exception) {
+                isFrictionOverlayPending = false
                 Log.e(TAG, "Farkındalık Kapısı eklenirken hata: ${e.message}")
             }
         }
@@ -687,7 +704,7 @@ class OverlayController(
     @SuppressLint("SetTextI18n")
     private fun buildMindfulGatewayView(
         context: Context,
-        barrierType: MindfulBarrierType,
+        barrierType: MindfulBarrierType = MindfulBarrierType.BREATH_AND_INTENT,
         isNightMode: Boolean,
         isEnglish: Boolean,
         onApproved: (durationMinutes: Int, microPlan: String) -> Unit,
@@ -703,13 +720,24 @@ class OverlayController(
         val badgeText = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
         val primaryBtnBg = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
         val primaryBtnText = if (isNightMode) Color.parseColor(COLOR_DARK_SURFACE) else Color.WHITE
-        val secondaryBtnBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
-        val secondaryBtnText = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
         val breathingCircleBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
         val breathingCircleStroke = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
 
-        val root = BackInterceptingFrameLayout(context, onCancel).apply {
-            setBackgroundColor(Color.parseColor("#E6000000"))
+        var countdownRunnable: Runnable? = null
+        var breathAnim: ValueAnimator? = null
+
+        fun cleanupAnim() {
+            countdownRunnable?.let { mainHandler.removeCallbacks(it) }
+            countdownRunnable = null
+            breathAnim?.cancel()
+            breathAnim = null
+        }
+
+        val root = BackInterceptingFrameLayout(context) {
+            cleanupAnim()
+            onCancel()
+        }.apply {
+            setBackgroundColor(Color.parseColor("#E60A0F0D"))
             setPadding(dp(context, 20), dp(context, 24), dp(context, 20), dp(context, 24))
         }
 
@@ -722,15 +750,19 @@ class OverlayController(
             gravity = Gravity.CENTER_HORIZONTAL
             background = GradientDrawable().apply {
                 setColor(Color.parseColor(cardBg))
-                cornerRadius = dp(context, 22).toFloat()
+                cornerRadius = dp(context, 24).toFloat()
                 setStroke(dp(context, 1), Color.parseColor(cardBorder))
             }
-            setPadding(dp(context, 24), dp(context, 26), dp(context, 24), dp(context, 26))
+            setPadding(dp(context, 24), dp(context, 28), dp(context, 24), dp(context, 24))
         }
 
-        // 1. Badge
+        // 1. Rozet (Badge)
         val badge = TextView(context).apply {
-            text = if (isNightMode) "GECE KORUMA · NIGHT REST" else strings.mindfulGatewayHeader
+            text = if (isNightMode) {
+                if (isEnglish) "🌙 NIGHT REST MODE" else "🌙 GECE DİNLENME MODU"
+            } else {
+                if (isEnglish) "🌿 MINDFUL PAUSE" else "🌿 FARKINDALIK KAPISI"
+            }
             setTextColor(Color.parseColor(badgeText))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             typeface = getSansBold(context)
@@ -745,18 +777,34 @@ class OverlayController(
             LinearLayout.LayoutParams.WRAP_CONTENT
         ))
 
-        // 2. Title View
+        // 2. Başlık (Title)
         val titleView = TextView(context).apply {
+            text = if (isNightMode) {
+                if (isEnglish) "Time to Rest" else "Gece Dinlenme Zamanı"
+            } else {
+                if (isEnglish) "Take a Deep Breath" else "Derin Bir Nefes Al"
+            }
             setTextColor(Color.parseColor(titleColor))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f)
             typeface = getSerifBold(context)
             gravity = Gravity.CENTER
             setPadding(0, dp(context, 16), 0, dp(context, 8))
         }
         card.addView(titleView)
 
-        // 3. Subtitle View
+        // 3. Açıklama (Subtitle)
         val subtitleView = TextView(context).apply {
+            text = if (isNightMode) {
+                if (isEnglish)
+                    "Late-night screens disrupt deep sleep. Give your mind permission to recharge."
+                else
+                    "Gece ekran ışığı derin uyku ritmini bozar. Zihnine dinlenmesi için alan açmak ister misin?"
+            } else {
+                if (isEnglish)
+                    "Notice the automatic scrolling reflex. Give yourself a moment to choose consciously."
+                else
+                    "Otomatik kaydırma refleksini fark et. Bilinçli bir seçim yapmak için kendine bir an tanı."
+            }
             setTextColor(Color.parseColor(textColor))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             typeface = getSansRegular(context)
@@ -766,472 +814,118 @@ class OverlayController(
         }
         card.addView(subtitleView)
 
-        // 4. Dynamic Content Area
-        val dynamicArea = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
+        // 4. Nefes Çemberi Animasyonu
+        val circleContainer = FrameLayout(context).apply {
+            setPadding(0, dp(context, 4), 0, dp(context, 24))
         }
-        card.addView(dynamicArea, LinearLayout.LayoutParams(
+        val circleSize = dp(context, 80)
+        val circleView = View(context).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.parseColor(breathingCircleBg))
+                setStroke(dp(context, 3), Color.parseColor(breathingCircleStroke))
+            }
+        }
+        val innerCircleSize = dp(context, 40)
+        val innerCircleView = View(context).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.parseColor(breathingCircleStroke))
+            }
+        }
+        circleContainer.addView(circleView, FrameLayout.LayoutParams(circleSize, circleSize, Gravity.CENTER))
+        circleContainer.addView(innerCircleView, FrameLayout.LayoutParams(innerCircleSize, innerCircleSize, Gravity.CENTER))
+        card.addView(circleContainer)
+
+        breathAnim = ValueAnimator.ofFloat(0.75f, 1.15f).apply {
+            duration = 2200L
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { anim ->
+                val scale = anim.animatedValue as Float
+                circleView.scaleX = scale
+                circleView.scaleY = scale
+            }
+            start()
+        }
+
+        // 5. Birincil Buton: "Vazgeç ve Geri Dön" (Normal, belirgin buton)
+        val btnCancel = Button(context).apply {
+            text = if (isEnglish) "Put Phone Down & Return" else "Vazgeç ve Geri Dön"
+            isAllCaps = false
+            setTextColor(primaryBtnText)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            typeface = getSansBold(context)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor(primaryBtnBg))
+                cornerRadius = dp(context, 22).toFloat()
+            }
+            setPadding(dp(context, 18), dp(context, 14), dp(context, 18), dp(context, 14))
+            setOnClickListener {
+                cleanupAnim()
+                onCancel()
+            }
+        }
+        card.addView(btnCancel, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
-        ))
+        ).apply {
+            topMargin = dp(context, 4)
+            bottomMargin = dp(context, 12)
+        })
 
-        // Helper to show Window Selection + Micro-Plan
-        fun showWindowSelection(windowMinutes: Int? = null) {
-            dynamicArea.removeAllViews()
-            titleView.text = if (isEnglish) "Set a Mindful Window" else "Seçim Senin"
-            subtitleView.text = if (isEnglish)
-                "How would you like to continue right now?"
-            else
-                "Şu an nasıl devam etmek istersin?"
-
-            if (windowMinutes == null) {
-                // Show choice: Put phone down vs 5 min vs 10 min
-                val putDownButton = Button(context).apply {
-                    text = "📱 ${strings.gatewayPutPhoneDown}"
-                    isAllCaps = false
-                    setTextColor(primaryBtnText)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                    typeface = getSansBold(context)
-                    background = GradientDrawable().apply {
-                        setColor(Color.parseColor(primaryBtnBg))
-                        cornerRadius = dp(context, 22).toFloat()
-                    }
-                    setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
-                    setOnClickListener { onCancel() }
-                }
-                dynamicArea.addView(putDownButton, LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { bottomMargin = dp(context, 12) })
-
-                val windowsRow = LinearLayout(context).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                }
-
-                val btn5Min = Button(context).apply {
-                    text = "⏱️ ${strings.gatewayMindful5Min}"
-                    isAllCaps = false
-                    setTextColor(Color.parseColor(secondaryBtnText))
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                    typeface = getSansBold(context)
-                    background = GradientDrawable().apply {
-                        setColor(Color.parseColor(secondaryBtnBg))
-                        cornerRadius = dp(context, 22).toFloat()
-                    }
-                    setOnClickListener { showWindowSelection(5) }
-                }
-
-                val btn10Min = Button(context).apply {
-                    text = "⏱️ ${strings.gatewayMindful10Min}"
-                    isAllCaps = false
-                    setTextColor(Color.parseColor(secondaryBtnText))
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                    typeface = getSansBold(context)
-                    background = GradientDrawable().apply {
-                        setColor(Color.parseColor(secondaryBtnBg))
-                        cornerRadius = dp(context, 22).toFloat()
-                    }
-                    setOnClickListener { showWindowSelection(10) }
-                }
-
-                windowsRow.addView(btn5Min, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                    marginEnd = dp(context, 6)
-                })
-                windowsRow.addView(btn10Min, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                    marginStart = dp(context, 6)
-                })
-
-                dynamicArea.addView(windowsRow, LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { bottomMargin = dp(context, 12) })
-            } else {
-                // User picked windowMinutes (5 or 10 min), ask for Micro-Plan (If-Then)
-                titleView.text = if (isEnglish) "$windowMinutes Min Mindful Window" else "$windowMinutes Dk Bilinçli Pencere"
-                subtitleView.text = strings.gatewayMicroPlanQuestion
-
-                val plans = listOf(
-                    "💧 ${strings.gatewayMicroPlanWater}",
-                    "💼 ${strings.gatewayMicroPlanWork}",
-                    "🛌 ${strings.gatewayMicroPlanSleep}",
-                    "🚶 ${strings.gatewayMicroPlanWalk}"
-                )
-
-                for (plan in plans) {
-                    val planBtn = Button(context).apply {
-                        text = plan
-                        isAllCaps = false
-                        setTextColor(Color.parseColor(secondaryBtnText))
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                        typeface = getSansBold(context)
-                        background = GradientDrawable().apply {
-                            setColor(Color.parseColor(secondaryBtnBg))
-                            cornerRadius = dp(context, 22).toFloat()
-                        }
-                        setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
-                        setOnClickListener {
-                            val cleanPlan = plan.substringAfter(" ").trim()
-                            onApproved(windowMinutes, cleanPlan)
-                        }
-                    }
-                    dynamicArea.addView(planBtn, LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply { bottomMargin = dp(context, 8) })
-                }
-            }
-
-            // Quick Exit
-            val exitBtn = TextView(context).apply {
-                text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor(textColor))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                typeface = getSansRegular(context)
-                gravity = Gravity.CENTER
-                setPadding(dp(context, 12), dp(context, 10), dp(context, 12), dp(context, 10))
-                setOnClickListener { onCancel() }
-            }
-            dynamicArea.addView(exitBtn)
-        }
-
-        // Helper to show Intent Selection Phase
-        fun showIntentPhase() {
-            dynamicArea.removeAllViews()
-            titleView.text = strings.gatewayIntentQuestion
-            subtitleView.text = if (isEnglish) "Notice your state without judgment." else "Yargılamadan sadece fark et."
-
-            // Option 1: Autopilot
-            val btnAutopilot = Button(context).apply {
-                text = "🍃 ${strings.gatewayIntentAutopilot}"
-                isAllCaps = false
-                setTextColor(Color.parseColor(secondaryBtnText))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = getSansBold(context)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor(secondaryBtnBg))
-                    cornerRadius = dp(context, 22).toFloat()
-                }
-                setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
-                setOnClickListener {
-                    dynamicArea.removeAllViews()
-                    titleView.text = if (isEnglish) "Awareness Achieved" else "Farkındalık"
-                    subtitleView.text = strings.gatewayAutopilotAck
-                    mainHandler.postDelayed({ onCancel() }, 1400L)
-                }
-            }
-            dynamicArea.addView(btnAutopilot, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 10) })
-
-            // Option 2: Quick Break
-            val btnBreak = Button(context).apply {
-                text = "☕ ${strings.gatewayIntentBreak}"
-                isAllCaps = false
-                setTextColor(Color.parseColor(secondaryBtnText))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = getSansBold(context)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor(secondaryBtnBg))
-                    cornerRadius = dp(context, 22).toFloat()
-                }
-                setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
-                setOnClickListener { showWindowSelection() }
-            }
-            dynamicArea.addView(btnBreak, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 10) })
-
-            // Option 3: Specific Task
-            val btnSpecific = Button(context).apply {
-                text = "🔍 ${strings.gatewayIntentSpecific}"
-                isAllCaps = false
-                setTextColor(Color.parseColor(secondaryBtnText))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = getSansBold(context)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor(secondaryBtnBg))
-                    cornerRadius = dp(context, 22).toFloat()
-                }
-                setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
-                setOnClickListener { showWindowSelection() }
-            }
-            dynamicArea.addView(btnSpecific, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 14) })
-
-            // Exit
-            val exitBtn = TextView(context).apply {
-                text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor(textColor))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                typeface = getSansRegular(context)
-                gravity = Gravity.CENTER
-                setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
-                setOnClickListener { onCancel() }
-            }
-            dynamicArea.addView(exitBtn)
-        }
-
-        // Branching according to mode
-        if (isNightMode) {
-            titleView.text = strings.gatewayNightTitle
-            subtitleView.text = strings.gatewayNightSub
-
-            val sleepBtn = Button(context).apply {
-                text = strings.gatewayNightSleep
-                isAllCaps = false
-                setTextColor(primaryBtnText)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                typeface = getSansBold(context)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor(primaryBtnBg))
-                    cornerRadius = dp(context, 22).toFloat()
-                }
-                setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
-                setOnClickListener { onCancel() }
-            }
-            dynamicArea.addView(sleepBtn, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 10) })
-
-            val watch5MinBtn = Button(context).apply {
-                text = strings.gatewayNight5Min
-                isAllCaps = false
-                setTextColor(Color.parseColor(secondaryBtnText))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = getSansBold(context)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor(secondaryBtnBg))
-                    cornerRadius = dp(context, 22).toFloat()
-                }
-                setPadding(dp(context, 14), dp(context, 12), dp(context, 14), dp(context, 12))
-                setOnClickListener { onApproved(5, strings.gatewayMicroPlanSleep) }
-            }
-            dynamicArea.addView(watch5MinBtn, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 12) })
-
-            val exitBtn = TextView(context).apply {
-                text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor(textColor))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                typeface = getSansRegular(context)
-                gravity = Gravity.CENTER
-                setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
-                setOnClickListener { onCancel() }
-            }
-            dynamicArea.addView(exitBtn)
-
-        } else if (barrierType == MindfulBarrierType.COGNITIVE_MATH) {
-            titleView.text = strings.barrierTypeMath
-            subtitleView.text = strings.gatewayMathPrompt
-
-            val qText = TextView(context).apply {
-                text = "14 + 19 = ?"
-                setTextColor(Color.parseColor(primaryBtnBg))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
-                typeface = getSerifBold(context)
-                gravity = Gravity.CENTER
-                setPadding(0, dp(context, 6), 0, dp(context, 16))
-            }
-            dynamicArea.addView(qText)
-
-            val answersRow = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
-            val options = listOf(23 to false, 33 to true, 35 to false)
-            for ((num, isCorrect) in options) {
-                val optBtn = Button(context).apply {
-                    text = "$num"
-                    isAllCaps = false
-                    setTextColor(Color.parseColor(secondaryBtnText))
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                    typeface = getSansBold(context)
-                    background = GradientDrawable().apply {
-                        setColor(Color.parseColor(secondaryBtnBg))
-                        cornerRadius = dp(context, 22).toFloat()
-                    }
-                    setOnClickListener {
-                        if (isCorrect) {
-                            showWindowSelection()
-                        } else {
-                            (background as? GradientDrawable)?.setColor(Color.parseColor("#FBECE9"))
-                            setTextColor(Color.parseColor("#A84838"))
-                        }
-                    }
-                }
-                answersRow.addView(optBtn, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                    marginEnd = dp(context, 4)
-                    marginStart = dp(context, 4)
-                })
-            }
-            dynamicArea.addView(answersRow, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 16) })
-
-            val exitBtn = TextView(context).apply {
-                text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor(textColor))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                typeface = getSansRegular(context)
-                gravity = Gravity.CENTER
-                setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
-                setOnClickListener { onCancel() }
-            }
-            dynamicArea.addView(exitBtn)
-
-        } else if (barrierType == MindfulBarrierType.MINDFUL_TYPING) {
-            titleView.text = strings.barrierTypeTyping
-            subtitleView.text = strings.gatewayTypingPrompt
-
-            val targetSentence = strings.gatewayTypingSentence
-            val quoteView = TextView(context).apply {
-                text = "\"$targetSentence\""
-                setTextColor(Color.parseColor(primaryBtnBg))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                typeface = getSansRegular(context)
-                gravity = Gravity.CENTER
-                setPadding(dp(context, 8), dp(context, 4), dp(context, 8), dp(context, 12))
-            }
-            dynamicArea.addView(quoteView)
-
-            val input = EditText(context).apply {
-                hint = if (isEnglish) "Type sentence here..." else "Cümleyi buraya yaz..."
-                setHintTextColor(Color.parseColor(textColor))
-                setTextColor(Color.parseColor(titleColor))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = getSansRegular(context)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor(if (isNightMode) COLOR_DARK_SURFACE else COLOR_LIGHT_CANVAS))
-                    cornerRadius = dp(context, 16).toFloat()
-                    setStroke(dp(context, 1), Color.parseColor(cardBorder))
-                }
-                setPadding(dp(context, 14), dp(context, 12), dp(context, 14), dp(context, 12))
-            }
-            dynamicArea.addView(input, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 12) })
-
-            val continueBtn = Button(context).apply {
-                text = if (isEnglish) "Continue" else "Devam Et"
-                isAllCaps = false
-                isEnabled = false
-                setTextColor(Color.parseColor(textColor))
-                typeface = getSansBold(context)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor(secondaryBtnBg))
-                    cornerRadius = dp(context, 22).toFloat()
-                }
-                setOnClickListener { showWindowSelection() }
-            }
-            dynamicArea.addView(continueBtn, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 12) })
-
-            input.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    val typed = s?.toString()?.trim() ?: ""
-                    val isMatch = typed.equals(targetSentence.trim(), ignoreCase = true)
-                    continueBtn.isEnabled = isMatch
-                    if (isMatch) {
-                        continueBtn.setTextColor(primaryBtnText)
-                        (continueBtn.background as? GradientDrawable)?.setColor(Color.parseColor(primaryBtnBg))
-                    } else {
-                        continueBtn.setTextColor(Color.parseColor(textColor))
-                        (continueBtn.background as? GradientDrawable)?.setColor(Color.parseColor(secondaryBtnBg))
-                    }
-                }
-                override fun afterTextChanged(s: Editable?) {}
+        // 6. İkincil Eylem: "5 dakika izin ver"
+        // (10 saniye kilitli, buton değil düz metin gibi, kendini belli etmeyen)
+        var remainingSeconds = 10
+        val continueText = TextView(context).apply {
+            text = if (isEnglish) "Allow 5 minutes (${remainingSeconds}s)" else "5 dakika izin ver (${remainingSeconds}s)"
+            setTextColor(Color.parseColor(textColor).let {
+                Color.argb(160, Color.red(it), Color.green(it), Color.blue(it))
             })
-
-            val exitBtn = TextView(context).apply {
-                text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor(textColor))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                typeface = getSansRegular(context)
-                gravity = Gravity.CENTER
-                setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
-                setOnClickListener { onCancel() }
-            }
-            dynamicArea.addView(exitBtn)
-
-        } else {
-            // Default: BREATH_AND_INTENT
-            titleView.text = strings.gatewayPauseTitle
-            subtitleView.text = strings.gatewayBreathPrompt
-
-            // Breathing pulsing circle
-            val circleSize = dp(context, 76)
-            val circleView = View(context).apply {
-                background = GradientDrawable().apply {
-                    shape = GradientDrawable.OVAL
-                    setColor(Color.parseColor(breathingCircleBg))
-                    setStroke(dp(context, 3), Color.parseColor(breathingCircleStroke))
-                }
-            }
-            dynamicArea.addView(circleView, LinearLayout.LayoutParams(circleSize, circleSize).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-                topMargin = dp(context, 8)
-                bottomMargin = dp(context, 20)
-            })
-
-            val breathAnim = ValueAnimator.ofFloat(0.72f, 1.15f).apply {
-                duration = 2000L
-                repeatMode = ValueAnimator.REVERSE
-                repeatCount = ValueAnimator.INFINITE
-                interpolator = AccelerateDecelerateInterpolator()
-                addUpdateListener { anim ->
-                    val scale = anim.animatedValue as Float
-                    circleView.scaleX = scale
-                    circleView.scaleY = scale
-                }
-                start()
-            }
-
-            val proceedBtn = Button(context).apply {
-                text = if (isEnglish) "Notice My Intention ➔" else "Niyetimi Fark Et ➔"
-                isAllCaps = false
-                setTextColor(primaryBtnText)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                typeface = getSansBold(context)
-                background = GradientDrawable().apply {
-                    setColor(Color.parseColor(primaryBtnBg))
-                    cornerRadius = dp(context, 22).toFloat()
-                }
-                setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 12))
-                setOnClickListener {
-                    breathAnim.cancel()
-                    showIntentPhase()
-                }
-            }
-            dynamicArea.addView(proceedBtn, LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(context, 12) })
-
-            // Instant Exit
-            val exitBtn = TextView(context).apply {
-                text = strings.gatewayExitImmediate
-                setTextColor(Color.parseColor(textColor))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                typeface = getSansRegular(context)
-                gravity = Gravity.CENTER
-                setPadding(dp(context, 12), dp(context, 8), dp(context, 12), dp(context, 8))
-                setOnClickListener {
-                    breathAnim.cancel()
-                    onCancel()
-                }
-            }
-            dynamicArea.addView(exitBtn)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            typeface = getSansRegular(context)
+            gravity = Gravity.CENTER
+            setPadding(dp(context, 16), dp(context, 10), dp(context, 16), dp(context, 10))
+            isClickable = false
+            isEnabled = false
         }
+
+        val runnable = object : Runnable {
+            override fun run() {
+                remainingSeconds--
+                if (remainingSeconds > 0) {
+                    continueText.text = if (isEnglish)
+                        "Allow 5 minutes (${remainingSeconds}s)"
+                    else
+                        "5 dakika izin ver (${remainingSeconds}s)"
+                    mainHandler.postDelayed(this, 1000L)
+                } else {
+                    continueText.text = if (isEnglish) "Allow 5 minutes" else "5 dakika izin ver"
+                    continueText.isEnabled = true
+                    continueText.isClickable = true
+                    continueText.setTextColor(Color.parseColor(primaryBtnBg))
+                    continueText.paintFlags = continueText.paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
+                }
+            }
+        }
+        countdownRunnable = runnable
+        mainHandler.postDelayed(runnable, 1000L)
+
+        continueText.setOnClickListener {
+            if (remainingSeconds <= 0) {
+                cleanupAnim()
+                onApproved(5, if (isEnglish) "Mindful Pause" else "Bilinçli Mola")
+            }
+        }
+
+        card.addView(continueText, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = Gravity.CENTER_HORIZONTAL
+            bottomMargin = dp(context, 4)
+        })
 
         scroll.addView(card)
         root.addView(scroll, FrameLayout.LayoutParams(
