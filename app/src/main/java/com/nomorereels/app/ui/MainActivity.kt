@@ -147,49 +147,6 @@ import com.nomorereels.app.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// ============================================================================
-// UI STATE DATA HOLDER
-// ============================================================================
-
-data class NoMoreReelsUiState(
-    val hasCompletedOnboarding: Boolean = false,
-    val onboardingStep: Int = 0,
-    val currentTab: NmrBottomTab = NmrBottomTab.KORUMALAR,
-    val showLiveLogsScreen: Boolean = false,
-    val themeMode: NmrThemeMode = NmrThemeMode.LIGHT,
-    val language: NmrLanguage = NmrLanguage.TR,
-    val isServiceActive: Boolean = false,
-    val generalMode: DmReelMode = DmReelMode.SINGLE_REEL,
-    val blockCount: Int = 18,
-    val savedMinutesStr: String = "13,5 dk",
-    val selectedProfile: ProtectionLevel = ProtectionLevel.BALANCED,
-    val dmMode: DmReelMode = DmReelMode.SINGLE_REEL,
-    val exploreMode: DmReelMode = DmReelMode.FOLLOW_GLOBAL,
-    val feedMode: DmReelMode = DmReelMode.BLOCK_ALL,
-    val profileMode: DmReelMode = DmReelMode.FOLLOW_GLOBAL,
-    val reelsTabMode: DmReelMode = DmReelMode.BLOCK_ALL,
-    val regionBeingEdited: String? = null,
-    val todayReelCount: Int = 12,
-    val dailyCountLimit: Int = 20,
-    val todayMinutesSpent: Int = 8,
-    val dailyTimeLimitMinutes: Int = 30,
-    val warningPercent: Int = 80,
-    val singleReelMaxSeconds: Int = 90,
-    val bedtimeEnabled: Boolean = true,
-    val bedtimeStartHour: Int = 23,
-    val bedtimeStartMinute: Int = 30,
-    val bedtimeEndHour: Int = 7,
-    val bedtimeEndMinute: Int = 0,
-    val strictModeEnabled: Boolean = true,
-    val showCustomCountDialog: Boolean = false,
-    val showCustomTimeDialog: Boolean = false,
-    val showWillpowerDialog: Boolean = false,
-    val showBedtimePickerDialog: Boolean = false,
-    val logFilter: String = "Ekran değişimi",
-    val isLogsPaused: Boolean = false,
-    val isNodeTreeExpanded: Boolean = false
-)
-
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -1032,7 +989,7 @@ fun ScreenBugun(
     val savedSeconds = blockCount * 45L
     val savedMinutes = savedSeconds / 60
 
-    val todayDateFormatted = remember {
+    val todayDateFormatted = remember(strings) {
         try {
             val now = java.time.LocalDate.now()
             val formatter = java.time.format.DateTimeFormatter.ofPattern(
@@ -1507,521 +1464,6 @@ fun ScreenBugun(
 }
 
 // ============================================================================
-// EKRAN 4.1: SEKME 2 — "KORUMA MERKEZİ" (4 Mod & Profiller)
-// ============================================================================
-
-@Composable
-fun ScreenKorumalar(
-    isServiceActive: Boolean,
-    generalMode: DmReelMode,
-    blockCount: Int,
-    strictModeEnabled: Boolean,
-    policySummary: String,
-    isSnoozeActive: Boolean,
-    snoozeRemainingMinutes: Int,
-    onOpenAccessibilitySettings: () -> Unit,
-    onGeneralModeChange: (DmReelMode) -> Unit,
-    onApplyProfile: (ProtectionLevel) -> Unit,
-    onStartSnoozeClick: () -> Unit,
-    onEndSnoozeClick: () -> Unit
-) {
-    val strings = LocalAppStrings.current
-    val savedSeconds = blockCount * 45L
-    val savedMinutes = savedSeconds / 60
-    val savedTimeDisplay = when {
-        blockCount == 0 -> strings.noBlocksYetFocusActive
-        savedMinutes == 0L -> strings.secSaved(savedSeconds)
-        else -> strings.minSaved(savedMinutes)
-    }
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = NmrTheme.dimens.screenHorizontalMargin),
-        verticalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
-    ) {
-        item {
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
-                            "MINDFUL LIVING JOURNAL"
-                        else
-                            "BİLİNÇLİ YAŞAM GÜNLÜĞÜ",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            letterSpacing = 1.6.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
-                            "Remember the value of time."
-                        else
-                            "Zamanın kıymetini yeniden hatırla.",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 25.sp,
-                            lineHeight = 31.sp,
-                            letterSpacing = (-0.4).sp
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-
-                Switch(
-                    checked = isServiceActive,
-                    onCheckedChange = { onOpenAccessibilitySettings() },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = MaterialTheme.colorScheme.primary,
-                        uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = MaterialTheme.colorScheme.outline
-                    )
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-
-        // 1. Erişilebilirlik Servisi Kapalı Uyarısı (Eğer kapalıysa en tepede parlar)
-        if (!isServiceActive) {
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius))
-                        .clickable(onClick = onOpenAccessibilitySettings),
-                    shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                    color = StatusRed.copy(alpha = 0.12f),
-                    border = BorderStroke(1.dp, StatusRed.copy(alpha = 0.5f))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(StatusRed.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Security,
-                                contentDescription = null,
-                                tint = StatusRed,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = strings.serviceInactiveTitle,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = StatusRed
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = strings.serviceInactiveDesc,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-                        Text(
-                            text = strings.openButton,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = StatusRed
-                        )
-                    }
-                }
-            }
-        }
-
-        // 2. Mola Modu Devrede Banner'ı (Eğer mola aktifse)
-        if (isSnoozeActive) {
-            item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                    color = StatusOrange.copy(alpha = 0.12f),
-                    border = BorderStroke(1.dp, StatusOrange.copy(alpha = 0.5f))
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier.size(8.dp).clip(CircleShape).background(StatusOrange)
-                                )
-                                Text(
-                                    text = strings.snoozeBannerTitle,
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = StatusOrange
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = strings.snoozeBannerDesc(snoozeRemainingMinutes),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-                        TextButton(onClick = onEndSnoozeClick) {
-                            Text(
-                                text = strings.endSnoozeButton,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = StatusOrange
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // 3. Wabi-Sabi Bölünmüş Keten Kart (Kazanılan Süre & Durdurulan Reel)
-        item {
-            NmrHeroCard {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Sol Sütun: Kurtarılan Süre
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "TIME RECLAIMED" else "KAZANILAN SÜRE",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                letterSpacing = 1.2.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.Bottom) {
-                            Text(
-                                text = "$savedMinutes",
-                                style = MaterialTheme.typography.displayLarge.copy(
-                                    fontSize = 46.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    lineHeight = 48.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            Spacer(modifier = Modifier.width(3.dp))
-                            Text(
-                                text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "min" else "dk",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "🍃 Mind is serene" else "🍃 Zihnin berrak",
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                            color = StatusGreen
-                        )
-                    }
-
-                    // Dikey Ayırıcı Derz Çizgisi
-                    Box(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(56.dp)
-                            .background(MaterialTheme.colorScheme.outline)
-                    )
-
-                    // Sağ Sütun: Durdurulan Reel
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "PAUSED" else "DURDURULAN",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                letterSpacing = 1.2.sp,
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.Bottom) {
-                            Text(
-                                text = "$blockCount",
-                                style = MaterialTheme.typography.displayLarge.copy(
-                                    fontSize = 46.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    lineHeight = 48.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Reel",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "Loop interrupted" else "Döngü kırıldı",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-        }
-
-        // 4. Günün Farkındalığı & Edebi Not Kartı (Kinfolk Manifesto & Mola Başlatıcı)
-        item {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(
-                        elevation = 3.dp,
-                        shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                        ambientColor = Color(0x0C2D3430),
-                        spotColor = Color(0x062D3430)
-                    )
-                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
-                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                tonalElevation = 0.dp
-            ) {
-                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-                    // Sol 5dp genişliğinde orman sediri şeridi (Wabi-Sabi imza çizgisi)
-                    Box(
-                        modifier = Modifier
-                            .width(5.dp)
-                            .fillMaxHeight()
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .padding(18.dp)
-                            .weight(1f)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
-                                    "DAILY MINDFULNESS"
-                                else
-                                    "GÜNÜN FARKINDALIĞI",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    letterSpacing = 1.3.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(text = "🌿", fontSize = 14.sp)
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
-                                "\"Life does not unfold in 15-second endless swipes; it happens in the breath you notice right now.\""
-                            else
-                                "\"Hayat, birbiri ardına kaydırdığın 15 saniyelerde değil; bu anı fark ettiğin nefeste akıyor.\"",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 16.sp,
-                                lineHeight = 24.sp,
-                                fontWeight = FontWeight.Normal
-                            ),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-
-                        Spacer(modifier = Modifier.height(14.dp))
-                        NmrHairlineDivider()
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
-                                    "Mindful Breathing Pause"
-                                else
-                                    "Farkındalık Nefesi Molası",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-
-                            Surface(
-                                shape = RoundedCornerShape(NmrTheme.dimens.chipRadius),
-                                color = NmrTheme.colors.selectedSurface,
-                                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(NmrTheme.dimens.chipRadius))
-                                    .clickable(onClick = onStartSnoozeClick)
-                            ) {
-                                Text(
-                                    text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
-                                        "Practice ➔"
-                                    else
-                                        "Uygula ➔",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // 4. Canlı Koruma Özeti ("INSTAGRAM'DA NE OLACAK?")
-        item {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = strings.whatHappensTitle,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = policySummary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                }
-            }
-        }
-
-        // 5. GENEL MOD Başlığı
-        item {
-            NmrSectionHeader(title = strings.generalModeHeader)
-        }
-
-        // 4 Mod Satırı
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                NmrSelectableRow(
-                    title = strings.blockAllTitle,
-                    subtitle = strings.blockAllSub,
-                    icon = NmrIcons.KompleYasak,
-                    selected = generalMode == DmReelMode.BLOCK_ALL,
-                    onClick = { onGeneralModeChange(DmReelMode.BLOCK_ALL) }
-                )
-                NmrSelectableRow(
-                    title = strings.singleReelTitle,
-                    subtitle = strings.singleReelSub,
-                    icon = NmrIcons.SadeceBirTane,
-                    selected = generalMode == DmReelMode.SINGLE_REEL,
-                    onClick = { onGeneralModeChange(DmReelMode.SINGLE_REEL) }
-                )
-                NmrSelectableRow(
-                    title = strings.countQuotaTitle,
-                    subtitle = strings.countQuotaSub,
-                    icon = NmrIcons.XTane,
-                    selected = generalMode == DmReelMode.COUNT_QUOTA,
-                    onClick = { onGeneralModeChange(DmReelMode.COUNT_QUOTA) }
-                )
-                NmrSelectableRow(
-                    title = strings.timeQuotaTitle,
-                    subtitle = strings.timeQuotaSub,
-                    icon = NmrIcons.XDakika,
-                    selected = generalMode == DmReelMode.TIME_QUOTA,
-                    onClick = { onGeneralModeChange(DmReelMode.TIME_QUOTA) }
-                )
-            }
-        }
-
-        // 6. HAZIR PROFİLLER Başlığı
-        item {
-            NmrSectionHeader(title = strings.presetsHeader)
-        }
-
-        // Hazır Profiller Çipleri
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(NmrTheme.dimens.gridUnit)
-            ) {
-                NmrChip(
-                    label = strings.presetBalanced,
-                    selected = false,
-                    onClick = { onApplyProfile(ProtectionLevel.BALANCED) },
-                    modifier = Modifier.weight(1f)
-                )
-                NmrChip(
-                    label = strings.presetMindful,
-                    selected = false,
-                    onClick = { onApplyProfile(ProtectionLevel.MINDFUL) },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        // 7. Süreli Mola Butonu (Eğer mola aktif değilse)
-        item {
-            if (!isSnoozeActive) {
-                Spacer(modifier = Modifier.height(4.dp))
-                NmrOutlinedButton(
-                    text = strings.takeSnoozeButton,
-                    onClick = onStartSnoozeClick
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-    }
-}
-
-// ============================================================================
 // EKRAN 5: SEKME 2 — "KORUMA MERKEZİ" (PROTECTION CENTER)
 // ============================================================================
 
@@ -2466,28 +1908,6 @@ fun RegionSettingRow(
     }
 }
 
-// Geriye dönük uyumluluk alias'ı
-@Composable
-fun ScreenBolgeler(
-    dmMode: DmReelMode,
-    exploreMode: DmReelMode,
-    feedMode: DmReelMode,
-    profileMode: DmReelMode,
-    reelsTabMode: DmReelMode,
-    onSelectRegion: (String) -> Unit
-) {
-    ScreenKorumaMerkezi(
-        generalMode = DmReelMode.BLOCK_ALL,
-        dmMode = dmMode,
-        exploreMode = exploreMode,
-        feedMode = feedMode,
-        profileMode = profileMode,
-        reelsTabMode = reelsTabMode,
-        onGeneralModeChange = {},
-        onApplyProfile = {},
-        onSelectRegion = onSelectRegion
-    )
-}
 
 // ============================================================================
 // EKRAN 6: SEKME 3 — "KOTA & SÜRE"
@@ -2520,7 +1940,9 @@ fun ScreenIcgoru(
     val savedSeconds = blockCount * 45L
     val savedMinutes = savedSeconds / 60
 
-    // Haftalık kazanım verisi (sakin ve zarif çubuk dağılımı)
+    val matrix by HeatmapStore.matrix.collectAsState()
+
+    // Haftalık kazanım verisi (HeatmapStore gerçek matris verisiyle)
     val dayNames = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) {
         listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     } else {
@@ -2530,12 +1952,14 @@ fun ScreenIcgoru(
         val dow = java.time.LocalDate.now().dayOfWeek.value
         (dow - 1).coerceIn(0, 6)
     }
-    val weeklyDayMinutes = remember(savedMinutes) {
-        listOf(18L, 25L, 14L, 22L, 30L, 16L, 20L).mapIndexed { index, defaultMin ->
-            if (index == currentDayIndex) maxOf(defaultMin, savedMinutes) else defaultMin
+    val weeklyDayMinutes = remember(matrix, savedMinutes, currentDayIndex) {
+        (0..6).map { dayIdx ->
+            val attempts = (0..23).sumOf { h -> matrix[dayIdx * 24 + h] }
+            val estMinutes = (attempts * 45L) / 60L
+            if (dayIdx == currentDayIndex) maxOf(estMinutes, savedMinutes) else estMinutes
         }
     }
-    val maxWeeklyMin = weeklyDayMinutes.maxOrNull()?.coerceAtLeast(30L) ?: 30L
+    val maxWeeklyMin = weeklyDayMinutes.maxOrNull()?.coerceAtLeast(15L) ?: 15L
     val totalWeeklyMinutes = weeklyDayMinutes.sum()
     val weeklyTotalHours = (totalWeeklyMinutes / 60).toInt()
     val weeklyTotalRemMinutes = (totalWeeklyMinutes % 60).toInt()
@@ -2665,6 +2089,162 @@ fun ScreenIcgoru(
                                     Spacer(modifier = Modifier.size(4.dp))
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2b. 7x24 Alışkanlık Isı Haritası (Heatmap)
+        item {
+            val totalAttempts = remember(matrix) { matrix.sum() }
+            val maxCellAttempts = remember(matrix) { matrix.maxOrNull()?.coerceAtLeast(1) ?: 1 }
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                tonalElevation = 0.dp
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Text(
+                        text = strings.habitHeatmapTitle,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 1.2.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = strings.habitHeatmapSub,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Saat işaretçileri (00, 06, 12, 18, 23)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(28.dp))
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            listOf("00", "06", "12", "18", "23").forEach { hr ->
+                                Text(
+                                    text = hr,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Normal
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // 7 Gün x 24 Saat Matrisi
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        dayNames.forEachIndexed { dayIdx, dayName ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = dayName.take(3),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
+                                        fontWeight = if (dayIdx == currentDayIndex) FontWeight.Bold else FontWeight.Normal
+                                    ),
+                                    color = if (dayIdx == currentDayIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.width(28.dp)
+                                )
+                                for (hour in 0..23) {
+                                    val cellAttempts = matrix[dayIdx * 24 + hour]
+                                    val cellColor = if (cellAttempts == 0) {
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                    } else {
+                                        val intensity = (0.3f + (cellAttempts.toFloat() / maxCellAttempts.toFloat()) * 0.7f).coerceIn(0.3f, 1f)
+                                        MaterialTheme.colorScheme.primary.copy(alpha = intensity)
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(9.dp)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(cellColor)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Lejant ve Bilgi
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (totalAttempts == 0) {
+                            Text(
+                                text = strings.habitHeatmapEmpty,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+                        } else {
+                            Text(
+                                text = "${totalAttempts} ${if (strings is com.nomorereels.app.ui.i18n.EnglishStrings) "total attempts" else "toplam yoklama"}",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = strings.habitHeatmapLess,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+                            )
+                            Text(
+                                text = strings.habitHeatmapMore,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -3609,15 +3189,20 @@ fun ScreenAyarlar(
 // EKRAN 8: CANLI OLAY GÜNLÜĞÜ (GELİŞTİRİCİ EKRANI)
 // ============================================================================
 
+enum class LogFilterType {
+    ALL, SCREEN_CHANGE, ACTION, NODE_TREE
+}
+
 @Composable
 fun LiveLogsScreen(
     onBack: () -> Unit,
     showBackButton: Boolean = false
 ) {
+    val strings = LocalAppStrings.current
     val rawLogs by DetectionLogStore.logs.collectAsState()
     var isPaused by remember { mutableStateOf(false) }
     var displayedLogs by remember { mutableStateOf(rawLogs) }
-    var selectedFilter by remember { mutableStateOf("Tümü") }
+    var selectedFilter by remember { mutableStateOf(LogFilterType.ALL) }
     var expandedLogId by remember { mutableStateOf<Long?>(null) }
 
     LaunchedEffect(rawLogs, isPaused) {
@@ -3628,10 +3213,10 @@ fun LiveLogsScreen(
 
     val filteredLogs = remember(displayedLogs, selectedFilter) {
         when (selectedFilter) {
-            "Ekran değişimi" -> displayedLogs.filter { it.actionTaken == null }
-            "Eylemler" -> displayedLogs.filter { it.actionTaken != null }
-            "Düğüm ağacı" -> displayedLogs.filter { it.keyNodes.isNotEmpty() }
-            else -> displayedLogs
+            LogFilterType.SCREEN_CHANGE -> displayedLogs.filter { it.actionTaken == null }
+            LogFilterType.ACTION -> displayedLogs.filter { it.actionTaken != null }
+            LogFilterType.NODE_TREE -> displayedLogs.filter { it.keyNodes.isNotEmpty() }
+            LogFilterType.ALL -> displayedLogs
         }
     }
 
@@ -3658,14 +3243,14 @@ fun LiveLogsScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = "Geri",
+                            contentDescription = strings.backButton,
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
                 Column {
                     Text(
-                        text = if (LocalAppStrings.current is com.nomorereels.app.ui.i18n.EnglishStrings)
+                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
                             "SYSTEM TRANSPARENCY"
                         else
                             "SİSTEM ŞEFFAFLIĞI",
@@ -3677,7 +3262,7 @@ fun LiveLogsScreen(
                     )
                     Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        text = if (LocalAppStrings.current is com.nomorereels.app.ui.i18n.EnglishStrings)
+                        text = if (strings is com.nomorereels.app.ui.i18n.EnglishStrings)
                             "Live Diagnostics"
                         else
                             "Canlı Teşhis",
@@ -3691,10 +3276,7 @@ fun LiveLogsScreen(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = if (isPaused)
-                            (if (LocalAppStrings.current is com.nomorereels.app.ui.i18n.EnglishStrings) "Paused · Stream frozen" else "Donduruldu · Akış duraklatıldı")
-                        else
-                            (if (LocalAppStrings.current is com.nomorereels.app.ui.i18n.EnglishStrings) "Live monitoring active (${filteredLogs.size} events)" else "Canlı akış devrede (${filteredLogs.size} olay)"),
+                        text = if (isPaused) strings.logsPausedStatus else strings.logsActiveStatus(filteredLogs.size),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (isPaused) NmrTheme.colors.statusOrange else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -3724,11 +3306,17 @@ fun LiveLogsScreen(
             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            listOf("Tümü", "Ekran değişimi", "Eylemler", "Düğüm ağacı").forEach { filter ->
+            val filterOptions = listOf(
+                LogFilterType.ALL to strings.logsFilterAll,
+                LogFilterType.SCREEN_CHANGE to strings.logsFilterScreenChange,
+                LogFilterType.ACTION to strings.logsFilterAction,
+                LogFilterType.NODE_TREE to strings.logsFilterNodeTree
+            )
+            filterOptions.forEach { (type, label) ->
                 NmrChip(
-                    label = filter,
-                    selected = selectedFilter == filter,
-                    onClick = { selectedFilter = filter }
+                    label = label,
+                    selected = selectedFilter == type,
+                    onClick = { selectedFilter = type }
                 )
             }
         }
@@ -3746,13 +3334,13 @@ fun LiveLogsScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Henüz algılama olayı yok",
+                        text = strings.logsEmptyTitle,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Instagram uygulamasını açtığınızda ekran geçişleri, Reels yakalamaları ve engelleme kararları burada anlık görünecektir.",
+                        text = strings.logsEmptySub,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center

@@ -113,6 +113,11 @@ interface Strings {
     val insightsSubtext: String
     val weeklyFocusTitle: String
     fun weeklyFocusDesc(hours: Int, minutes: Int): String
+    val habitHeatmapTitle: String
+    val habitHeatmapSub: String
+    val habitHeatmapLess: String
+    val habitHeatmapMore: String
+    val habitHeatmapEmpty: String
     val quotaBudgetTitle: String
     val quotaReachedSerenity: String
     val quotaUnderBudget: String
@@ -166,6 +171,14 @@ interface Strings {
     val backupImportFail: String
     val developerHeader: String
     val liveLogsTitle: String
+    val logsFilterAll: String
+    val logsFilterScreenChange: String
+    val logsFilterAction: String
+    val logsFilterNodeTree: String
+    val logsEmptyTitle: String
+    val logsEmptySub: String
+    val logsPausedStatus: String
+    fun logsActiveStatus(count: Int): String
     val versionFooter: String
 
     // Mindful Gateway (Farkındalık Kapısı)
@@ -381,6 +394,11 @@ object TurkishStrings : Strings {
     override val weeklyFocusTitle = "Haftalık Kazanım Özeti"
     override fun weeklyFocusDesc(hours: Int, minutes: Int) =
         "Bu hafta $hours saat $minutes dakika kendine kaldı."
+    override val habitHeatmapTitle = "Haftalık Alışkanlık Isı Haritası"
+    override val habitHeatmapSub = "Reels açma dürtülerinin gün ve saatlere göre sakin dağılımı."
+    override val habitHeatmapLess = "Sakin"
+    override val habitHeatmapMore = "Yoğun"
+    override val habitHeatmapEmpty = "Henüz kaydedilmiş bir dürtü yok. Zihnin sakin ve berrak."
     override val quotaBudgetTitle = "GÜNLÜK BÜTÇE DURUMU"
     override val quotaReachedSerenity = "Bugünkü niyetine ulaştın 🍃"
     override val quotaUnderBudget = "Sakin ve dengeli bir akıştasın."
@@ -433,6 +451,14 @@ object TurkishStrings : Strings {
     override val backupImportFail = "Ayar dosyası geçersiz veya bozuk"
     override val developerHeader = "GELİŞTİRİCİ"
     override val liveLogsTitle = "Canlı Olay Günlüğü"
+    override val logsFilterAll = "Tümü"
+    override val logsFilterScreenChange = "Ekran değişimi"
+    override val logsFilterAction = "Eylemler"
+    override val logsFilterNodeTree = "Düğüm ağacı"
+    override val logsEmptyTitle = "Henüz algılama olayı yok"
+    override val logsEmptySub = "Instagram uygulamasını açtığınızda ekran geçişleri, Reels yakalamaları ve engelleme kararları burada anlık görünecektir."
+    override val logsPausedStatus = "Donduruldu · Akış duraklatıldı"
+    override fun logsActiveStatus(count: Int) = "Canlı akış devrede ($count olay)"
     override val versionFooter = "Sürüm 1.0 · Açık kaynak"
 
     // Mindful Gateway (Farkındalık Kapısı)
@@ -646,6 +672,11 @@ object EnglishStrings : Strings {
     override val weeklyFocusTitle = "Weekly Recovered Summary"
     override fun weeklyFocusDesc(hours: Int, minutes: Int) =
         "You kept $hours hours $minutes minutes to yourself this week."
+    override val habitHeatmapTitle = "Weekly Habit Heatmap"
+    override val habitHeatmapSub = "Gentle distribution of Reels opening impulses across days and hours."
+    override val habitHeatmapLess = "Calm"
+    override val habitHeatmapMore = "Dense"
+    override val habitHeatmapEmpty = "No opening attempts recorded yet. Your mind is calm and clear."
     override val quotaBudgetTitle = "DAILY BUDGET STATUS"
     override val quotaReachedSerenity = "You've fulfilled today's intention 🍃"
     override val quotaUnderBudget = "You are in a calm and balanced flow."
@@ -698,6 +729,14 @@ object EnglishStrings : Strings {
     override val backupImportFail = "Settings file is invalid or corrupt"
     override val developerHeader = "DEVELOPER"
     override val liveLogsTitle = "Live Event Log"
+    override val logsFilterAll = "All"
+    override val logsFilterScreenChange = "Screen changes"
+    override val logsFilterAction = "Actions"
+    override val logsFilterNodeTree = "Node tree"
+    override val logsEmptyTitle = "No detection events yet"
+    override val logsEmptySub = "Screen transitions, Reels detections, and block decisions will appear here in real-time when Instagram is opened."
+    override val logsPausedStatus = "Paused · Stream frozen"
+    override fun logsActiveStatus(count: Int) = "Live monitoring active ($count events)"
     override val versionFooter = "Version 1.0 · Open Source"
 
     // Mindful Gateway (Farkındalık Kapısı)

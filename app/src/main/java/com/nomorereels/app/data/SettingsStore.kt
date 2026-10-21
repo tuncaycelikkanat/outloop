@@ -419,6 +419,15 @@ object SettingsStore {
         }
     }
 
+    fun isDarkThemeActiveNow(context: Context): Boolean {
+        val theme = _appThemeMode.value
+        if (theme == AppThemeMode.DARK) return true
+        if (theme == AppThemeMode.LIGHT) return false
+        if (isBedtimeActiveNow()) return true
+        val uiMode = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        return uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+    }
+
     fun setAppThemeMode(context: Context, themeMode: AppThemeMode) {
         _appThemeMode.value = themeMode
         val appContext = context.applicationContext
@@ -509,6 +518,7 @@ object SettingsStore {
         microPlan: String = ""
     ) {
         val now = System.currentTimeMillis()
+        val isAlreadySnoozing = isSnoozeActiveNow(now)
         val endTime = now + (durationMinutes * 60_000L)
         val savedGeneral = _generalMode.value
         val savedDm = _dmReelMode.value
@@ -524,12 +534,14 @@ object SettingsStore {
         scope.launch {
             appContext.dataStore.edit { prefs ->
                 prefs[KEY_SNOOZE_END_TIME_MS] = endTime
-                prefs[KEY_SNOOZE_SAVED_GENERAL_MODE] = savedGeneral.name
-                prefs[KEY_SNOOZE_SAVED_DM_MODE] = savedDm.name
-                prefs[KEY_SNOOZE_SAVED_EXPLORE_MODE] = savedExplore.name
-                prefs[KEY_SNOOZE_SAVED_FEED_MODE] = savedFeed.name
-                prefs[KEY_SNOOZE_SAVED_PROFILE_MODE] = savedProfile.name
-                prefs[KEY_SNOOZE_SAVED_REELS_TAB_MODE] = savedTab.name
+                if (!isAlreadySnoozing) {
+                    prefs[KEY_SNOOZE_SAVED_GENERAL_MODE] = savedGeneral.name
+                    prefs[KEY_SNOOZE_SAVED_DM_MODE] = savedDm.name
+                    prefs[KEY_SNOOZE_SAVED_EXPLORE_MODE] = savedExplore.name
+                    prefs[KEY_SNOOZE_SAVED_FEED_MODE] = savedFeed.name
+                    prefs[KEY_SNOOZE_SAVED_PROFILE_MODE] = savedProfile.name
+                    prefs[KEY_SNOOZE_SAVED_REELS_TAB_MODE] = savedTab.name
+                }
                 prefs[KEY_GENERAL_MODE] = temporaryMode.name
                 prefs[KEY_LAST_MICRO_PLAN] = microPlan
             }

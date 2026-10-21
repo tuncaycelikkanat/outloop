@@ -19,6 +19,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -69,6 +70,28 @@ private const val COLOR_DARK_MUTED = "#A3ADA3"
 private const val COLOR_DARK_BORDER = "#2B322C"
 
 /**
+ * Fiziksel veya jest tabanlı Geri (Back) tuşunu yakalayıp onay kapısını güvenle kapatan özel FrameLayout.
+ * Kullanıcının ekranda hapis kalmasını (trap) önler.
+ */
+private class BackInterceptingFrameLayout(
+    context: Context,
+    private val onBackPress: () -> Unit
+) : FrameLayout(context) {
+    init {
+        isFocusableInTouchMode = true
+        isFocusable = true
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
+            onBackPress()
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+}
+
+/**
  * Erişilebilirlik katmanı (TYPE_ACCESSIBILITY_OVERLAY) veya uygulama katmanı
  * (TYPE_APPLICATION_OVERLAY) üzerinden:
  * 1. "Bilinçli Sürtünme (5 Saniye Basılı Tutma)" tam ekran onay kapısını,
@@ -100,6 +123,7 @@ class OverlayController(
         fallbackContext: Context? = null,
         reelSummary: String? = null,
         holdDurationMs: Long = DEFAULT_HOLD_DURATION_MS,
+        isNightMode: Boolean = false,
         onApproved: () -> Unit,
         onCancelAndGoBack: () -> Unit
     ): Boolean {
@@ -118,6 +142,7 @@ class OverlayController(
                     context = targetContext,
                     reelSummary = reelSummary,
                     holdDurationMs = holdDurationMs,
+                    isNightMode = isNightMode,
                     onApproved = {
                         dismissMindfulFrictionOverlay()
                         onApproved()
@@ -452,32 +477,44 @@ class OverlayController(
         context: Context,
         reelSummary: String?,
         holdDurationMs: Long,
+        isNightMode: Boolean = false,
         onApproved: () -> Unit,
         onCancel: () -> Unit
     ): View {
-        val root = FrameLayout(context).apply {
+        val root = BackInterceptingFrameLayout(context, onCancel).apply {
             setBackgroundColor(Color.parseColor("#E6000000"))
             setPadding(dp(context, 20), dp(context, 24), dp(context, 20), dp(context, 24))
         }
+
+        val cardBg = if (isNightMode) COLOR_DARK_SURFACE else COLOR_LIGHT_SURFACE
+        val cardBorder = if (isNightMode) COLOR_DARK_BORDER else COLOR_LIGHT_BORDER
+        val titleColor = if (isNightMode) COLOR_DARK_TEXT else COLOR_LIGHT_TEXT
+        val textColor = if (isNightMode) COLOR_DARK_MUTED else COLOR_LIGHT_MUTED
+        val badgeBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
+        val badgeText = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+        val primaryBtnBg = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+        val primaryBtnText = if (isNightMode) Color.parseColor(COLOR_DARK_SURFACE) else Color.WHITE
+        val secondaryBtnBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
+        val secondaryBtnText = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
 
         val card = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             background = GradientDrawable().apply {
-                setColor(Color.parseColor(COLOR_LIGHT_SURFACE))
+                setColor(Color.parseColor(cardBg))
                 cornerRadius = dp(context, 22).toFloat()
-                setStroke(dp(context, 1), Color.parseColor(COLOR_LIGHT_BORDER))
+                setStroke(dp(context, 1), Color.parseColor(cardBorder))
             }
             setPadding(dp(context, 24), dp(context, 28), dp(context, 24), dp(context, 24))
         }
 
         val badge = TextView(context).apply {
             text = "FARKINDALIK KAPISI · DM REEL"
-            setTextColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
+            setTextColor(Color.parseColor(badgeText))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             typeface = getSansBold(context)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor(COLOR_LIGHT_ACCENT))
+                setColor(Color.parseColor(badgeBg))
                 cornerRadius = dp(context, 16).toFloat()
             }
             setPadding(dp(context, 12), dp(context, 6), dp(context, 12), dp(context, 6))
@@ -489,7 +526,7 @@ class OverlayController(
 
         val title = TextView(context).apply {
             text = "Nefes Al. Otomatik Pilotta mısın?"
-            setTextColor(Color.parseColor(COLOR_LIGHT_TEXT))
+            setTextColor(Color.parseColor(titleColor))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
             typeface = getSerifBold(context)
             gravity = Gravity.CENTER
@@ -507,7 +544,7 @@ class OverlayController(
 
         val subtitle = TextView(context).apply {
             text = subtitleText
-            setTextColor(Color.parseColor(COLOR_LIGHT_MUTED))
+            setTextColor(Color.parseColor(textColor))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             typeface = getSansRegular(context)
             gravity = Gravity.CENTER
@@ -521,11 +558,11 @@ class OverlayController(
             max = 1000
             progress = 0
             val bgDrawable = GradientDrawable().apply {
-                setColor(Color.parseColor(COLOR_LIGHT_CANVAS))
+                setColor(Color.parseColor(if (isNightMode) COLOR_DARK_CANVAS else COLOR_LIGHT_CANVAS))
                 cornerRadius = dp(context, 8).toFloat()
             }
             val fgShape = GradientDrawable().apply {
-                setColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
+                setColor(Color.parseColor(primaryBtnBg))
                 cornerRadius = dp(context, 8).toFloat()
             }
             val clip = ClipDrawable(fgShape, Gravity.START, ClipDrawable.HORIZONTAL)
@@ -545,13 +582,13 @@ class OverlayController(
         val holdButton = Button(context).apply {
             text = "İzlemek İçin 5 Saniye Basılı Tut"
             isAllCaps = false
-            setTextColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
+            setTextColor(Color.parseColor(secondaryBtnText))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
             typeface = getSansBold(context)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor(COLOR_LIGHT_ACCENT))
+                setColor(Color.parseColor(secondaryBtnBg))
                 cornerRadius = dp(context, 22).toFloat()
-                setStroke(dp(context, 1), Color.parseColor(COLOR_LIGHT_ACCENT))
+                setStroke(dp(context, 1), Color.parseColor(secondaryBtnBg))
             }
             setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
         }
@@ -565,8 +602,8 @@ class OverlayController(
                     isHolding = true
                     holdStartTime = System.currentTimeMillis()
                     v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                    (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
-                    holdButton.setTextColor(Color.WHITE)
+                    (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor(primaryBtnBg))
+                    holdButton.setTextColor(primaryBtnText)
 
                     val tick = object : Runnable {
                         override fun run() {
@@ -599,8 +636,8 @@ class OverlayController(
                         holdTickRunnable = null
                         progressBar.progress = 0
                         holdButton.text = "Yarıda Bırakıldı · 5 Sn Basılı Tut"
-                        (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor(COLOR_LIGHT_ACCENT))
-                        holdButton.setTextColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
+                        (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor(secondaryBtnBg))
+                        holdButton.setTextColor(Color.parseColor(secondaryBtnText))
                     }
                     true
                 }
@@ -620,11 +657,11 @@ class OverlayController(
         val cancelButton = Button(context).apply {
             text = "Vazgeç ve Sohbete Dön"
             isAllCaps = false
-            setTextColor(Color.WHITE)
+            setTextColor(primaryBtnText)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
             typeface = getSansBold(context)
             background = GradientDrawable().apply {
-                setColor(Color.parseColor(COLOR_LIGHT_PRIMARY))
+                setColor(Color.parseColor(primaryBtnBg))
                 cornerRadius = dp(context, 22).toFloat()
             }
             setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
@@ -671,7 +708,7 @@ class OverlayController(
         val breathingCircleBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
         val breathingCircleStroke = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
 
-        val root = FrameLayout(context).apply {
+        val root = BackInterceptingFrameLayout(context, onCancel).apply {
             setBackgroundColor(Color.parseColor("#E6000000"))
             setPadding(dp(context, 20), dp(context, 24), dp(context, 20), dp(context, 24))
         }

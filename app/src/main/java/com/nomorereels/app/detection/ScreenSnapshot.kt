@@ -1,6 +1,16 @@
 package com.nomorereels.app.detection
 
+import android.os.Build
 import android.view.accessibility.AccessibilityNodeInfo
+
+@Suppress("DEPRECATION")
+fun safeRecycle(node: AccessibilityNodeInfo?) {
+    if (Build.VERSION.SDK_INT < 34) {
+        try {
+            node?.recycle()
+        } catch (_: Exception) {}
+    }
+}
 
 data class NodeSnapshot(
     val viewId: String? = null,
@@ -78,13 +88,17 @@ data class ScreenSnapshot(
                     if (nodeCounter[0] >= MAX_TOTAL_NODES) break
                     val child = node.getChild(i)
                     if (child != null) {
-                        if (child.isVisibleToUser) {
-                            val childId = child.viewIdResourceName ?: ""
-                            val isIrrelevantSubtree = childId.contains("row_comment", ignoreCase = true) ||
-                                childId.contains("comment_thread", ignoreCase = true)
-                            if (!isIrrelevantSubtree) {
-                                children.add(createNodeSnapshot(child, depth + 1, nodeCounter))
+                        try {
+                            if (child.isVisibleToUser) {
+                                val childId = child.viewIdResourceName ?: ""
+                                val isIrrelevantSubtree = childId.contains("row_comment", ignoreCase = true) ||
+                                    childId.contains("comment_thread", ignoreCase = true)
+                                if (!isIrrelevantSubtree) {
+                                    children.add(createNodeSnapshot(child, depth + 1, nodeCounter))
+                                }
                             }
+                        } finally {
+                            safeRecycle(child)
                         }
                     }
                 }

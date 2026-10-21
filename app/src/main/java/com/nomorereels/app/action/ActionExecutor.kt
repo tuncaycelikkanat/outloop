@@ -94,10 +94,14 @@ class ActionExecutor(
         }
 
         if (matchingNode != null) {
-            val clicked = performClick(matchingNode)
-            if (clicked) {
-                Log.i(TAG, "Ana Sayfa sekmesine tıklandı (contentDescription ile).")
-                return true
+            try {
+                val clicked = performClick(matchingNode)
+                if (clicked) {
+                    Log.i(TAG, "Ana Sayfa sekmesine tıklandı (contentDescription ile).")
+                    return true
+                }
+            } finally {
+                if (matchingNode !== root) com.nomorereels.app.detection.safeRecycle(matchingNode)
             }
         }
 
@@ -110,11 +114,15 @@ class ActionExecutor(
         for (id in homeIds) {
             val nodes = root.findAccessibilityNodeInfosByViewId(id)
             if (!nodes.isNullOrEmpty()) {
-                val firstNode = nodes[0]
-                val clicked = performClick(firstNode)
-                if (clicked) {
-                    Log.i(TAG, "Ana Sayfa sekmesine tıklandı (viewId ile: $id).")
-                    return true
+                try {
+                    val firstNode = nodes[0]
+                    val clicked = performClick(firstNode)
+                    if (clicked) {
+                        Log.i(TAG, "Ana Sayfa sekmesine tıklandı (viewId ile: $id).")
+                        return true
+                    }
+                } finally {
+                    for (n in nodes) com.nomorereels.app.detection.safeRecycle(n)
                 }
             }
         }
@@ -133,8 +141,12 @@ class ActionExecutor(
             val child = node.getChild(i) ?: continue
             val found = findNodeRecursive(child, predicate)
             if (found != null) {
+                if (found !== child) {
+                    com.nomorereels.app.detection.safeRecycle(child)
+                }
                 return found
             }
+            com.nomorereels.app.detection.safeRecycle(child)
         }
         return null
     }
@@ -143,9 +155,13 @@ class ActionExecutor(
         var current: AccessibilityNodeInfo? = node
         while (current != null) {
             if (current.isClickable) {
-                return current.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                val result = current.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                if (current !== node) com.nomorereels.app.detection.safeRecycle(current)
+                return result
             }
-            current = current.parent
+            val parent = current.parent
+            if (current !== node) com.nomorereels.app.detection.safeRecycle(current)
+            current = parent
         }
         return false
     }

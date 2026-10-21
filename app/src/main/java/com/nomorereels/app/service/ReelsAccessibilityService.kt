@@ -92,9 +92,13 @@ class ReelsAccessibilityService : AccessibilityService() {
         }
 
         val activityName = event.className?.toString()
-        // event.source bir Binder IPC çağrısıdır; yalnızca kaydırma olaylarında gerekir.
         val srcId = if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            try { event.source?.viewIdResourceName } catch (_: Exception) { null }
+            val sourceNode = try { event.source } catch (_: Exception) { null }
+            try {
+                sourceNode?.viewIdResourceName
+            } finally {
+                com.nomorereels.app.detection.safeRecycle(sourceNode)
+            }
         } else {
             null
         }
@@ -120,13 +124,13 @@ class ReelsAccessibilityService : AccessibilityService() {
         }
 
         val rootNode = rootInActiveWindow ?: return
-
-        // 1. Düğüm ağacını saf veri modeline dönüştür
-        val snapshot = ScreenSnapshot.fromNodeInfo(
-            packageName = pkgName,
-            activityName = activityName,
-            rootNode = rootNode
-        )
+        try {
+            // 1. Düğüm ağacını saf veri modeline dönüştür
+            val snapshot = ScreenSnapshot.fromNodeInfo(
+                packageName = pkgName,
+                activityName = activityName,
+                rootNode = rootNode
+            )
 
         // 1b. Mola (Bilinçli Pencere) süresi doldu mu kontrol et
         val wasSnoozeActive = SettingsStore.isSnoozeActiveNow(now)
@@ -374,11 +378,11 @@ class ReelsAccessibilityService : AccessibilityService() {
 
             decision.shouldShowFriction -> {
                 if (!overlayController.isFrictionOverlayShowing) {
-                    if (SettingsStore.mindfulGatewayEnabled.value) {
-                        val isEnglish = SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.EN
-                        val isNightMode = SettingsStore.isBedtimeActiveNow()
-                        val barrierType = SettingsStore.mindfulBarrierType.value
+                    val isEnglish = SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.EN
+                    val isNightMode = SettingsStore.isDarkThemeActiveNow(this)
+                    val barrierType = SettingsStore.mindfulBarrierType.value
 
+                    if (SettingsStore.mindfulGatewayEnabled.value) {
                         overlayController.showMindfulGatewayOverlay(
                             barrierType = barrierType,
                             isNightMode = isNightMode,
@@ -410,6 +414,7 @@ class ReelsAccessibilityService : AccessibilityService() {
                     } else {
                         val shown = overlayController.showMindfulFrictionOverlay(
                             reelSummary = reelFingerprint.toSummaryString(),
+                            isNightMode = isNightMode,
                             onApproved = {
                                 navigationTracker.approveCurrentDmReel()
                                 DetectionLogStore.log(
@@ -455,7 +460,10 @@ class ReelsAccessibilityService : AccessibilityService() {
                 }
             }
         }
+    } finally {
+        com.nomorereels.app.detection.safeRecycle(rootNode)
     }
+}
 
     private var lastDumpSignature: String = ""
 
