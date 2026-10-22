@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
+        android:name="com.nomorereels.app.OutloopApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -15,7 +16,7 @@
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name="com.nomorereels.app.ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,7 +25,7 @@
         </activity>
 
         <service
-            android:name=".service.ReelsAccessibilityService"
+            android:name="com.nomorereels.app.service.ReelsAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="true">
             <intent-filter>
@@ -36,7 +37,7 @@
         </service>
 
         <receiver
-            android:name=".widget.QuotaAppWidgetProvider"
+            android:name="com.nomorereels.app.widget.QuotaAppWidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
