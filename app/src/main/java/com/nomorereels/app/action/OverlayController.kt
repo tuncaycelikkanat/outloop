@@ -135,7 +135,11 @@ class OverlayController(
         onApproved: () -> Unit,
         onCancelAndGoBack: () -> Unit
     ): Boolean {
-        if (frictionView != null) return true
+        if (isSuppressed) {
+            Log.d(TAG, "Bilinçli Sürtünme bastırıldı (cooldown aktif).")
+            return false
+        }
+        if (frictionView != null || isFrictionOverlayPending) return true
 
         val (targetContext, windowType) = resolveOverlayContextAndType(fallbackContext) ?: run {
             Log.w(TAG, "Overlay gösterilemedi: Uygun servis veya SYSTEM_ALERT_WINDOW izni yok.")
@@ -147,8 +151,13 @@ class OverlayController(
         pendingReleaseAudioRunnable = null
         MediaPauseHelper.pauseMedia(targetContext)
 
+        isFrictionOverlayPending = true
+
         mainHandler.post {
-            if (frictionView != null) return@post
+            if (frictionView != null) {
+                isFrictionOverlayPending = false
+                return@post
+            }
             try {
                 val wm = targetContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
                 val view = buildFrictionOverlayView(
@@ -180,8 +189,10 @@ class OverlayController(
                 wm.addView(view, params)
                 frictionView = view
                 frictionWindowManager = wm
+                isFrictionOverlayPending = false
                 Log.i(TAG, "Bilinçli Sürtünme (5 sn basılı tutma) ekranı gösterildi.")
             } catch (e: Exception) {
+                isFrictionOverlayPending = false
                 Log.e(TAG, "Bilinçli Sürtünme ekranı eklenirken hata: ${e.message}")
             }
         }
@@ -747,6 +758,7 @@ class OverlayController(
             }
             setPadding(dp(context, 16), dp(context, 14), dp(context, 16), dp(context, 14))
             setOnClickListener {
+                isEnabled = false
                 onCancel()
             }
         }
@@ -927,6 +939,7 @@ class OverlayController(
             }
             setPadding(dp(context, 18), dp(context, 14), dp(context, 18), dp(context, 14))
             setOnClickListener {
+                isEnabled = false
                 cleanupAnim()
                 onCancel()
             }
