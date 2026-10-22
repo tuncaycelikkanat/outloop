@@ -647,11 +647,11 @@ object TurkishStrings : Strings {
 
     override val supportHeader = "PROJEYİ DESTEKLE"
     override val supportCardTitle = "Geliştiriciye Kahve Ismarla ☕"
-    override val supportCardDesc = "NoMoreReels dikkatinizi korumak için %100 reklamsız, ücretsiz ve bağımsızdır. Zamanınızı geri kazanmanıza yardımcı olduysa, geliştiriciye bir kahve ısmarlayarak projeyi destekleyebilirsiniz."
+    override val supportCardDesc = "Outloop dikkatinizi korumak için %100 reklamsız, ücretsiz ve bağımsızdır. Zamanınızı geri kazanmanıza yardımcı olduysa, geliştiriciye bir kahve ısmarlayarak projeyi destekleyebilirsiniz."
     override val supporterBadgeTitle = "★ Proje Destekçisisiniz"
-    override val supporterBadgeDesc = "Desteğiniz için çok teşekkürler! Katkınızla NoMoreReels bağımsız ve reklamsız kalmaya devam ediyor."
+    override val supporterBadgeDesc = "Desteğiniz için çok teşekkürler! Katkınızla Outloop bağımsız ve reklamsız kalmaya devam ediyor."
     override val tipThankYouTitle = "Çok Teşekkürler! ❤️"
-    override val tipThankYouMessage = "Desteğin NoMoreReels'i reklamsız, bağımsız ve tertemiz tutmamıza yardımcı oluyor. İyi ki varsın!"
+    override val tipThankYouMessage = "Desteğin Outloop'u reklamsız, bağımsız ve tertemiz tutmamıza yardımcı oluyor. İyi ki varsın!"
 }
 
 object EnglishStrings : Strings {
@@ -973,9 +973,9 @@ object EnglishStrings : Strings {
 
     override val supportHeader = "SUPPORT THE PROJECT"
     override val supportCardTitle = "Buy Me a Coffee ☕"
-    override val supportCardDesc = "NoMoreReels is 100% ad-free, free, and independent to protect your attention. If it helped you reclaim your time, you can support development by buying me a coffee."
+    override val supportCardDesc = "Outloop is 100% ad-free, free, and independent to protect your attention. If it helped you reclaim your time, you can support development by buying me a coffee."
     override val supporterBadgeTitle = "★ Project Supporter"
-    override val supporterBadgeDesc = "Thank you so much for your support! Your contribution keeps NoMoreReels independent and ad-free."
+    override val supporterBadgeDesc = "Thank you so much for your support! Your contribution keeps Outloop independent and ad-free."
     override val tipThankYouTitle = "Thank You So Much! ❤️"
-    override val tipThankYouMessage = "Your support helps keep NoMoreReels ad-free, independent, and distraction-free. You are amazing!"
+    override val tipThankYouMessage = "Your support helps keep Outloop ad-free, independent, and distraction-free. You are amazing!"
 }

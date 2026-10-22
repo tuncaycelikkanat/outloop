@@ -3247,9 +3247,9 @@ fun ScreenIcgoru(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = if (isEnglish)
-                                    "NoMoreReels making a difference?"
+                                    "Outloop making a difference?"
                                 else
-                                    "NoMoreReels hayatında fark yarattı mı?",
+                                    "Outloop hayatında fark yarattı mı?",
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                                 color = MaterialTheme.colorScheme.onBackground
                             )
