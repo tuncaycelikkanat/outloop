@@ -63,6 +63,7 @@ object SettingsStore {
     private val KEY_PROFILE_REEL_MODE = stringPreferencesKey("profile_reel_mode")
     private val KEY_REELS_TAB_MODE = stringPreferencesKey("reels_tab_mode")
     private val KEY_OVERLAY_FEEDBACK_ENABLED = booleanPreferencesKey("overlay_feedback_enabled")
+    private val KEY_HAPTIC_FEEDBACK_ENABLED = booleanPreferencesKey("haptic_feedback_enabled")
     private val KEY_CUSTOM_REEL_OVERLAY_ENABLED = booleanPreferencesKey("custom_reel_overlay_enabled")
     private val KEY_HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
     private val KEY_BEDTIME_MODE_ENABLED = booleanPreferencesKey("bedtime_mode_enabled")
@@ -85,11 +86,17 @@ object SettingsStore {
     private val KEY_MINDFUL_BARRIER_TYPE = stringPreferencesKey("mindful_barrier_type")
     private val KEY_NIGHT_COMPASSION_ENABLED = booleanPreferencesKey("night_compassion_enabled")
     private val KEY_LAST_MICRO_PLAN = stringPreferencesKey("last_micro_plan")
+    private val KEY_IS_SUPPORTER = booleanPreferencesKey("is_supporter")
+    private val KEY_SUPPORTER_DONATION_COUNT = intPreferencesKey("supporter_donation_count")
+    private val KEY_PROTECTION_MASTER_ENABLED = booleanPreferencesKey("protection_master_enabled")
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Volatile
     private var isInitialized = false
+
+    private val _protectionMasterEnabled = MutableStateFlow(true)
+    val protectionMasterEnabled: StateFlow<Boolean> = _protectionMasterEnabled.asStateFlow()
 
     private val _generalMode = MutableStateFlow(DmReelMode.SINGLE_REEL)
     val generalMode: StateFlow<DmReelMode> = _generalMode.asStateFlow()
@@ -111,6 +118,9 @@ object SettingsStore {
 
     private val _overlayFeedbackEnabled = MutableStateFlow(true)
     val overlayFeedbackEnabled: StateFlow<Boolean> = _overlayFeedbackEnabled.asStateFlow()
+
+    private val _hapticFeedbackEnabled = MutableStateFlow(true)
+    val hapticFeedbackEnabled: StateFlow<Boolean> = _hapticFeedbackEnabled.asStateFlow()
 
     private val _customReelOverlayEnabled = MutableStateFlow(false)
     val customReelOverlayEnabled: StateFlow<Boolean> = _customReelOverlayEnabled.asStateFlow()
@@ -160,6 +170,12 @@ object SettingsStore {
     private val _lastMicroPlan = MutableStateFlow("")
     val lastMicroPlan: StateFlow<String> = _lastMicroPlan.asStateFlow()
 
+    private val _isSupporter = MutableStateFlow(false)
+    val isSupporter: StateFlow<Boolean> = _isSupporter.asStateFlow()
+
+    private val _supporterDonationCount = MutableStateFlow(0)
+    val supporterDonationCount: StateFlow<Int> = _supporterDonationCount.asStateFlow()
+
     fun init(context: Context) {
         if (isInitialized) return
         isInitialized = true
@@ -174,6 +190,7 @@ object SettingsStore {
                 _profileReelMode.value = DmReelMode.fromName(prefs[KEY_PROFILE_REEL_MODE], DmReelMode.FOLLOW_GLOBAL)
                 _reelsTabMode.value = DmReelMode.fromName(prefs[KEY_REELS_TAB_MODE], DmReelMode.BLOCK_ALL)
                 _overlayFeedbackEnabled.value = prefs[KEY_OVERLAY_FEEDBACK_ENABLED] ?: true
+                _hapticFeedbackEnabled.value = prefs[KEY_HAPTIC_FEEDBACK_ENABLED] ?: true
                 _customReelOverlayEnabled.value = prefs[KEY_CUSTOM_REEL_OVERLAY_ENABLED] ?: false
 
                 _hasCompletedOnboarding.value = prefs[KEY_HAS_COMPLETED_ONBOARDING] ?: false
@@ -193,6 +210,44 @@ object SettingsStore {
                 _mindfulBarrierType.value = MindfulBarrierType.fromCode(prefs[KEY_MINDFUL_BARRIER_TYPE])
                 _nightCompassionEnabled.value = prefs[KEY_NIGHT_COMPASSION_ENABLED] ?: true
                 _lastMicroPlan.value = prefs[KEY_LAST_MICRO_PLAN] ?: ""
+                _isSupporter.value = prefs[KEY_IS_SUPPORTER] ?: false
+                _supporterDonationCount.value = prefs[KEY_SUPPORTER_DONATION_COUNT] ?: 0
+                _protectionMasterEnabled.value = prefs[KEY_PROTECTION_MASTER_ENABLED] ?: true
+            }
+        }
+    }
+
+    fun setProtectionMasterEnabled(context: Context, enabled: Boolean) {
+        _protectionMasterEnabled.value = enabled
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_PROTECTION_MASTER_ENABLED] = enabled
+            }
+        }
+    }
+
+    fun recordDonation(context: Context) {
+        val newCount = _supporterDonationCount.value + 1
+        _supporterDonationCount.value = newCount
+        _isSupporter.value = true
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_IS_SUPPORTER] = true
+                prefs[KEY_SUPPORTER_DONATION_COUNT] = newCount
+            }
+        }
+    }
+
+    fun resetSupporterStatus(context: Context) {
+        _supporterDonationCount.value = 0
+        _isSupporter.value = false
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_IS_SUPPORTER] = false
+                prefs[KEY_SUPPORTER_DONATION_COUNT] = 0
             }
         }
     }
@@ -289,6 +344,16 @@ object SettingsStore {
         scope.launch {
             appContext.dataStore.edit { prefs ->
                 prefs[KEY_OVERLAY_FEEDBACK_ENABLED] = enabled
+            }
+        }
+    }
+
+    fun setHapticFeedbackEnabled(context: Context, enabled: Boolean) {
+        _hapticFeedbackEnabled.value = enabled
+        val appContext = context.applicationContext
+        scope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[KEY_HAPTIC_FEEDBACK_ENABLED] = enabled
             }
         }
     }

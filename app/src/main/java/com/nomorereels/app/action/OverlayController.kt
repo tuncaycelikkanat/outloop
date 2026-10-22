@@ -10,6 +10,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -114,9 +115,13 @@ class OverlayController(
     private var bannerWindowManager: WindowManager? = null
     private var bannerDismissRunnable: Runnable? = null
     private var holdTickRunnable: Runnable? = null
+    private var pendingReleaseAudioRunnable: Runnable? = null
 
     val isFrictionOverlayShowing: Boolean
         get() = frictionView != null || isFrictionOverlayPending
+
+    val isSuppressed: Boolean
+        get() = System.currentTimeMillis() < suppressionUntilMs
 
     /**
      * DM'den açılan Reel için 5 saniye basılı tutma gerektiren "Bilinçli Sürtünme"
@@ -137,6 +142,11 @@ class OverlayController(
             return false
         }
 
+        // Medyayı HEMEN duraklat (post beklemeden)
+        pendingReleaseAudioRunnable?.let { mainHandler.removeCallbacks(it) }
+        pendingReleaseAudioRunnable = null
+        MediaPauseHelper.pauseMedia(targetContext)
+
         mainHandler.post {
             if (frictionView != null) return@post
             try {
@@ -147,11 +157,11 @@ class OverlayController(
                     holdDurationMs = holdDurationMs,
                     isNightMode = isNightMode,
                     onApproved = {
-                        dismissMindfulFrictionOverlay()
+                        dismissMindfulFrictionOverlay(releaseAudioImmediately = true)
                         onApproved()
                     },
                     onCancel = {
-                        dismissMindfulFrictionOverlay()
+                        dismissMindfulFrictionOverlay(releaseAudioImmediately = false)
                         onCancelAndGoBack()
                     }
                 )
@@ -179,11 +189,31 @@ class OverlayController(
     }
 
     /**
-     * Açık olan Bilinçli Sürtünme ekranını kapatır.
+     * Açık olan Bilinçli Sürtünme / Farkındalık Kapısı ekranını kapatır.
+     * @param releaseAudioImmediately true ise ses odağı derhal bırakılır (onaylanıp Reels izlenmeye başlandığında).
+     * false ise vazgeçildiğinde Reels'in arkada hemen tekrar çalmasını önlemek için 1.5 sn gecikmeyle bırakılır.
      */
-    fun dismissMindfulFrictionOverlay() {
+    fun dismissMindfulFrictionOverlay(releaseAudioImmediately: Boolean = false) {
         suppressionUntilMs = System.currentTimeMillis() + 3000L
         isFrictionOverlayPending = false
+
+        pendingReleaseAudioRunnable?.let { mainHandler.removeCallbacks(it) }
+        pendingReleaseAudioRunnable = null
+
+        val ctx = serviceProvider() ?: frictionView?.context
+        if (ctx != null) {
+            if (releaseAudioImmediately) {
+                MediaPauseHelper.releaseAudioFocus(ctx)
+            } else {
+                val r = Runnable {
+                    MediaPauseHelper.releaseAudioFocus(ctx)
+                    pendingReleaseAudioRunnable = null
+                }
+                pendingReleaseAudioRunnable = r
+                mainHandler.postDelayed(r, 1500L)
+            }
+        }
+
         mainHandler.post {
             holdTickRunnable?.let { mainHandler.removeCallbacks(it) }
             holdTickRunnable = null
@@ -227,6 +257,11 @@ class OverlayController(
             return false
         }
 
+        // Medyayı HEMEN duraklat (post beklemeden)
+        pendingReleaseAudioRunnable?.let { mainHandler.removeCallbacks(it) }
+        pendingReleaseAudioRunnable = null
+        MediaPauseHelper.pauseMedia(targetContext)
+
         isFrictionOverlayPending = true
 
         mainHandler.post {
@@ -242,11 +277,11 @@ class OverlayController(
                     isNightMode = isNightMode,
                     isEnglish = isEnglish,
                     onApproved = { duration, plan ->
-                        dismissMindfulFrictionOverlay()
+                        dismissMindfulFrictionOverlay(releaseAudioImmediately = true)
                         onApproved(duration, plan)
                     },
                     onCancel = {
-                        dismissMindfulFrictionOverlay()
+                        dismissMindfulFrictionOverlay(releaseAudioImmediately = false)
                         onCancelAndGoBack()
                     }
                 )
@@ -316,8 +351,8 @@ class OverlayController(
                     PixelFormat.TRANSLUCENT
                 ).apply {
                     gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                    y = dp(targetContext, 12)
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                    y = if (windowType == WindowManager.LayoutParams.TYPE_APPLICATION) dp(targetContext, 24) else dp(targetContext, 12)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
                     }
                 }
@@ -365,7 +400,8 @@ class OverlayController(
         fallbackContext: Context? = null,
         durationMs: Long = 2400L
     ) {
-        val (titleText, subText, accentColor) = getBannerStringsAndColor(decision)
+        val targetCtx = fallbackContext ?: serviceProvider()
+        val (titleText, subText, accentColor) = getBannerStringsAndColor(decision, targetCtx)
         if (SettingsStore.punchHoleAlertEnabled.value) {
             showPunchHolePill(titleText, subText, accentColor, fallbackContext, durationMs)
             return
@@ -390,14 +426,34 @@ class OverlayController(
                     PixelFormat.TRANSLUCENT
                 ).apply {
                     gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                    y = dp(targetContext, 64)
+                    y = if (windowType == WindowManager.LayoutParams.TYPE_APPLICATION) dp(targetContext, 24) else dp(targetContext, 56)
                 }
+
+                view.scaleX = 0.3f
+                view.scaleY = 0.3f
+                view.alpha = 0f
 
                 wm.addView(view, params)
                 bannerView = view
                 bannerWindowManager = wm
 
-                val dismissTask = Runnable { removeBannerImmediate() }
+                view.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .alpha(1.0f)
+                    .setDuration(220L)
+                    .setInterpolator(android.view.animation.OvershootInterpolator(1.2f))
+                    .start()
+
+                val dismissTask = Runnable {
+                    view.animate()
+                        .scaleX(0.3f)
+                        .scaleY(0.3f)
+                        .alpha(0f)
+                        .setDuration(180L)
+                        .withEndAction { removeBannerImmediate() }
+                        .start()
+                }
                 bannerDismissRunnable = dismissTask
                 mainHandler.postDelayed(dismissTask, durationMs)
             } catch (e: Exception) {
@@ -474,7 +530,7 @@ class OverlayController(
     }
 
     fun dismissAll() {
-        dismissMindfulFrictionOverlay()
+        dismissMindfulFrictionOverlay(releaseAudioImmediately = true)
         mainHandler.post { removeBannerImmediate() }
     }
 
@@ -482,6 +538,14 @@ class OverlayController(
         val service = serviceProvider()
         if (service != null) {
             return service to WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+        }
+        var ctx = fallbackContext
+        while (ctx is android.content.ContextWrapper) {
+            if (ctx is android.app.Activity) break
+            ctx = ctx.baseContext
+        }
+        if (ctx is android.app.Activity && !ctx.isFinishing && !ctx.isDestroyed) {
+            return ctx to WindowManager.LayoutParams.TYPE_APPLICATION
         }
         if (fallbackContext != null && Settings.canDrawOverlays(fallbackContext)) {
             return fallbackContext.applicationContext to WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -937,37 +1001,43 @@ class OverlayController(
         return root
     }
 
-    fun getBannerStringsAndColor(decision: PolicyDecision): Triple<String, String, Int> {
-        val calmSage = Color.parseColor(COLOR_LIGHT_PRIMARY)
+    fun getBannerStringsAndColor(
+        decision: PolicyDecision,
+        context: Context? = null
+    ): Triple<String, String, Int> {
+        val isEnglish = SettingsStore.appLanguage.value == AppLanguage.EN
+        val isDark = context?.let { SettingsStore.isDarkThemeActiveNow(it) } ?: false
+        val calmSage = Color.parseColor(if (isDark) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY)
+
         return when (decision) {
             PolicyDecision.BLOCK_AFTER_SWIPE -> Triple(
-                "Tek Reel İznin Bitti",
-                "2. videoya kaydırıldı",
+                if (isEnglish) "Single Reel Limit Reached" else "Tek Reel İznin Bitti",
+                if (isEnglish) "Scrolled to 2nd video" else "2. videoya kaydırıldı",
                 calmSage
             )
             PolicyDecision.BLOCK_AFTER_TIMEOUT -> Triple(
-                "Süre Sınırı Doldu",
-                "Tek Reel süresi aşıldı",
+                if (isEnglish) "Time Limit Reached" else "Süre Sınırı Doldu",
+                if (isEnglish) "Single Reel timeout reached" else "Tek Reel süresi aşıldı",
                 calmSage
             )
             PolicyDecision.BLOCK_BEDTIME -> Triple(
-                "Gece Odak Saati 🌙",
-                "Uyku vakti kilidi devrede",
-                Color.parseColor(COLOR_DARK_PRIMARY)
+                if (isEnglish) "Bedtime Focus Active" else "Gece Odak Saati",
+                if (isEnglish) "Bedtime lock active" else "Uyku vakti kilidi devrede",
+                Color.parseColor(if (isDark) "#9FA8DA" else "#5C6BC0")
             )
             PolicyDecision.BLOCK_DAILY_COUNT_LIMIT -> Triple(
-                "Reel Kotan Doldu 🎯",
-                "Günlük limitine ulaştın",
+                if (isEnglish) "Daily Reel Limit Reached" else "Reel Kotan Doldu",
+                if (isEnglish) "Daily limit reached" else "Günlük limitine ulaştın",
                 calmSage
             )
             PolicyDecision.BLOCK_DAILY_TIME_LIMIT -> Triple(
-                "Günlük Süren Doldu ⏱️",
-                "Reels hedef süren tamamlandı",
+                if (isEnglish) "Daily Time Limit Reached" else "Günlük Süren Doldu",
+                if (isEnglish) "Daily Reels target completed" else "Reels hedef süren tamamlandı",
                 calmSage
             )
             else -> Triple(
-                "Reels Engellendi 🛑",
-                "Odağın korundu",
+                if (isEnglish) "Reels Blocked" else "Reels Engellendi",
+                if (isEnglish) "Your focus was protected" else "Odağın korundu",
                 calmSage
             )
         }
@@ -979,50 +1049,86 @@ class OverlayController(
         subtitle: String?,
         accentColor: Int
     ): View {
+        val isDark = SettingsStore.isDarkThemeActiveNow(context)
+
+        val bgColor = if (isDark) Color.parseColor("#F5111512") else Color.parseColor("#FDFEFC")
+        val borderColor = if (isDark) Color.parseColor("#2C3A2F") else Color.parseColor("#DCE4DC")
+        val titleColor = if (isDark) Color.parseColor("#F0F4ED") else Color.parseColor("#1E2B22")
+        val subtitleColor = if (isDark) Color.parseColor("#9CAD9F") else Color.parseColor("#637265")
+        val dividerColor = if (isDark) Color.parseColor("#2E3D31") else Color.parseColor("#D4DDD4")
+        val haloColor = Color.argb(
+            if (isDark) 50 else 38,
+            Color.red(accentColor),
+            Color.green(accentColor),
+            Color.blue(accentColor)
+        )
+
         return LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             background = GradientDrawable().apply {
-                setColor(Color.parseColor("#F2101310"))
+                setColor(bgColor)
                 cornerRadius = dp(context, 999).toFloat()
-                setStroke(dp(context, 1), Color.parseColor(COLOR_DARK_BORDER))
+                setStroke(dp(context, 1), borderColor)
             }
-            setPadding(dp(context, 12), dp(context, 7), dp(context, 16), dp(context, 7))
-
-            val cameraDot = View(context).apply {
-                background = GradientDrawable().apply {
-                    shape = GradientDrawable.OVAL
-                    setColor(accentColor)
-                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                elevation = dp(context, 6).toFloat()
             }
-            addView(cameraDot, LinearLayout.LayoutParams(dp(context, 8), dp(context, 8)).apply {
-                marginEnd = dp(context, 8)
-            })
+            setPadding(dp(context, 10), dp(context, 7), dp(context, 15), dp(context, 7))
 
-            val textColumn = LinearLayout(context).apply {
-                orientation = LinearLayout.HORIZONTAL
+            // Glowing dual-layer indicator dot
+            val dotContainer = FrameLayout(context).apply {
+                addView(View(context).apply {
+                    background = GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(haloColor)
+                    }
+                }, FrameLayout.LayoutParams(dp(context, 14), dp(context, 14), Gravity.CENTER))
+
+                addView(View(context).apply {
+                    background = GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(accentColor)
+                    }
+                }, FrameLayout.LayoutParams(dp(context, 7), dp(context, 7), Gravity.CENTER))
+            }
+
+            addView(dotContainer, LinearLayout.LayoutParams(dp(context, 14), dp(context, 14)).apply {
+                marginEnd = dp(context, 9)
                 gravity = Gravity.CENTER_VERTICAL
-            }
+            })
 
             val titleView = TextView(context).apply {
                 text = title
-                setTextColor(Color.WHITE)
+                setTextColor(titleColor)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
                 typeface = getSansBold(context)
+                includeFontPadding = false
             }
-            textColumn.addView(titleView)
+            addView(titleView)
 
             if (!subtitle.isNullOrBlank()) {
+                val separator = View(context).apply {
+                    background = GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(dividerColor)
+                    }
+                }
+                addView(separator, LinearLayout.LayoutParams(dp(context, 3), dp(context, 3)).apply {
+                    marginStart = dp(context, 8)
+                    marginEnd = dp(context, 8)
+                    gravity = Gravity.CENTER_VERTICAL
+                })
+
                 val subtitleView = TextView(context).apply {
-                    text = " · $subtitle"
-                    setTextColor(Color.parseColor(COLOR_DARK_MUTED))
+                    text = subtitle
+                    setTextColor(subtitleColor)
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
                     typeface = getSansRegular(context)
+                    includeFontPadding = false
                 }
-                textColumn.addView(subtitleView)
+                addView(subtitleView)
             }
-
-            addView(textColumn)
         }
     }
 
@@ -1032,33 +1138,7 @@ class OverlayController(
         subText: String,
         accentColor: Int
     ): View {
-        return LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            background = GradientDrawable().apply {
-                setColor(Color.parseColor("#F2101310"))
-                cornerRadius = dp(context, 16).toFloat()
-                setStroke(dp(context, 1), Color.parseColor(COLOR_DARK_BORDER))
-            }
-            setPadding(dp(context, 20), dp(context, 12), dp(context, 20), dp(context, 12))
-
-            addView(TextView(context).apply {
-                text = titleText
-                setTextColor(Color.WHITE)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                typeface = getSansBold(context)
-                gravity = Gravity.CENTER
-            })
-
-            addView(TextView(context).apply {
-                text = subText
-                setTextColor(Color.parseColor(COLOR_DARK_MUTED))
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-                typeface = getSansRegular(context)
-                gravity = Gravity.CENTER
-                setPadding(0, dp(context, 2), 0, 0)
-            })
-        }
+        return buildPunchHolePillView(context, titleText, subText, accentColor)
     }
 
     private fun dp(context: Context, value: Int): Int {

@@ -8,3 +8,26 @@ local.properties
 /captures
 .externalNativeBuild
 .cxx
+
+# Built binaries and packages
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Signing keys and keystores (Critical Security)
+*.jks
+*.keystore
+*.key
+signing.properties
+
+# Local audit reports and scratch files
+warden_reports/
+WARDEN_EXECUTIVE_REPORT.md
+*.log
+captures/
+.navigation/
+
+# Android Studio & OS memory dumps
+*.hprof

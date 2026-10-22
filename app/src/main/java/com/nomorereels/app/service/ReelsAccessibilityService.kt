@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.nomorereels.app.action.ActionExecutor
+import com.nomorereels.app.action.MediaPauseHelper
 import com.nomorereels.app.action.OverlayController
 import com.nomorereels.app.data.HeatmapStore
 import com.nomorereels.app.data.QuotaStore
@@ -124,6 +125,10 @@ class ReelsAccessibilityService : AccessibilityService() {
         }
 
         val rootNode = rootInActiveWindow ?: return
+        if (actionExecutor.isExiting || overlayController.isSuppressed) {
+            com.nomorereels.app.detection.safeRecycle(rootNode)
+            return
+        }
         try {
             // 1. Düğüm ağacını saf veri modeline dönüştür
             val snapshot = ScreenSnapshot.fromNodeInfo(
@@ -220,6 +225,20 @@ class ReelsAccessibilityService : AccessibilityService() {
         }
 
         // 5. Reels ekranındayız (REELS_TAB veya REELS_VIEWER)
+        val isProtectionMasterEnabled = SettingsStore.protectionMasterEnabled.value
+        val isSnoozeActive = SettingsStore.isSnoozeActiveNow(now)
+        if (!isProtectionMasterEnabled || isSnoozeActive) {
+            if (overlayController.isFrictionOverlayShowing) {
+                overlayController.dismissMindfulFrictionOverlay()
+            }
+            _lastDetectedType.value = activeScreen
+            _lastOriginScreen.value = navigationTracker.reelOriginScreen
+            if (activeScreen.isReels) {
+                lastReelViewerActiveTimeMs = now
+            }
+            return
+        }
+
         QuotaStore.ensureToday(this)
         val newReelEntered = isScreenChanged || navigationTracker.checkAndClearNewReelSwiped()
         if (newReelEntered) {
@@ -243,16 +262,6 @@ class ReelsAccessibilityService : AccessibilityService() {
             reelsTabMode = reelsTabMode,
             generalMode = generalMode
         )
-
-        val isSnoozeActive = SettingsStore.isSnoozeActiveNow(now)
-        if (isSnoozeActive) {
-            _lastDetectedType.value = activeScreen
-            _lastOriginScreen.value = navigationTracker.reelOriginScreen
-            if (activeScreen.isReels) {
-                lastReelViewerActiveTimeMs = now
-            }
-            return
-        }
 
         // Politikayı çalıştır
         val decision = reelsPolicy.evaluate(
@@ -315,9 +324,12 @@ class ReelsAccessibilityService : AccessibilityService() {
         }
         when {
             decision.shouldBlock -> {
-                if (overlayController.isFrictionOverlayShowing) {
+                if (overlayController.isFrictionOverlayShowing || overlayController.isSuppressed || actionExecutor.isExiting) {
                     return
                 }
+
+                // Medyayı HEMEN duraklat (sessiz AudioTrack + audio focus)
+                MediaPauseHelper.pauseMedia(this)
 
                 if (SettingsStore.mindfulGatewayEnabled.value) {
                     val isEnglish = SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.EN
@@ -349,12 +361,10 @@ class ReelsAccessibilityService : AccessibilityService() {
                                 )
                             },
                             onCancelAndGoBack = {
-                                val freshRoot = rootInActiveWindow
-                                try {
-                                    actionExecutor.executeBlock(activeScreen, freshRoot, force = true)
-                                } finally {
-                                    freshRoot?.let { com.nomorereels.app.detection.safeRecycle(it) }
-                                }
+                                actionExecutor.exitReels(
+                                    screenType = activeScreen,
+                                    originScreen = navigationTracker.reelOriginScreen
+                                )
                                 DetectionLogStore.log(
                                     screenType = activeScreen,
                                     details = "Farkındalık Kapısı: Çıkış / Vazgeçme",
@@ -372,8 +382,8 @@ class ReelsAccessibilityService : AccessibilityService() {
                                 keyNodes = keyNodes
                             )
                         }
-                        return
                     }
+                    return
                 } else {
                     Log.w(TAG, "Reels engelleniyor! Karar: $decision, Ekran: $activeScreen, Köken: $originLabel, Mod: ${activeModeForLog.name}")
                     val handled = actionExecutor.executeBlock(activeScreen, rootNode)
@@ -392,7 +402,10 @@ class ReelsAccessibilityService : AccessibilityService() {
             }
 
             decision.shouldShowFriction -> {
-                if (!overlayController.isFrictionOverlayShowing) {
+                if (!overlayController.isFrictionOverlayShowing && !overlayController.isSuppressed && !actionExecutor.isExiting) {
+                    // Medyayı HEMEN duraklat
+                    MediaPauseHelper.pauseMedia(this)
+
                     val isEnglish = SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.EN
                     val isNightMode = SettingsStore.isDarkThemeActiveNow(this)
                     val barrierType = SettingsStore.mindfulBarrierType.value
@@ -417,7 +430,10 @@ class ReelsAccessibilityService : AccessibilityService() {
                                 )
                             },
                             onCancelAndGoBack = {
-                                actionExecutor.executeBlock(ScreenType.REELS_VIEWER, null, force = true)
+                                actionExecutor.exitReels(
+                                    screenType = ScreenType.REELS_VIEWER,
+                                    originScreen = navigationTracker.reelOriginScreen ?: ScreenType.DIRECT_MESSAGES
+                                )
                                 DetectionLogStore.log(
                                     screenType = ScreenType.REELS_VIEWER,
                                     details = "Farkındalık Kapısı (DM): Vazgeçildi",
@@ -440,7 +456,10 @@ class ReelsAccessibilityService : AccessibilityService() {
                                 )
                             },
                             onCancelAndGoBack = {
-                                actionExecutor.executeBlock(ScreenType.REELS_VIEWER, null, force = true)
+                                actionExecutor.exitReels(
+                                    screenType = ScreenType.REELS_VIEWER,
+                                    originScreen = navigationTracker.reelOriginScreen ?: ScreenType.DIRECT_MESSAGES
+                                )
                                 DetectionLogStore.log(
                                     screenType = ScreenType.REELS_VIEWER,
                                     details = "Köken: $originLabel · Kullanıcı Vazgeçti",

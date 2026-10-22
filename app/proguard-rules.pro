@@ -1,1 +1,37 @@
-# ProGuard rules for NoMoreReels
+# ==============================================================================
+# ProGuard / R8 Rules for NoMoreReels (Production Release)
+# ==============================================================================
+
+# 1. Android Accessibility Service & System Components
+-keep public class com.nomorereels.app.service.ReelsAccessibilityService {
+    public <init>();
+    *;
+}
+-keep public class com.nomorereels.app.widget.QuotaAppWidgetProvider {
+    public <init>();
+    *;
+}
+
+# 2. Google Play Billing Client
+-keep class com.android.billingclient.api.** { *; }
+-dontwarn com.android.billingclient.api.**
+
+# 3. DataStore & Serialization Models
+-keepclassmembers class * {
+    @androidx.annotation.Keep <fields>;
+    @androidx.annotation.Keep <methods>;
+}
+-keep class com.nomorereels.app.detection.DynamicRules { *; }
+-keep class com.nomorereels.app.detection.ScreenRule { *; }
+-keep class com.nomorereels.app.data.** { *; }
+
+# 4. Strip Debug & Verbose Logging from Release Builds
+# Release derlemesinde Log.d ve Log.v çağrılarını bayt kodundan tamamen siler
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int d(...);
+}
+
+# 5. Jetpack Compose Runtime Rules
+-keepclassmembers class * extends androidx.compose.runtime.State { *; }

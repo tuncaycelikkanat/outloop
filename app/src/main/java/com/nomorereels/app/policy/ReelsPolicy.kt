@@ -43,8 +43,8 @@ enum class DmReelMode(
         get() = when (this) {
             FOLLOW_GLOBAL -> "Genel moda uy"
             BLOCK_ALL -> "Komple Yasak"
-            SINGLE_REEL -> "Sadece Bir Tane"
-            COUNT_QUOTA -> "X Tane"
+            SINGLE_REEL -> "Sadece 1 Tane"
+            COUNT_QUOTA -> "X Tane / Süre"
             TIME_QUOTA -> "X Dakika"
             ASK_WITH_FRICTION -> "5 sn Onaylı"
             FREE -> "Serbest"

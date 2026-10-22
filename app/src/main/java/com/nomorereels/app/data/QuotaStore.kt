@@ -41,6 +41,7 @@ object QuotaStore {
     private val KEY_TODAY_TIME_SPENT_SECONDS = longPreferencesKey("quota_today_time_spent_seconds")
     private val KEY_TODAY_BLOCK_COUNT = intPreferencesKey("quota_today_block_count")
     private val KEY_TOTAL_BLOCK_COUNT = longPreferencesKey("quota_total_block_count")
+    private val KEY_DAILY_HISTORY_CSV = stringPreferencesKey("quota_daily_history_csv")
 
     private val KEY_DAILY_COUNT_LIMIT_ENABLED = booleanPreferencesKey("daily_count_limit_enabled")
     private val KEY_DAILY_COUNT_LIMIT = intPreferencesKey("daily_count_limit")
@@ -74,6 +75,9 @@ object QuotaStore {
 
     private val _totalBlockCount = MutableStateFlow(0L)
     val totalBlockCount: StateFlow<Long> = _totalBlockCount.asStateFlow()
+
+    private val _dailyHistory = MutableStateFlow<Map<String, Long>>(emptyMap())
+    val dailyHistory: StateFlow<Map<String, Long>> = _dailyHistory.asStateFlow()
 
     private val _dailyCountLimitEnabled = MutableStateFlow(false)
     val dailyCountLimitEnabled: StateFlow<Boolean> = _dailyCountLimitEnabled.asStateFlow()
@@ -118,6 +122,19 @@ object QuotaStore {
                 _todayBlockCount.value = prefs[KEY_TODAY_BLOCK_COUNT] ?: 0
             }
 
+            val historyCsv = prefs[KEY_DAILY_HISTORY_CSV] ?: ""
+            if (historyCsv.isNotBlank()) {
+                val map = historyCsv.split(",").mapNotNull { entry ->
+                    val parts = entry.split(":")
+                    if (parts.size == 2) {
+                        val d = parts[0]
+                        val m = parts[1].toLongOrNull() ?: 0L
+                        d to m
+                    } else null
+                }.toMap()
+                _dailyHistory.value = map
+            }
+
             // 2. Ayarları (limitler, eşikler) sürekli dinle
             appContext.quotaDataStore.data.collect { p ->
                 _dailyCountLimitEnabled.value = p[KEY_DAILY_COUNT_LIMIT_ENABLED] ?: false
@@ -160,6 +177,10 @@ object QuotaStore {
         val secs = _todayTimeSpentSeconds.value
         val blocks = _todayBlockCount.value
         val total = _totalBlockCount.value
+        val todayMins = secs / 60L
+        val updatedMap = (_dailyHistory.value + (day to todayMins)).toList().takeLast(14).toMap()
+        _dailyHistory.value = updatedMap
+        val historyCsv = updatedMap.entries.joinToString(",") { "${it.key}:${it.value}" }
         scope.launch {
             appContext.quotaDataStore.edit { prefs ->
                 prefs[KEY_LAST_RESET_DATE] = day
@@ -167,6 +188,7 @@ object QuotaStore {
                 prefs[KEY_TODAY_TIME_SPENT_SECONDS] = secs
                 prefs[KEY_TODAY_BLOCK_COUNT] = blocks
                 prefs[KEY_TOTAL_BLOCK_COUNT] = total
+                prefs[KEY_DAILY_HISTORY_CSV] = historyCsv
             }
             com.nomorereels.app.widget.QuotaAppWidgetProvider.updateAllWidgets(appContext)
         }
@@ -215,6 +237,28 @@ object QuotaStore {
         currentDay = getTodayDateString()
         resetCountersInMemory()
         persistCounters(context.applicationContext)
+    }
+
+    fun resetAllStatistics(context: Context) {
+        val appContext = context.applicationContext
+        currentDay = getTodayDateString()
+        resetCountersInMemory()
+        _todayBlockCount.value = 0
+        _totalBlockCount.value = 0L
+        _dailyHistory.value = emptyMap()
+        scope.launch {
+            try {
+                appContext.quotaDataStore.edit { prefs ->
+                    prefs[KEY_TODAY_REEL_COUNT] = 0
+                    prefs[KEY_TODAY_TIME_SPENT_SECONDS] = 0L
+                    prefs[KEY_TODAY_BLOCK_COUNT] = 0
+                    prefs[KEY_TOTAL_BLOCK_COUNT] = 0L
+                    prefs[KEY_DAILY_HISTORY_CSV] = ""
+                    prefs[KEY_LAST_RESET_DATE] = currentDay
+                }
+            } catch (_: Exception) {}
+        }
+        com.nomorereels.app.service.ReelsAccessibilityService.actionExecutor.resetBlockCount()
     }
 
     fun setDailyCountLimitEnabled(context: Context, enabled: Boolean) {
@@ -315,6 +359,20 @@ object QuotaStore {
             return true
         }
         return false
+    }
+
+    fun getTenDayAverageMinutes(fallbackWeeklyMinutes: List<Long>): Long {
+        val historyValues = _dailyHistory.value.values.filter { it > 0 }
+        return if (historyValues.size >= 2) {
+            historyValues.takeLast(10).average().toLong().coerceAtLeast(1L)
+        } else {
+            val nonZero = fallbackWeeklyMinutes.filter { it > 0 }
+            if (nonZero.isNotEmpty()) {
+                nonZero.average().toLong().coerceAtLeast(1L)
+            } else {
+                15L
+            }
+        }
     }
 
     fun getTodayDateString(): String {
