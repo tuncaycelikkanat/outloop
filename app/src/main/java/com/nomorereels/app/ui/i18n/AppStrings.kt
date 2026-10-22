@@ -75,6 +75,10 @@ interface Strings {
     val countQuotaSub: String
     val timeQuotaTitle: String
     val timeQuotaSub: String
+    val quotaTypeReelCount: String
+    val quotaTypeTotalTime: String
+    val quotaTypeHeader: String
+    val quotaTypeSubtext: String
 
     val presetBalanced: String
     val presetMindful: String
@@ -121,6 +125,7 @@ interface Strings {
     val quotaBudgetTitle: String
     val quotaReachedSerenity: String
     val quotaUnderBudget: String
+    val quoteOfTheDayTitle: String
 
     val quotaTitle: String
     val blockAllActiveTitle: String
@@ -160,6 +165,27 @@ interface Strings {
     val batteryOptInactiveSub: String
     val batteryOptExemptBadge: String
     val batteryOptFixButton: String
+    val feedbackHeader: String
+    val overlayFeedbackTitle: String
+    val overlayFeedbackSub: String
+    val hapticFeedbackTitle: String
+    val hapticFeedbackSub: String
+    val howItWorksTitle: String
+    val howItWorksSub: String
+    val howItWorksDialogTitle: String
+    val howItWorksPoint1Title: String
+    val howItWorksPoint1Desc: String
+    val howItWorksPoint2Title: String
+    val howItWorksPoint2Desc: String
+    val howItWorksPoint3Title: String
+    val howItWorksPoint3Desc: String
+    val resetStatsTitle: String
+    val resetStatsSub: String
+    val resetStatsDialogTitle: String
+    val resetStatsDialogMessage: String
+    val resetStatsConfirm: String
+    val resetStatsCancel: String
+    val resetStatsSuccess: String
     val backupHeader: String
     val backupExportTitle: String
     val backupExportSub: String
@@ -219,6 +245,7 @@ interface Strings {
     val gatewayWindowExpiredTitle: String
     fun gatewayWindowExpiredDesc(plan: String): String
 
+    val quotaSuffixReels: String
     val quotaSuffixMinutes: String
     val quotaSuffixSeconds: String
     val quotaConditionNote: String
@@ -251,6 +278,14 @@ interface Strings {
     val bedtimeEndLabel: String
 
     // Onboarding
+    val introHeroTitle: String
+    val introFeature1Title: String
+    val introFeature1Sub: String
+    val introFeature2Title: String
+    val introFeature2Sub: String
+    val introFeature3Title: String
+    val introFeature3Sub: String
+
     val privacyHeroTitle: String
     val privacyFeature1Title: String
     val privacyFeature1Sub: String
@@ -261,6 +296,8 @@ interface Strings {
 
     val accessibilityStepTitle: String
     val accessibilityStepSub: String
+    val accessibilityDisclosureTitle: String
+    val accessibilityDisclosureBody: String
     val step1Text: String
     val step2Text: String
     val step3Text: String
@@ -277,6 +314,18 @@ interface Strings {
     val backButton: String
     val startButton: String
     val openSettingsButton: String
+    val walkthroughSettingTitle: String
+    val walkthroughSettingSub: String
+    val closeButton: String
+
+    // Support & Donation
+    val supportHeader: String
+    val supportCardTitle: String
+    val supportCardDesc: String
+    val supporterBadgeTitle: String
+    val supporterBadgeDesc: String
+    val tipThankYouTitle: String
+    val tipThankYouMessage: String
 }
 
 object TurkishStrings : Strings {
@@ -326,7 +375,7 @@ object TurkishStrings : Strings {
 
     override fun themeLabel(theme: NmrThemeMode) = theme.labelTr
 
-    override val appName = "No More Reels"
+    override val appName = "Unreel"
     override val protectionActive = "Koruma aktif"
     override val protectionInactive = "Koruma kapalı"
     override val generalModePrefix = "Genel mod:"
@@ -350,12 +399,16 @@ object TurkishStrings : Strings {
 
     override val blockAllTitle = "Komple Yasak"
     override val blockAllSub = "Sıfır video"
-    override val singleReelTitle = "Sadece Bir Tane"
+    override val singleReelTitle = "Sadece 1 Tane"
     override val singleReelSub = "İlk video serbest, kaydırınca kapanır"
     override val countQuotaTitle = "X Tane"
-    override val countQuotaSub = "Günlük adet kadar"
-    override val timeQuotaTitle = "X Dakika"
-    override val timeQuotaSub = "Günlük süre kadar"
+    override val countQuotaSub = "Günlük video sayısı kadar"
+    override val timeQuotaTitle = "X Süre"
+    override val timeQuotaSub = "Günlük toplam dakika kadar"
+    override val quotaTypeReelCount = "Reel Sayısı"
+    override val quotaTypeTotalTime = "Toplam Süre"
+    override val quotaTypeHeader = "GÜNLÜK KOTA TÜRÜ VE LİMİTİ"
+    override val quotaTypeSubtext = "Kotanın video adedine mi yoksa toplam süreye mi uygulanacağını seçin."
 
     override val presetBalanced = "Dengeli"
     override val presetMindful = "Bilinçli"
@@ -402,6 +455,7 @@ object TurkishStrings : Strings {
     override val quotaBudgetTitle = "GÜNLÜK BÜTÇE DURUMU"
     override val quotaReachedSerenity = "Bugünkü niyetine ulaştın 🍃"
     override val quotaUnderBudget = "Sakin ve dengeli bir akıştasın."
+    override val quoteOfTheDayTitle = "GÜNÜN SÖZÜ"
 
     override val quotaTitle = "Kota & Süre"
     override val blockAllActiveTitle = "KOMPLE YASAK DEVREDE"
@@ -440,6 +494,27 @@ object TurkishStrings : Strings {
     override val batteryOptInactiveSub = "Korumalı değil · Sistem servisi kapatabilir (Dokun)"
     override val batteryOptExemptBadge = "Muaf"
     override val batteryOptFixButton = "Muaf Tut"
+    override val feedbackHeader = "BİLDİRİM VE GERİ BİLDİRİM"
+    override val overlayFeedbackTitle = "Engelleme Bilgi Rozeti"
+    override val overlayFeedbackSub = "Reels engellendiğinde ekranda kısa bir bilgi rozeti göster"
+    override val hapticFeedbackTitle = "Dokunsal Titreşim"
+    override val hapticFeedbackSub = "Etkileşimlerde ve engellemelerde hafif titreşim ver"
+    override val howItWorksTitle = "Nasıl Çalışır & Gizlilik"
+    override val howItWorksSub = "Verileriniz %100 çevrimdışı ve cihazınızda saklanır"
+    override val howItWorksDialogTitle = "Nasıl Çalışır & Gizlilik Güvencesi"
+    override val howItWorksPoint1Title = "Sıfır İnternet & Tam Gizlilik"
+    override val howItWorksPoint1Desc = "Uygulama hiçbir internet iznine sahip değildir. Hiçbir veriniz, izleme geçmişiniz veya kullanıcı bilgileriniz sunucuya gönderilmez."
+    override val howItWorksPoint2Title = "Sistem Seviyesinde Tespit"
+    override val howItWorksPoint2Desc = "Android Erişilebilirlik Servisi yalnızca Instagram'da Reels sekmesine veya tam ekran Reels oynatıcısına girildiğini algılar. Mesajlarınızı veya gönderilerinizi asla okumaz."
+    override val howItWorksPoint3Title = "Odak Süresi Modellemesi"
+    override val howItWorksPoint3Desc = "Kurtarılan odak süresi, engellenen her Reels teşebbüsü için ortalama 45 saniyelik bir kullanım katsayısıyla güvenilir biçimde hesaplanır."
+    override val resetStatsTitle = "Tüm İstatistikleri Sıfırla"
+    override val resetStatsSub = "Test verilerini ve bugünkü kullanım geçmişini temizler"
+    override val resetStatsDialogTitle = "İstatistikleri Sıfırla"
+    override val resetStatsDialogMessage = "Kurtarılan süre, haftalık grafik ve bugünkü kullanım sayaçları sıfırlanacaktır. Bu işlem geri alınamaz."
+    override val resetStatsConfirm = "Sıfırla"
+    override val resetStatsCancel = "İptal"
+    override val resetStatsSuccess = "Tüm istatistikler ve sayaçlar sıfırlandı."
     override val backupHeader = "YEDEKLEME VE VERİ"
     override val backupExportTitle = "Ayarları Dosyaya Yedekle"
     override val backupExportSub = "İnternet gerekmez · JSON formatında cihaza kaydet"
@@ -499,6 +574,7 @@ object TurkishStrings : Strings {
     override val gatewayWindowExpiredTitle = "Bilinçli Penceren Doldu ⏱️"
     override fun gatewayWindowExpiredDesc(plan: String) = if (plan.isNotBlank()) "Planladığın gibi: $plan" else "Bilinçli süren tamamlandı."
 
+    override val quotaSuffixReels = "Reel"
     override val quotaSuffixMinutes = "dk"
     override val quotaSuffixSeconds = "sn"
     override val quotaConditionNote = " (Kota açıldığında geçerlidir)"
@@ -529,6 +605,14 @@ object TurkishStrings : Strings {
     override val bedtimeStartLabel = "Başlangıç (Uyku):"
     override val bedtimeEndLabel = "Bitiş (Uyanış):"
 
+    override val introHeroTitle = "Sonsuz kaydırmayı durdur, zamanını geri kazan"
+    override val introFeature1Title = "Reels Akışını Otomatik Engelle"
+    override val introFeature1Sub = "Reels sekmesine veya 2. videoya kaydırıldığında seni anında ana sayfaya döndürür."
+    override val introFeature2Title = "Farkındalık Kapısı"
+    override val introFeature2Sub = "Sert engel yerine sakin bir duraklama, niyet aynası ve bilinçli mola penceresi sunar."
+    override val introFeature3Title = "Akıllı Günlük Kotalar"
+    override val introFeature3Sub = "Günlük süre ve video sınırları belirleyerek dijital dengeni korur."
+
     override val privacyHeroTitle = "Sıfır internet. Sıfır takip."
     override val privacyFeature1Title = "İnternet izni bile yok"
     override val privacyFeature1Sub = "Uygulama dışarıya tek bayt gönderemez."
@@ -539,15 +623,17 @@ object TurkishStrings : Strings {
 
     override val accessibilityStepTitle = "Tek izin: Erişilebilirlik"
     override val accessibilityStepSub = "Yalnızca Instagram'da hangi ekranda olduğunu anlar. Mesajlarını veya içeriğini okumaz."
+    override val accessibilityDisclosureTitle = "Açık ve Belirgin Beyan (Google Play Uyumluluğu)"
+    override val accessibilityDisclosureBody = "Unreel, yalnızca Instagram uygulamasında Reels sekmesini ve video oynatıcıyı tespit edip otomatik olarak geri dönmek için Android Erişilebilirlik API'sini (AccessibilityService) kullanır. Bu hizmet mesajlarınızı, tuş vuruşlarınızı veya ekran metinlerinizi asla okumaz; hiçbir kişisel veriyi toplamaz ve cihazınızdan dışarı aktarmaz."
     override val step1Text = "Ayarlar'ı aç"
-    override val step2Text = "No More Reels'i seç"
+    override val step2Text = "Unreel'i seç"
     override val step3Text = "Servisi aç"
     override val waitingPermission = "İzin bekleniyor"
     override val permissionGranted = "İzin verildi"
 
     override val profileStepTitle = "Bir profil seç"
     override val profileStepBalancedSub = "Günlük kotayla dengeli izleme"
-    override val profileStepMindfulSub = "Gevşetmek için 5 sn basılı tutma"
+    override val profileStepMindfulSub = "Farkındalık kapısı ve sakin duraklama"
     override val profileStepStrictSub = "Sıfır video"
     override val profileStepFooter = "Sonra istediğin gibi değiştirebilirsin."
 
@@ -555,6 +641,17 @@ object TurkishStrings : Strings {
     override val backButton = "Geri"
     override val startButton = "Başla"
     override val openSettingsButton = "Erişilebilirlik ayarlarını aç"
+    override val walkthroughSettingTitle = "Uygulama Tanıtımı & Nasıl Çalışır?"
+    override val walkthroughSettingSub = "Özellikleri, koruma yöntemlerini ve gizliliği keşfet"
+    override val closeButton = "Kapat"
+
+    override val supportHeader = "PROJEYİ DESTEKLE"
+    override val supportCardTitle = "Geliştiriciye Kahve Ismarla ☕"
+    override val supportCardDesc = "NoMoreReels dikkatinizi korumak için %100 reklamsız, ücretsiz ve bağımsızdır. Zamanınızı geri kazanmanıza yardımcı olduysa, geliştiriciye bir kahve ısmarlayarak projeyi destekleyebilirsiniz."
+    override val supporterBadgeTitle = "★ Proje Destekçisisiniz"
+    override val supporterBadgeDesc = "Desteğiniz için çok teşekkürler! Katkınızla NoMoreReels bağımsız ve reklamsız kalmaya devam ediyor."
+    override val tipThankYouTitle = "Çok Teşekkürler! ❤️"
+    override val tipThankYouMessage = "Desteğin NoMoreReels'i reklamsız, bağımsız ve tertemiz tutmamıza yardımcı oluyor. İyi ki varsın!"
 }
 
 object EnglishStrings : Strings {
@@ -604,7 +701,7 @@ object EnglishStrings : Strings {
 
     override fun themeLabel(theme: NmrThemeMode) = theme.labelEn
 
-    override val appName = "No More Reels"
+    override val appName = "Unreel"
     override val protectionActive = "Protection active"
     override val protectionInactive = "Protection off"
     override val generalModePrefix = "General mode:"
@@ -628,12 +725,16 @@ object EnglishStrings : Strings {
 
     override val blockAllTitle = "Block All"
     override val blockAllSub = "Zero videos"
-    override val singleReelTitle = "Single Reel"
+    override val singleReelTitle = "1 Reel Only"
     override val singleReelSub = "First video allowed, closes on scroll"
-    override val countQuotaTitle = "X Count"
-    override val countQuotaSub = "Up to daily count"
-    override val timeQuotaTitle = "X Minutes"
-    override val timeQuotaSub = "Up to daily duration"
+    override val countQuotaTitle = "X Reels"
+    override val countQuotaSub = "Daily video count limit"
+    override val timeQuotaTitle = "X Duration"
+    override val timeQuotaSub = "Daily total minutes limit"
+    override val quotaTypeReelCount = "Reel Count"
+    override val quotaTypeTotalTime = "Total Time"
+    override val quotaTypeHeader = "DAILY QUOTA TYPE & LIMIT"
+    override val quotaTypeSubtext = "Choose whether to limit by reel count or total viewing time."
 
     override val presetBalanced = "Balanced"
     override val presetMindful = "Mindful"
@@ -680,6 +781,7 @@ object EnglishStrings : Strings {
     override val quotaBudgetTitle = "DAILY BUDGET STATUS"
     override val quotaReachedSerenity = "You've fulfilled today's intention 🍃"
     override val quotaUnderBudget = "You are in a calm and balanced flow."
+    override val quoteOfTheDayTitle = "QUOTE OF THE DAY"
 
     override val quotaTitle = "Quota & Time"
     override val blockAllActiveTitle = "BLOCK ALL ACTIVE"
@@ -718,6 +820,27 @@ object EnglishStrings : Strings {
     override val batteryOptInactiveSub = "Not protected · System may kill background service (Tap)"
     override val batteryOptExemptBadge = "Exempt"
     override val batteryOptFixButton = "Exempt"
+    override val feedbackHeader = "FEEDBACK & NOTIFICATIONS"
+    override val overlayFeedbackTitle = "Block Info Badge"
+    override val overlayFeedbackSub = "Show a brief info badge on screen when Reels is blocked"
+    override val hapticFeedbackTitle = "Haptic Feedback"
+    override val hapticFeedbackSub = "Subtle vibration on interactions and blocks"
+    override val howItWorksTitle = "How it Works & Privacy"
+    override val howItWorksSub = "100% offline & local data privacy"
+    override val howItWorksDialogTitle = "How it Works & Privacy Guarantee"
+    override val howItWorksPoint1Title = "Zero Internet & Full Privacy"
+    override val howItWorksPoint1Desc = "The app has zero internet permissions. No data, viewing history, or personal info is ever sent to any server."
+    override val howItWorksPoint2Title = "System-Level Detection"
+    override val howItWorksPoint2Desc = "Android Accessibility Service only detects when the Reels tab or viewer is active. It never reads your messages or posts."
+    override val howItWorksPoint3Title = "Focus Time Modeling"
+    override val howItWorksPoint3Desc = "Saved focus time is reliably projected using an industry-standard 45-second average per blocked Reel attempt."
+    override val resetStatsTitle = "Reset All Statistics"
+    override val resetStatsSub = "Clears test data and today's usage history"
+    override val resetStatsDialogTitle = "Reset Statistics"
+    override val resetStatsDialogMessage = "Saved focus time, weekly chart, and today's usage counters will be cleared. This action cannot be undone."
+    override val resetStatsConfirm = "Reset"
+    override val resetStatsCancel = "Cancel"
+    override val resetStatsSuccess = "All statistics and counters have been reset."
     override val backupHeader = "BACKUP & DATA"
     override val backupExportTitle = "Backup Settings to File"
     override val backupExportSub = "No internet required · Save as JSON to device"
@@ -777,6 +900,7 @@ object EnglishStrings : Strings {
     override val gatewayWindowExpiredTitle = "Mindful Window Expired ⏱️"
     override fun gatewayWindowExpiredDesc(plan: String) = if (plan.isNotBlank()) "As planned: $plan" else "Your mindful time is complete."
 
+    override val quotaSuffixReels = "Reels"
     override val quotaSuffixMinutes = "min"
     override val quotaSuffixSeconds = "sec"
     override val quotaConditionNote = " (Applies when quota is active)"
@@ -807,6 +931,14 @@ object EnglishStrings : Strings {
     override val bedtimeStartLabel = "Bedtime (Sleep):"
     override val bedtimeEndLabel = "Wakeup (Morning):"
 
+    override val introHeroTitle = "Stop endless scrolling, reclaim your time"
+    override val introFeature1Title = "Auto Block Reels Feed"
+    override val introFeature1Sub = "Instantly redirects you back to the home feed when you enter Reels or swipe to video 2."
+    override val introFeature2Title = "Mindful Gateway"
+    override val introFeature2Sub = "Offers a calm pause, intent reflection, and mindful break window instead of an abrupt block."
+    override val introFeature3Title = "Smart Daily Quotas"
+    override val introFeature3Sub = "Set daily duration and video limits to stay in control of your digital habits."
+
     override val privacyHeroTitle = "Zero internet. Zero tracking."
     override val privacyFeature1Title = "No internet permission at all"
     override val privacyFeature1Sub = "The app cannot send a single byte externally."
@@ -817,15 +949,17 @@ object EnglishStrings : Strings {
 
     override val accessibilityStepTitle = "Only one permission: Accessibility"
     override val accessibilityStepSub = "Detects which screen is active in Instagram only. Never reads messages or private content."
+    override val accessibilityDisclosureTitle = "Prominent Disclosure (Google Play Compliance)"
+    override val accessibilityDisclosureBody = "Unreel uses the Android AccessibilityService API strictly to detect the Instagram Reels tab and video player, and automatically navigate back to protect your focus. This service never reads your personal messages, keystrokes, or screen text; it collects zero personal data and has no internet access."
     override val step1Text = "Open Settings"
-    override val step2Text = "Select No More Reels"
+    override val step2Text = "Select Unreel"
     override val step3Text = "Turn on Service"
     override val waitingPermission = "Waiting for permission"
     override val permissionGranted = "Permission granted"
 
     override val profileStepTitle = "Choose a profile"
     override val profileStepBalancedSub = "Balanced viewing with daily limits"
-    override val profileStepMindfulSub = "5s hold to loosen protection"
+    override val profileStepMindfulSub = "Mindful gateway with calm pause"
     override val profileStepStrictSub = "Zero videos"
     override val profileStepFooter = "You can change this anytime later."
 
@@ -833,4 +967,15 @@ object EnglishStrings : Strings {
     override val backButton = "Back"
     override val startButton = "Start"
     override val openSettingsButton = "Open accessibility settings"
+    override val walkthroughSettingTitle = "App Walkthrough & How It Works"
+    override val walkthroughSettingSub = "Explore features, protection methods, and privacy"
+    override val closeButton = "Close"
+
+    override val supportHeader = "SUPPORT THE PROJECT"
+    override val supportCardTitle = "Buy Me a Coffee ☕"
+    override val supportCardDesc = "NoMoreReels is 100% ad-free, free, and independent to protect your attention. If it helped you reclaim your time, you can support development by buying me a coffee."
+    override val supporterBadgeTitle = "★ Project Supporter"
+    override val supporterBadgeDesc = "Thank you so much for your support! Your contribution keeps NoMoreReels independent and ad-free."
+    override val tipThankYouTitle = "Thank You So Much! ❤️"
+    override val tipThankYouMessage = "Your support helps keep NoMoreReels ad-free, independent, and distraction-free. You are amazing!"
 }

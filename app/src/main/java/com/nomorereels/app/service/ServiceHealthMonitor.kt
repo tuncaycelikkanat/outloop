@@ -87,7 +87,7 @@ object ServiceHealthMonitor {
             context.startActivity(fallbackIntent)
             android.widget.Toast.makeText(
                 context,
-                "No More Reels'i bulup 'Optimize Etme' seçeneğini işaretleyin.",
+                "Unreel'i bulup 'Optimize Etme' seçeneğini işaretleyin.",
                 android.widget.Toast.LENGTH_LONG
             ).show()
         } catch (_: Exception) {

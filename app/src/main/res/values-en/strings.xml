@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Unreel</string>
+    <string name="accessibility_service_name">Unreel Service</string>
+    <string name="accessibility_service_description">Detects Instagram Reels feed and gently exits or blocks it to protect your focus and digital well-being. This service strictly does not read personal messages, texts, or user data, and never transmits anything to the internet.</string>
+</resources>

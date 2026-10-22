@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">No More Reels</string>
-    <string name="accessibility_service_name">No More Reels Hizmeti</string>
+    <string name="app_name">Unreel</string>
+    <string name="accessibility_service_name">Unreel Hizmeti</string>
     <string name="accessibility_service_description">Instagram Reels akışını algılayıp otomatik geri dönerek veya engelleyerek dikkatinizi korur. Bu hizmet hiçbir metin, mesaj veya kişisel veri okumaz ve internete iletmez.</string>
 </resources>
