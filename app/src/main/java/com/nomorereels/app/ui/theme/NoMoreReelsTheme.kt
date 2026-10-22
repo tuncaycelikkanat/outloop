@@ -5,11 +5,19 @@ import android.content.ContextWrapper
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +28,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -323,12 +332,14 @@ object NmrIcons {
     val GeceOdak: ImageVector = Icons.Outlined.Bedtime
     val IradeKilidi: ImageVector = Icons.Outlined.Lock
     val KameraKapsulu: ImageVector = Icons.Outlined.Visibility
+    val Titresim: ImageVector = Icons.Outlined.Vibration
+    val BildirimRozeti: ImageVector = Icons.Outlined.Notifications
 
     // 5 Ana Navigasyon Hedefi
     val BugunNav: ImageVector = Icons.Outlined.Spa
     val KorumaNav: ImageVector = Icons.Outlined.Shield
     val IcgoruNav: ImageVector = Icons.Outlined.Insights
-    val GunlukNav: ImageVector = Icons.Outlined.ReceiptLong
+    val GunlukNav: ImageVector = Icons.AutoMirrored.Outlined.ReceiptLong
     val AyarlarNav: ImageVector = Icons.Outlined.Tune
 
     // Geriye dönük uyumluluk alias'ları
@@ -344,7 +355,7 @@ object NmrIcons {
 enum class NmrThemeMode(val labelTr: String, val labelEn: String = labelTr) {
     LIGHT("Açık", "Light"),
     SYSTEM("Sistem", "System"),
-    AMOLED("AMOLED", "AMOLED")
+    AMOLED("Koyu", "Dark")
 }
 
 enum class NmrLanguage(val code: String) {
@@ -814,19 +825,22 @@ fun NmrBottomNavigationBar(
     modifier: Modifier = Modifier
 ) {
     val strings = com.nomorereels.app.ui.i18n.LocalAppStrings.current
+    val haptic = LocalHapticFeedback.current
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .padding(horizontal = 14.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(56.dp)
                 .shadow(
                     elevation = 4.dp,
                     shape = CircleShape,
-                    spotColor = Color(0x0C24332A),
+                    spotColor = Color(0x0E24332A),
                     ambientColor = Color(0x0624332A)
                 ),
             shape = CircleShape,
@@ -834,69 +848,90 @@ fun NmrBottomNavigationBar(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             tonalElevation = 0.dp
         ) {
-            Row(
+            BoxWithConstraints(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 5.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .padding(4.dp)
             ) {
-                NmrBottomTab.entries.forEach { tab ->
-                    val selected = tab == currentTab
-                    val labelText = when (tab) {
-                        NmrBottomTab.BUGUN -> strings.tabToday
-                        NmrBottomTab.KORUMA -> strings.tabProtection
-                        NmrBottomTab.ICGORU -> strings.tabInsights
-                        NmrBottomTab.AYARLAR -> strings.tabSettings
-                    }
+                val tabWidth = maxWidth / 4
+                val selectedIndex = currentTab.ordinal
 
-                    val containerColor by animateColorAsState(
-                        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                        animationSpec = tween(180),
-                        label = "tabContainerColor"
-                    )
-                    val contentColor by animateColorAsState(
-                        targetValue = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                        animationSpec = tween(180),
-                        label = "tabContentColor"
-                    )
+                val indicatorOffset by animateDpAsState(
+                    targetValue = tabWidth * selectedIndex,
+                    animationSpec = spring(
+                        dampingRatio = 0.84f,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
+                    label = "tabIndicatorOffset"
+                )
 
-                    Surface(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { onTabSelected(tab) },
-                        shape = CircleShape,
-                        color = containerColor
-                    ) {
-                        Row(
+                // Kayan yeşil kapsül gösterge (Sliding Pill)
+                Box(
+                    modifier = Modifier
+                        .width(tabWidth)
+                        .fillMaxHeight()
+                        .offset { IntOffset(x = indicatorOffset.roundToPx(), y = 0) }
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+
+                // 4 Sabit Sekme Butonu
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    NmrBottomTab.entries.forEach { tab ->
+                        val selected = tab == currentTab
+                        val labelText = when (tab) {
+                            NmrBottomTab.BUGUN -> strings.tabToday
+                            NmrBottomTab.KORUMA -> strings.tabProtection
+                            NmrBottomTab.ICGORU -> strings.tabInsights
+                            NmrBottomTab.AYARLAR -> strings.tabSettings
+                        }
+
+                        val contentColor by animateColorAsState(
+                            targetValue = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
+                            animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+                            label = "tabContentColor"
+                        )
+
+                        Box(
                             modifier = Modifier
-                                .animateContentSize(animationSpec = tween(180))
-                                .padding(horizontal = if (selected) 10.dp else 6.dp, vertical = 7.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clip(CircleShape)
+                                .clickable(
+                                    interactionSource = remember(tab) { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    if (tab != currentTab) {
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        onTabSelected(tab)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = tab.icon,
-                                contentDescription = labelText,
-                                tint = contentColor,
-                                modifier = Modifier.size(19.dp)
-                            )
-                            AnimatedVisibility(
-                                visible = selected,
-                                enter = fadeIn(animationSpec = tween(160)) + expandHorizontally(animationSpec = tween(160)),
-                                exit = fadeOut(animationSpec = tween(100)) + shrinkHorizontally(animationSpec = tween(100))
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
                             ) {
+                                Icon(
+                                    imageVector = tab.icon,
+                                    contentDescription = labelText,
+                                    tint = contentColor,
+                                    modifier = Modifier.size(19.dp)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = labelText,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        letterSpacing = 0.sp
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.5.sp,
+                                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                                        letterSpacing = (-0.1).sp
                                     ),
                                     color = contentColor,
-                                    maxLines = 1
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
@@ -906,4 +941,5 @@ fun NmrBottomNavigationBar(
         }
     }
 }
+
 
