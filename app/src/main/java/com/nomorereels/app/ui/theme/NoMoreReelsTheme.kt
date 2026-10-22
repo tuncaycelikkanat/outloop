@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
@@ -865,12 +866,14 @@ fun NmrBottomNavigationBar(
                     label = "tabIndicatorOffset"
                 )
 
-                // Kayan yeşil kapsül gösterge (Sliding Pill)
+                // Kayan yeşil kapsül gösterge (Sliding Pill) - GPU render thread hızlandırması
                 Box(
                     modifier = Modifier
                         .width(tabWidth)
                         .fillMaxHeight()
-                        .offset { IntOffset(x = indicatorOffset.roundToPx(), y = 0) }
+                        .graphicsLayer {
+                            translationX = indicatorOffset.toPx()
+                        }
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary)
                 )

@@ -122,6 +122,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.scale
@@ -142,6 +143,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -468,22 +471,44 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
                 }
             )
         } else {
+            // Arka planda sekmeleri ön-derleyen (pre-warm) ve bellekte tutarak ilk geçiş dahil
+            // her zaman 120 FPS akıcı geçiş sağlayan yapı.
+            var warmedTabs by remember { mutableStateOf(setOf(NmrBottomTab.BUGUN)) }
+            LaunchedEffect(Unit) {
+                // Bugün sekmesinin ilk karesi çizildikten hemen sonra diğer sekmeler arka planda sessizce derlenir
+                kotlinx.coroutines.delay(120L)
+                warmedTabs = NmrBottomTab.entries.toSet()
+            }
+
             // 4 ANA SEKME AKIŞI (Ekran 4, 5, 6, 7)
             Column(modifier = Modifier.fillMaxSize()) {
-                AnimatedContent(
-                    targetState = currentTab,
-                    transitionSpec = {
-                        (fadeIn(animationSpec = tween(190, easing = LinearOutSlowInEasing)) +
-                            scaleIn(initialScale = 0.985f, animationSpec = tween(190, easing = LinearOutSlowInEasing)))
-                            .togetherWith(
-                                fadeOut(animationSpec = tween(110, easing = FastOutLinearInEasing))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    NmrBottomTab.entries.forEach { tab ->
+                        val isCurrent = currentTab == tab
+                        val isWarmed = isCurrent || tab in warmedTabs
+                        if (isWarmed) {
+                            val alpha by animateFloatAsState(
+                                targetValue = if (isCurrent) 1f else 0f,
+                                animationSpec = tween(160, easing = LinearOutSlowInEasing),
+                                label = "tabAlpha_${tab.name}"
                             )
-                    },
-                    label = "tabScreenTransition",
-                    modifier = Modifier.weight(1f).fillMaxWidth()
-                ) { targetTab ->
-                    when (targetTab) {
-                        NmrBottomTab.BUGUN -> {
+
+                            // GPU hızlandırmalı donanım katmanı: Görünmeyen sekmeler tıklama almaz ve GPU'da sıfır maliyetle bekler
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .zIndex(if (isCurrent) 1f else 0f)
+                                    .graphicsLayer {
+                                        this.alpha = alpha
+                                        translationY = if (isCurrent || alpha > 0.01f) 0f else 99999f
+                                    }
+                            ) {
+                                when (tab) {
+                                    NmrBottomTab.BUGUN -> {
                             ScreenBugun(
                                 isServiceActive = isServiceActive,
                                 protectionMasterEnabled = protectionMasterEnabled,
@@ -616,6 +641,9 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
                         }
                     }
                 }
+            }
+        }
+    }
 
                 // Alt Navigasyon Çubuğu
                 NmrBottomNavigationBar(
