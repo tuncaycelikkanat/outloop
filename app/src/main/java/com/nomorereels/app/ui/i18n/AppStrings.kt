@@ -375,7 +375,7 @@ object TurkishStrings : Strings {
 
     override fun themeLabel(theme: NmrThemeMode) = theme.labelTr
 
-    override val appName = "Unreel"
+    override val appName = "Outloop"
     override val protectionActive = "Koruma aktif"
     override val protectionInactive = "Koruma kapalı"
     override val generalModePrefix = "Genel mod:"
@@ -624,9 +624,9 @@ object TurkishStrings : Strings {
     override val accessibilityStepTitle = "Tek izin: Erişilebilirlik"
     override val accessibilityStepSub = "Yalnızca Instagram'da hangi ekranda olduğunu anlar. Mesajlarını veya içeriğini okumaz."
     override val accessibilityDisclosureTitle = "Açık ve Belirgin Beyan (Google Play Uyumluluğu)"
-    override val accessibilityDisclosureBody = "Unreel, yalnızca Instagram uygulamasında Reels sekmesini ve video oynatıcıyı tespit edip otomatik olarak geri dönmek için Android Erişilebilirlik API'sini (AccessibilityService) kullanır. Bu hizmet mesajlarınızı, tuş vuruşlarınızı veya ekran metinlerinizi asla okumaz; hiçbir kişisel veriyi toplamaz ve cihazınızdan dışarı aktarmaz."
+    override val accessibilityDisclosureBody = "Outloop, yalnızca Instagram uygulamasında Reels sekmesini ve video oynatıcıyı tespit edip otomatik olarak geri dönmek için Android Erişilebilirlik API'sini (AccessibilityService) kullanır. Bu hizmet mesajlarınızı, tuş vuruşlarınızı veya ekran metinlerinizi asla okumaz; hiçbir kişisel veriyi toplamaz ve cihazınızdan dışarı aktarmaz."
     override val step1Text = "Ayarlar'ı aç"
-    override val step2Text = "Unreel'i seç"
+    override val step2Text = "Outloop'u seç"
     override val step3Text = "Servisi aç"
     override val waitingPermission = "İzin bekleniyor"
     override val permissionGranted = "İzin verildi"
@@ -701,7 +701,7 @@ object EnglishStrings : Strings {
 
     override fun themeLabel(theme: NmrThemeMode) = theme.labelEn
 
-    override val appName = "Unreel"
+    override val appName = "Outloop"
     override val protectionActive = "Protection active"
     override val protectionInactive = "Protection off"
     override val generalModePrefix = "General mode:"
@@ -950,9 +950,9 @@ object EnglishStrings : Strings {
     override val accessibilityStepTitle = "Only one permission: Accessibility"
     override val accessibilityStepSub = "Detects which screen is active in Instagram only. Never reads messages or private content."
     override val accessibilityDisclosureTitle = "Prominent Disclosure (Google Play Compliance)"
-    override val accessibilityDisclosureBody = "Unreel uses the Android AccessibilityService API strictly to detect the Instagram Reels tab and video player, and automatically navigate back to protect your focus. This service never reads your personal messages, keystrokes, or screen text; it collects zero personal data and has no internet access."
+    override val accessibilityDisclosureBody = "Outloop uses the Android AccessibilityService API strictly to detect the Instagram Reels tab and video player, and automatically navigate back to protect your focus. This service never reads your personal messages, keystrokes, or screen text; it collects zero personal data and has no internet access."
     override val step1Text = "Open Settings"
-    override val step2Text = "Select Unreel"
+    override val step2Text = "Select Outloop"
     override val step3Text = "Turn on Service"
     override val waitingPermission = "Waiting for permission"
     override val permissionGranted = "Permission granted"
