@@ -423,7 +423,9 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
                         donationManager?.launchDonationFlow(activity, productId)
                     }
                 },
-                onResetSupporter = { SettingsStore.resetSupporterStatus(context) }
+                onVerifySupporterCode = { code ->
+                    donationManager?.verifySupporterCode(context, code) ?: false
+                }
             )
         }
 

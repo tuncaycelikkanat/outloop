@@ -139,12 +139,8 @@ class DonationManager(private val context: Context) {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             activity.startActivity(intent)
-
-            SettingsStore.recordDonation(context)
-
-            scope.launch {
-                _events.emit(DonationEvent.Success(productId))
-            }
+            // Harici tarayıcı açıldı. Kullanıcı bağışı tamamladığında hoş geldin mesajındaki
+            // Destekçi Kodu (Supporter Code) ile rozetini aktifleştirir.
         } catch (e: Exception) {
             Log.e(TAG, "Tarayıcı açılamadı: ${e.message}")
             val isEnglish = SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.EN
@@ -153,6 +149,21 @@ class DonationManager(private val context: Context) {
                 _events.emit(DonationEvent.Error(msg))
             }
         }
+    }
+
+    /**
+     * Kullanıcının girdiği destekçi kodunu çevrimdışı doğrular.
+     * Geçerliyse rozeti aktifleştirir ve Success olayını tetikler.
+     */
+    fun verifySupporterCode(activityContext: Context, code: String): Boolean {
+        if (SupporterCodeValidator.isValid(code)) {
+            SettingsStore.recordDonation(activityContext)
+            scope.launch {
+                _events.emit(DonationEvent.Success("supporter_code"))
+            }
+            return true
+        }
+        return false
     }
 
     fun endConnection() {}

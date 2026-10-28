@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,11 +33,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,10 +69,27 @@ fun SupportBottomSheet(
     isEnglish: Boolean,
     onDismiss: () -> Unit,
     onTipClick: (String) -> Unit,
+    onVerifySupporterCode: ((String) -> Boolean)? = null,
     onResetSupporter: (() -> Unit)? = null
 ) {
     val strings = LocalAppStrings.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showCodeDialog by remember { mutableStateOf(false) }
+
+    if (showCodeDialog && onVerifySupporterCode != null) {
+        SupporterCodeDialog(
+            isEnglish = isEnglish,
+            onDismiss = { showCodeDialog = false },
+            onVerify = { code ->
+                val ok = onVerifySupporterCode(code)
+                if (ok) {
+                    showCodeDialog = false
+                    onDismiss()
+                }
+                ok
+            }
+        )
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -196,6 +220,26 @@ fun SupportBottomSheet(
                             Spacer(modifier = Modifier.weight(1f))
                         }
                     }
+                }
+            }
+
+            if (!isSupporter && onVerifySupporterCode != null) {
+                OutlinedButton(
+                    onClick = { showCodeDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = strings.enterSupporterCodeButton,
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
 
@@ -568,3 +612,79 @@ fun TipThankYouDialog(
         containerColor = MaterialTheme.colorScheme.surface
     )
 }
+
+/**
+ * Bağış platformlarından (Kreosus, Buy Me a Coffee, GitHub Sponsors)
+ * alınan destekçi kodunu girmek ve doğrulamak için kullanılan çevrimdışı dialog.
+ */
+@Composable
+fun SupporterCodeDialog(
+    isEnglish: Boolean,
+    onDismiss: () -> Unit,
+    onVerify: (String) -> Boolean
+) {
+    val strings = LocalAppStrings.current
+    var codeInput by remember { mutableStateOf("") }
+    var isError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = strings.enterSupporterCodeTitle,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = strings.enterSupporterCodeDesc,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                OutlinedTextField(
+                    value = codeInput,
+                    onValueChange = {
+                        codeInput = it.uppercase()
+                        isError = false
+                    },
+                    placeholder = { Text(strings.supporterCodeInputPlaceholder) },
+                    singleLine = true,
+                    isError = isError,
+                    supportingText = if (isError) {
+                        {
+                            Text(
+                                text = strings.invalidSupporterCodeError,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    } else null,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val ok = onVerify(codeInput)
+                    if (!ok) {
+                        isError = true
+                    }
+                }
+            ) {
+                Text(strings.verifyButton)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(strings.cancelButton)
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface
+    )
+}
+

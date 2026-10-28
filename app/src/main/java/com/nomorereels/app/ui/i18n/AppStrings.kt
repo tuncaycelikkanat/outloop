@@ -317,6 +317,14 @@ interface Strings {
     val supporterBadgeDesc: String
     val tipThankYouTitle: String
     val tipThankYouMessage: String
+    val enterSupporterCodeButton: String
+    val enterSupporterCodeTitle: String
+    val enterSupporterCodeDesc: String
+    val supporterCodeInputPlaceholder: String
+    val verifyButton: String
+    val cancelButton: String
+    val invalidSupporterCodeError: String
+    val supporterCodeSuccessToast: String
 }
 
 object TurkishStrings : Strings {
@@ -634,6 +642,14 @@ object TurkishStrings : Strings {
     override val supporterBadgeDesc = "Desteğiniz için çok teşekkürler! Katkınızla Outloop bağımsız ve reklamsız kalmaya devam ediyor."
     override val tipThankYouTitle = "Çok Teşekkürler! ❤️"
     override val tipThankYouMessage = "Desteğin Outloop'u reklamsız, bağımsız ve tertemiz tutmamıza yardımcı oluyor. İyi ki varsın!"
+    override val enterSupporterCodeButton = "Destekçi Kodunu Gir"
+    override val enterSupporterCodeTitle = "Destekçi Kodunu Doğrula"
+    override val enterSupporterCodeDesc = "Kreosus, Buy Me a Coffee veya GitHub Sponsors üzerinden destek olduğunuzda karşılama mesajında yer alan kodu girin."
+    override val supporterCodeInputPlaceholder = "Örn: OUTLOOP-HERO"
+    override val verifyButton = "Doğrula"
+    override val cancelButton = "Vazgeç"
+    override val invalidSupporterCodeError = "Geçersiz destekçi kodu. Lütfen kontrol edip tekrar deneyin."
+    override val supporterCodeSuccessToast = "Teşekkürler! Destekçi rozetiniz aktifleştirildi ⭐"
 }
 
 object EnglishStrings : Strings {
@@ -951,4 +967,12 @@ object EnglishStrings : Strings {
     override val supporterBadgeDesc = "Thank you so much for your support! Your contribution keeps Outloop independent and ad-free."
     override val tipThankYouTitle = "Thank You So Much! ❤️"
     override val tipThankYouMessage = "Your support helps keep Outloop ad-free, independent, and distraction-free. You are amazing!"
+    override val enterSupporterCodeButton = "Enter Supporter Code"
+    override val enterSupporterCodeTitle = "Verify Supporter Code"
+    override val enterSupporterCodeDesc = "Enter the supporter code received in your welcome note after donating on Kreosus, Buy Me a Coffee, or GitHub Sponsors."
+    override val supporterCodeInputPlaceholder = "E.g. OUTLOOP-HERO"
+    override val verifyButton = "Verify"
+    override val cancelButton = "Cancel"
+    override val invalidSupporterCodeError = "Invalid supporter code. Please check and try again."
+    override val supporterCodeSuccessToast = "Thank you! Supporter badge activated ⭐"
 }
