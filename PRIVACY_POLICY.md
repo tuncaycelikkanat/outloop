@@ -1,9 +1,9 @@
-# Privacy Policy for NoMoreReels
+# Privacy Policy for Outloop
 
 **Last Updated:** October 2026
 
 ## 1. Overview
-NoMoreReels ("we", "our", or "the app") is a minimalist digital wellness and focus tool built for Android. Our core design philosophy is **Zero Data Collection**: we believe your attention and digital privacy belong entirely to you.
+Outloop (formerly NoMoreReels, "we", "our", or "the app") is a minimalist digital wellness and focus tool built for Android. Our core design philosophy is **Zero Data Collection**: we believe your attention and digital privacy belong entirely to you.
 
 ## 2. Zero Data Collection & Serverless Architecture
 NoMoreReels operates with **zero external servers, zero analytics, zero crash reporters, and zero trackers**. 
