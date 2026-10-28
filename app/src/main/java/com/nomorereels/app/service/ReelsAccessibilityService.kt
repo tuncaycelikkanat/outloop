@@ -852,6 +852,7 @@ class ReelsAccessibilityService : AccessibilityService() {
         if (overlayController.isFrictionOverlayShowing) {
             overlayController.dismissMindfulFrictionOverlay(releaseAudioImmediately = true)
         }
+        overlayController.release()
     }
 
     override fun onDestroy() {
@@ -861,6 +862,7 @@ class ReelsAccessibilityService : AccessibilityService() {
         QuotaStore.flush(this)
         actionExecutor.onReturnedToNonReels()
         overlayController.dismissAll()
+        overlayController.release()
         currentInstance = null
         _isServiceActive.value = false
         navigationTracker.reset()

@@ -109,14 +109,6 @@ class OverlayController(
     private var isFrictionOverlayPending: Boolean = false
     @Volatile
     private var suppressionUntilMs: Long = 0L
-
-    private var bannerView: View? = null
-    private var bannerWindowManager: WindowManager? = null
-    private var bannerParentGroup: android.view.ViewGroup? = null
-    private var bannerDismissRunnable: Runnable? = null
-    private var lastBannerSignature: String = ""
-    private var lastBannerShownAtMs: Long = 0L
-
     private var holdTickRunnable: Runnable? = null
     private var pendingReleaseAudioRunnable: Runnable? = null
 
@@ -374,11 +366,79 @@ class OverlayController(
         showPunchHolePill(title, sub, Color.parseColor("#274D3E"), fallbackContext, durationMs = 3000L)
     }
 
+    private var bannerView: View? = null
     private var bannerPillView: View? = null
     private var bannerTitleView: TextView? = null
     private var bannerAnimator: ValueAnimator? = null
+    private var bannerWindowManager: WindowManager? = null
+    private var bannerParentGroup: android.view.ViewGroup? = null
     private var isBannerDismissing: Boolean = false
     private var pendingBannerShowRunnable: Runnable? = null
+    private var bannerDismissRunnable: Runnable? = null
+    private var bannerWatchdog: Runnable? = null
+    private var bannerGen: Int = 0
+    private var lastBannerShownAtMs: Long = 0L
+    private var lastBannerSignature: String = ""
+
+    /**
+     * Servis veya Activity sonlandırılırken / kesintiye uğrarken tüm banner kaynaklarını derhal temizler.
+     */
+    fun release() {
+        mainHandler.post { removeBannerImmediate() }
+    }
+
+    private fun scheduleDismiss(pill: View, gen: Int, durationMs: Long) {
+        bannerDismissRunnable?.let { mainHandler.removeCallbacks(it) }
+        bannerWatchdog?.let { mainHandler.removeCallbacks(it) }
+
+        val dismiss = Runnable {
+            if (gen == bannerGen) {
+                startExit(pill, gen)
+            }
+        }
+        bannerDismissRunnable = dismiss
+        mainHandler.postDelayed(dismiss, durationMs)
+
+        // Ne olursa olsun pencereyi kesin olarak kaldıran son çare güvenlik ağı
+        val watchdog = Runnable {
+            if (gen == bannerGen) {
+                removeBannerImmediate()
+            }
+        }
+        bannerWatchdog = watchdog
+        mainHandler.postDelayed(watchdog, durationMs + 600L)
+    }
+
+    private fun startExit(pill: View, gen: Int) {
+        isBannerDismissing = true
+        bannerAnimator?.cancel()
+        val endOffsetPx = -dp(pill.context, 8).toFloat()
+        var cancelled = false
+        val exitAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 170L
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { anim ->
+                val f = anim.animatedValue as Float
+                pill.translationY = endOffsetPx * f
+                val s = 1f - 0.08f * f
+                pill.scaleX = s
+                pill.scaleY = s
+                pill.alpha = (1f - f).coerceIn(0f, 1f)
+            }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationCancel(animation: android.animation.Animator) {
+                    cancelled = true
+                }
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    if (!cancelled && gen == bannerGen) {
+                        removeBannerImmediate()
+                    }
+                }
+            })
+        }
+        bannerAnimator = exitAnim
+        exitAnim.start()
+    }
 
     /**
      * Kamera deliği (punch-hole) ve durum çubuğunun (status bar) tam altında,
@@ -405,14 +465,18 @@ class OverlayController(
             val now = System.currentTimeMillis()
             val displayText = if (!subtitle.isNullOrBlank()) "$title · $subtitle" else title
 
-            // 1. HIZLI YOL: Halihazırda ekranda bir pencere varsa (veya kapanıyorsa),
-            // pencereyi WindowManager'da yıkıp baştan kurma gecikmesini (SurfaceFlinger gecikmesini) önle!
-            // Var olan pencerenin kapanışını iptal et, metnini güncelle ve canlı bir pop animasyonuyla tazele!
+            // P0: 150ms içinde gelen tamamen aynı metinli çağrıyı yok say (seri tetikleme titremesini engelle)
+            if (displayText == lastBannerSignature && (now - lastBannerShownAtMs) < 150L && bannerView != null) {
+                return@Runnable
+            }
+
+            // 1. HIZLI YOL: Halihazırda ekranda sağlıklı bir pencere varsa (ve kapanmıyorsa),
+            // pencereyi WindowManager'da yıkıp baştan kurma gecikmesini önle!
             val existingRoot = bannerView
             val existingPill = bannerPillView
-            if (fallbackContext == null && existingRoot != null && existingPill != null) {
+            if (fallbackContext == null && existingRoot != null && existingPill != null
+                && existingRoot.isAttachedToWindow && !isBannerDismissing) {
                 bannerAnimator?.cancel()
-                bannerDismissRunnable?.let { mainHandler.removeCallbacks(it) }
                 isBannerDismissing = false
 
                 bannerTitleView?.text = displayText
@@ -438,9 +502,7 @@ class OverlayController(
                 bannerAnimator = refreshAnim
                 refreshAnim.start()
 
-                val dismissTask = buildBannerDismissRunnable(existingPill)
-                bannerDismissRunnable = dismissTask
-                mainHandler.postDelayed(dismissTask, durationMs)
+                scheduleDismiss(existingPill, bannerGen, durationMs)
                 return@Runnable
             }
 
@@ -514,9 +576,13 @@ class OverlayController(
 
             if (!addedToWindow) return@Runnable
 
+            val currentGen = bannerGen
             isBannerDismissing = false
             lastBannerSignature = displayText
             lastBannerShownAtMs = now
+
+            // Dismiss zamanlayıcısını ve watchdog'unu hemen kur (attach veya post gecikmesine bağlama!)
+            scheduleDismiss(pillView, currentGen, durationMs)
 
             val startOffsetPx = -dp(renderContext, 10).toFloat()
             pillView.translationY = startOffsetPx
@@ -524,8 +590,8 @@ class OverlayController(
             pillView.scaleY = 0.92f
             pillView.alpha = 0f
 
-            val startEnter = {
-                if (bannerPillView === pillView) {
+            outerContainer.post {
+                if (currentGen == bannerGen && bannerPillView === pillView) {
                     val enterAnim = ValueAnimator.ofFloat(0f, 1f).apply {
                         duration = 200L
                         interpolator = android.view.animation.OvershootInterpolator(1.05f)
@@ -540,15 +606,8 @@ class OverlayController(
                     }
                     bannerAnimator = enterAnim
                     enterAnim.start()
-
-                    val dismissTask = buildBannerDismissRunnable(pillView)
-                    bannerDismissRunnable = dismissTask
-                    mainHandler.postDelayed(dismissTask, durationMs)
                 }
             }
-
-            // Pencere eklendikten sonra ilk render geçişinde doğrudan animasyonu başlat (sıfır gecikme)
-            outerContainer.post { startEnter() }
         }
 
         if (showDelayMs > 0L) {
@@ -580,39 +639,6 @@ class OverlayController(
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
             }
         }
-    }
-
-    private fun buildBannerDismissRunnable(pillView: View): Runnable = Runnable {
-        isBannerDismissing = true
-        bannerAnimator?.cancel()
-        val ctx = pillView.context
-        val endOffsetPx = -dp(ctx, 8).toFloat()
-        val exitAnim = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 170L
-            interpolator = AccelerateDecelerateInterpolator()
-            addUpdateListener { anim ->
-                val f = anim.animatedValue as Float
-                pillView.translationY = endOffsetPx * f
-                val s = 1f - 0.08f * f
-                pillView.scaleX = s
-                pillView.scaleY = s
-                pillView.alpha = (1f - f).coerceIn(0f, 1f)
-            }
-            addListener(object : android.animation.AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: android.animation.Animator) {
-                    removeBannerImmediate()
-                }
-                override fun onAnimationCancel(animation: android.animation.Animator) {
-                    removeBannerImmediate()
-                }
-            })
-        }
-        bannerAnimator = exitAnim
-        exitAnim.start()
-        // Güvenlik ağı: animasyon durdurulursa veya pencere geçişinde düşerse ekranda takılmasını önle
-        mainHandler.postDelayed({
-            removeBannerImmediate()
-        }, 220L)
     }
 
     /**
@@ -692,10 +718,13 @@ class OverlayController(
     }
 
     private fun removeBannerImmediate() {
+        bannerGen++ // Eski tüm bekleyen callback ve animasyonları derhal geçersiz kılar
         pendingBannerShowRunnable?.let { mainHandler.removeCallbacks(it) }
         pendingBannerShowRunnable = null
         bannerDismissRunnable?.let { mainHandler.removeCallbacks(it) }
         bannerDismissRunnable = null
+        bannerWatchdog?.let { mainHandler.removeCallbacks(it) }
+        bannerWatchdog = null
         isBannerDismissing = false
 
         val anim = bannerAnimator
@@ -720,7 +749,8 @@ class OverlayController(
             if (wm != null) {
                 try {
                     wm.removeViewImmediate(view)
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    Log.w(TAG, "removeViewImmediate başarısız: ${e.message}")
                     try { wm.removeView(view) } catch (_: Exception) {}
                 }
             }
