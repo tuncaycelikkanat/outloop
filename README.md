@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/tuncaycelikkanat/NoMoreReels/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-244E34.svg" alt="License" /></a>
+  <a href="https://github.com/tuncaycelikkanat/outloop/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-244E34.svg" alt="License" /></a>
   <a href="https://developer.android.com/about/versions/oreo"><img src="https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-346949.svg" alt="Android Version" /></a>
   <img src="https://img.shields.io/badge/Internet%20Permission-NONE%20(%25100%20Offline)-224830.svg" alt="Zero Internet" />
   <img src="https://img.shields.io/badge/Tests-58%2F58%20Passed%20(100%25)-success.svg" alt="Unit Tests" />
