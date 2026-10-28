@@ -6,9 +6,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicLong
+
+private val nextDetectionLogId = AtomicLong(1L)
 
 data class DetectionEventLog(
-    val id: Long = System.currentTimeMillis() + (0..999).random(),
+    val id: Long = nextDetectionLogId.getAndIncrement(),
     val timestamp: Long = System.currentTimeMillis(),
     val timeFormatted: String = SimpleDateFormat("HH:mm:ss.SS", Locale.getDefault()).format(Date(timestamp)),
     val screenType: ScreenType,

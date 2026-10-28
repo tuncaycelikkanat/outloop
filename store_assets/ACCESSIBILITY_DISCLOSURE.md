@@ -10,17 +10,17 @@ Google Play Console, `AccessibilityService` izni kullanan tüm uygulamalardan ş
 
 ### Türkçe (Play Console Türkçe panel için):
 > Outloop, bir dijital refah ve odaklanma uygulamasıdır. Erişilebilirlik Hizmetini (AccessibilityService API) yalnızca şu amaçla kullanır:
-> 1. Kullanıcı Instagram uygulamasını kullanırken, bağımlılık yapıcı kısa video (Reels) akışının açılıp açılmadığını pencere içeriğindeki arayüz düğümlerinden tespit etmek.
-> 2. Kullanıcı bir Reels akışına girdiğinde, kullanıcının belirlediği odaklanma ayarlarına göre ekrandan güvenli şekilde geri çıkış (GLOBAL_ACTION_BACK) eylemini gerçekleştirmek.
+> 1. Kullanıcı Instagram uygulamasını kullanırken, kısa video (Reels) akışının açılıp açılmadığını ve bir sonraki videoya kaydırılıp kaydırılmadığını pencere içeriğindeki arayüz düğümlerinden cihaz belleğinde anlık olarak tespit etmek.
+> 2. Kullanıcı bir Reels akışına girdiğinde veya belirlediği sınırları aştığında, odaklanma ayarlarına göre Farkındalık Kapısı göstermek veya ekrandan güvenli şekilde geri çıkış (GLOBAL_ACTION_BACK) eylemini gerçekleştirmek.
 > 
-> Uygulama tamamen sunucusuz ve çevrimdışıdır (android.permission.INTERNET izni KESİNLİKLE yoktur). Bu hizmet aracılığıyla hiçbir kişisel veri, kullanıcı girdisi, şifre, mesaj içeriği veya ekran görüntüsü toplanmaz, kaydedilmez veya harici hiçbir yere iletilmez.
+> Uygulama tamamen sunucusuz ve çevrimdışıdır. Bu hizmet aracılığıyla hiçbir kişisel veri, özel mesaj, şifre, tuş vuruşu veya ekran içeriği kalıcı olarak kaydedilmez, saklanmaz veya harici hiçbir yere iletilmez.
 
 ### English (Play Console English panel):
 > Outloop is a digital wellbeing and focus application. It uses the AccessibilityService API strictly for the following purposes:
-> 1. To detect when short-video reels are displayed within the Instagram application by inspecting active UI window identifiers.
-> 2. To perform the navigation exit action (GLOBAL_ACTION_BACK) to help users avoid addictive doomscrolling based on their personal digital wellbeing settings.
+> 1. To detect when short-video reels and video swipe transitions occur within the Instagram application by transiently inspecting active UI window nodes in device memory.
+> 2. To display a Mindful Gateway or perform the navigation exit action (GLOBAL_ACTION_BACK) to help users avoid addictive doomscrolling based on their personal digital wellbeing settings.
 > 
-> Outloop operates 100% offline (it does NOT declare or hold android.permission.INTERNET). It never reads, logs, stores, or transmits any personal data, messages, keystrokes, passwords, or screen contents.
+> Outloop operates 100% offline. It never permanently logs, stores, or transmits any personal data, private messages, keystrokes, passwords, or screen contents.
 
 ---
 

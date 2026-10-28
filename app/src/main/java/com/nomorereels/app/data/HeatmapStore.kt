@@ -31,7 +31,9 @@ object HeatmapStore {
     private val KEY_FIRST_RECORD_MS = longPreferencesKey("heatmap_first_record_ms")
     private val KEY_TOTAL_ATTEMPTS = longPreferencesKey("heatmap_total_attempts")
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private val scope = CoroutineScope(Dispatchers.IO.limitedParallelism(1) + SupervisorJob())
+    @Volatile
     private var isInitialized = false
 
     // 168 elemanlı bellek içi sayaç dizisi
@@ -53,10 +55,11 @@ object HeatmapStore {
     fun init(context: Context) {
         if (isInitialized) return
         isInitialized = true
+        val appContext = context.applicationContext
 
         scope.launch {
             try {
-                val prefs = context.heatmapDataStore.data.first()
+                val prefs = appContext.heatmapDataStore.data.first()
                 val csv = prefs[KEY_MATRIX] ?: ""
                 val firstTime = prefs[KEY_FIRST_RECORD_MS] ?: 0L
                 val total = prefs[KEY_TOTAL_ATTEMPTS] ?: 0L
@@ -69,9 +72,18 @@ object HeatmapStore {
                     }
                 }
 
+                // Bellekte init tamamlanmadan önce kaydedilmiş deneme varsa birleştir
+                val currentMem = _matrix.value
+                val memTotal = _totalAttempts.value
+                if (memTotal > 0L) {
+                    for (i in 0 until TOTAL_CELLS) {
+                        parsed[i] += currentMem[i]
+                    }
+                }
+
                 _matrix.value = parsed
-                _firstRecordTimeMs.value = firstTime
-                _totalAttempts.value = total
+                _firstRecordTimeMs.value = if (firstTime > 0L) firstTime else _firstRecordTimeMs.value
+                _totalAttempts.value = total + memTotal
             } catch (_: Exception) {}
         }
     }

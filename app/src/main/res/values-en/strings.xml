@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Outloop</string>
     <string name="accessibility_service_name">Outloop Service</string>
-    <string name="accessibility_service_description">Detects Instagram Reels feed and gently exits or blocks it to protect your focus and digital well-being. This service strictly does not read personal messages, texts, or user data, and never transmits anything to the internet.</string>
+    <string name="accessibility_service_description">Detects Instagram Reels screens and video transitions to gently exit or show a mindful pause to protect your focus. UI structure is checked transiently in-memory on your device only; no personal messages, user data, or content are ever stored or transmitted.</string>
 </resources>

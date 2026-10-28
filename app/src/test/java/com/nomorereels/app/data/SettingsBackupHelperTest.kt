@@ -15,13 +15,16 @@ class SettingsBackupHelperTest {
         assertTrue(jsonStr.isNotBlank())
 
         val json = JSONObject(jsonStr)
-        assertEquals(1, json.getInt("version"))
+        assertEquals(2, json.getInt("version"))
         assertTrue(json.has("timestamp"))
         assertTrue(json.has("generalMode"))
         assertTrue(json.has("dailyCountLimit"))
         assertTrue(json.has("dailyTimeLimitMinutes"))
         assertTrue(json.has("bedtimeEnabled"))
-        assertTrue(json.has("strictModeEnabled"))
+        assertTrue(json.has("protectionMasterEnabled"))
+        assertTrue(json.has("mindfulGatewayEnabled"))
+        assertTrue(json.has("overlayFeedbackEnabled"))
+        assertTrue(json.has("hapticFeedbackEnabled"))
         assertTrue(json.has("appThemeMode"))
         assertTrue(json.has("appLanguage"))
     }

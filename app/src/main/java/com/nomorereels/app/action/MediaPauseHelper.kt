@@ -30,28 +30,18 @@ object MediaPauseHelper {
     private var silentAudioTrack: AudioTrack? = null
 
     /**
-     * Medya oynatımını ve sesini derhal duraklatır:
-     * 1. KEYCODE_MEDIA_PAUSE tuş etkinliğini gönderir.
-     * 2. Geçici ses odağı (AUDIOFOCUS_GAIN_TRANSIENT) talep eder.
-     * 3. Sessiz bir AudioTrack döngüsü başlatarak Android ve Samsung AudioService'in
+     * Medya oynatımını ve sesini geçici ses odağı ile duraklatır:
+     * 1. Geçici ses odağı (AUDIOFOCUS_GAIN_TRANSIENT) talep eder (kapı kapandığında bırakılır).
+     * 2. Sessiz bir AudioTrack döngüsü başlatarak Android ve Samsung AudioService'in
      *    Instagram ExoPlayer'ı derhal duraklatmasını zorunlu kılar.
+     * Not: Küresel KEYCODE_MEDIA_PAUSE gönderilmez; böylece arka plandaki Spotify/YouTube Music
+     * gibi medya oturumları kalıcı olarak durdurulmaz, geçici odak bırakıldığında devam edebilir.
      */
     @Synchronized
     fun pauseMedia(context: Context) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
 
-        // 1. KEYCODE_MEDIA_PAUSE tuş etkinliğini gönder
-        try {
-            val downEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)
-            val upEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE)
-            audioManager.dispatchMediaKeyEvent(downEvent)
-            audioManager.dispatchMediaKeyEvent(upEvent)
-            Log.d(TAG, "MediaPauseHelper: KEYCODE_MEDIA_PAUSE gönderildi.")
-        } catch (e: Exception) {
-            Log.w(TAG, "MediaPauseHelper: dispatchMediaKeyEvent hatası: ${e.message}")
-        }
-
-        // 2. Geçici Ses Odağı (Transient Audio Focus) Talep Et - USAGE_MEDIA ve CONTENT_TYPE_MUSIC
+        // Geçici Ses Odağı (Transient Audio Focus) Talep Et - USAGE_MEDIA ve CONTENT_TYPE_MUSIC
         try {
             val attrs = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)

@@ -8,7 +8,6 @@ import com.nomorereels.app.billing.DonationManager
 import com.nomorereels.app.data.AppLanguage
 import com.nomorereels.app.data.AppThemeMode
 import com.nomorereels.app.data.HeatmapStore
-import com.nomorereels.app.data.MindfulBarrierType
 import com.nomorereels.app.data.QuotaStore
 import com.nomorereels.app.data.SettingsStore
 import com.nomorereels.app.service.ServiceHealthMonitor
@@ -23,9 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 private data class BasePrefs(
     val language: NmrLanguage,
     val themeMode: NmrThemeMode,
-    val mindfulGatewayEnabled: Boolean,
-    val mindfulBarrierType: MindfulBarrierType,
-    val nightCompassionEnabled: Boolean
+    val mindfulGatewayEnabled: Boolean
 )
 
 private data class FeedbackAndBedtime(
@@ -63,10 +60,8 @@ class SettingsViewModel(
     private val basePreferencesFlow = combine(
         settingsStore.appLanguage,
         settingsStore.appThemeMode,
-        settingsStore.mindfulGatewayEnabled,
-        settingsStore.mindfulBarrierType,
-        settingsStore.nightCompassionEnabled
-    ) { lang, theme, gateway, barrier, night ->
+        settingsStore.mindfulGatewayEnabled
+    ) { lang, theme, gateway ->
         val uiLang = when (lang) {
             AppLanguage.TR -> NmrLanguage.TR
             AppLanguage.EN -> NmrLanguage.EN
@@ -76,7 +71,7 @@ class SettingsViewModel(
             AppThemeMode.DARK -> NmrThemeMode.AMOLED
             AppThemeMode.SYSTEM -> NmrThemeMode.SYSTEM
         }
-        BasePrefs(uiLang, uiTheme, gateway, barrier, night)
+        BasePrefs(uiLang, uiTheme, gateway)
     }
 
     private val feedbackAndBedtimeFlow = combine(
@@ -99,16 +94,8 @@ class SettingsViewModel(
         BedtimeEndAndSupporter(endH, endM, isSupporter, donationCount, batteryIgnored)
     }
 
-    private val donationItemsFlow: StateFlow<List<DonationItem>> = if (donationManager != null) {
-        combine(donationManager.productDetailsMap) { detailsMapArray ->
-            val detailsMap = detailsMapArray[0]
-            donationManager.defaultItems.map { item ->
-                item.copy(productDetails = detailsMap[item.productId])
-            }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), donationManager.defaultItems)
-    } else {
-        MutableStateFlow(emptyList())
-    }
+    private val donationItemsFlow: StateFlow<List<DonationItem>> =
+        MutableStateFlow(donationManager?.defaultItems ?: emptyList())
 
     val uiState: StateFlow<SettingsUiState> = combine(
         basePreferencesFlow,
@@ -120,8 +107,6 @@ class SettingsViewModel(
             language = base.language,
             themeMode = base.themeMode,
             mindfulGatewayEnabled = base.mindfulGatewayEnabled,
-            mindfulBarrierType = base.mindfulBarrierType,
-            nightCompassionEnabled = base.nightCompassionEnabled,
             overlayFeedbackEnabled = fb.overlayFeedbackEnabled,
             hapticFeedbackEnabled = fb.hapticFeedbackEnabled,
             bedtimeEnabled = fb.bedtimeEnabled,
@@ -160,14 +145,6 @@ class SettingsViewModel(
         settingsStore.setMindfulGatewayEnabled(getApplication(), enabled)
     }
 
-    fun setMindfulBarrierType(type: MindfulBarrierType) {
-        settingsStore.setMindfulBarrierType(getApplication(), type)
-    }
-
-    fun setNightCompassionEnabled(enabled: Boolean) {
-        settingsStore.setNightCompassionEnabled(getApplication(), enabled)
-    }
-
     fun setOverlayFeedbackEnabled(enabled: Boolean) {
         settingsStore.setOverlayFeedbackEnabled(getApplication(), enabled)
     }
@@ -188,6 +165,7 @@ class SettingsViewModel(
         val app = getApplication<Application>()
         quotaStore.resetAllStatistics(app)
         heatmapStore.clear(app)
+        settingsStore.resetDailySnoozeCount(app)
     }
 
     fun resetSupporterStatus() {

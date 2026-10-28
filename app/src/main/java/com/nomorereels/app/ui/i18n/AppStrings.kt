@@ -211,12 +211,6 @@ interface Strings {
     val mindfulGatewayHeader: String
     val mindfulGatewayTitle: String
     val mindfulGatewaySub: String
-    val barrierTypeTitle: String
-    val barrierTypeBreathIntent: String
-    val barrierTypeMath: String
-    val barrierTypeTyping: String
-    val nightCompassionTitle: String
-    val nightCompassionSub: String
     val previewGatewayButton: String
 
     val gatewayPauseTitle: String
@@ -239,9 +233,6 @@ interface Strings {
     val gatewayNightSub: String
     val gatewayNightSleep: String
     val gatewayNight5Min: String
-    val gatewayMathPrompt: String
-    val gatewayTypingPrompt: String
-    val gatewayTypingSentence: String
     val gatewayWindowExpiredTitle: String
     fun gatewayWindowExpiredDesc(plan: String): String
 
@@ -502,12 +493,12 @@ object TurkishStrings : Strings {
     override val howItWorksTitle = "Nasıl Çalışır & Gizlilik"
     override val howItWorksSub = "Verileriniz %100 çevrimdışı ve cihazınızda saklanır"
     override val howItWorksDialogTitle = "Nasıl Çalışır & Gizlilik Güvencesi"
-    override val howItWorksPoint1Title = "Sıfır İnternet & Tam Gizlilik"
-    override val howItWorksPoint1Desc = "Uygulama hiçbir internet iznine sahip değildir. Hiçbir veriniz, izleme geçmişiniz veya kullanıcı bilgileriniz sunucuya gönderilmez."
+    override val howItWorksPoint1Title = "Sunucusuz & Tam Gizlilik"
+    override val howItWorksPoint1Desc = "Uygulama tamamen sunucusuz çalışır. Hiçbir veriniz, izleme geçmişiniz veya kişisel bilginiz harici bir sunucuya gönderilmez."
     override val howItWorksPoint2Title = "Sistem Seviyesinde Tespit"
-    override val howItWorksPoint2Desc = "Android Erişilebilirlik Servisi yalnızca Instagram'da Reels sekmesine veya tam ekran Reels oynatıcısına girildiğini algılar. Mesajlarınızı veya gönderilerinizi asla okumaz."
+    override val howItWorksPoint2Desc = "Android Erişilebilirlik Servisi yalnızca Instagram'da Reels sekmesini ve video geçişlerini cihaz belleğinde anlık olarak algılar. Özel mesajlarınızı veya kişisel verilerinizi asla kaydetmez ve paylaşmaz."
     override val howItWorksPoint3Title = "Odak Süresi Modellemesi"
-    override val howItWorksPoint3Desc = "Kurtarılan odak süresi, engellenen her Reels teşebbüsü için ortalama 45 saniyelik bir kullanım katsayısıyla güvenilir biçimde hesaplanır."
+    override val howItWorksPoint3Desc = "Kurtarılan odak süresi, engellenen her Reels teşebbüsü için kişisel izleme ortalamanız ve standart kullanım katsayısıyla yaklaşık olarak hesaplanır."
     override val resetStatsTitle = "İstatistikleri Sıfırla"
     override val resetStatsSub = "Sayaçları ve geçmişi temizle"
     override val resetStatsDialogTitle = "İstatistikleri Sıfırla"
@@ -540,12 +531,6 @@ object TurkishStrings : Strings {
     override val mindfulGatewayHeader = "FARKINDALIK KAPISI"
     override val mindfulGatewayTitle = "Farkındalık Kapısı"
     override val mindfulGatewaySub = "Reels öncesi 10 sn sakin duraklama"
-    override val barrierTypeTitle = "Bariyer Türü"
-    override val barrierTypeBreathIntent = "Nefes & Niyet (Önerilen)"
-    override val barrierTypeMath = "Zihinsel Kıvılcım (Matematik)"
-    override val barrierTypeTyping = "Bilinçli Cümle (Katı Mod)"
-    override val nightCompassionTitle = "Gece Şefkat Modu"
-    override val nightCompassionSub = "23:00 sonrası uyku odaklı seçim"
     override val previewGatewayButton = "Önizle"
 
     override val gatewayPauseTitle = "Kısa bir duraklama."
@@ -568,9 +553,6 @@ object TurkishStrings : Strings {
     override val gatewayNightSub = "Yorgun bir zihni zorlamak yerine dinlenmek iyi gelecektir."
     override val gatewayNightSleep = "Ekranı Kapat / Uyu"
     override val gatewayNight5Min = "5 Dakika Bakıp Kapatacağım"
-    override val gatewayMathPrompt = "Zihnini toplamak için soruyu çöz:"
-    override val gatewayTypingPrompt = "Niyetini sabitlemek için yaz:"
-    override val gatewayTypingSentence = "Şu an dikkatimi ve zamanımı bilinçli harcamayı seçiyorum."
     override val gatewayWindowExpiredTitle = "Bilinçli Penceren Doldu ⏱️"
     override fun gatewayWindowExpiredDesc(plan: String) = if (plan.isNotBlank()) "Planladığın gibi: $plan" else "Bilinçli süren tamamlandı."
 
@@ -613,18 +595,18 @@ object TurkishStrings : Strings {
     override val introFeature3Title = "Akıllı Günlük Kotalar"
     override val introFeature3Sub = "Günlük süre ve video sınırları belirleyerek dijital dengeni korur."
 
-    override val privacyHeroTitle = "Sıfır internet. Sıfır takip."
-    override val privacyFeature1Title = "İnternet izni bile yok"
-    override val privacyFeature1Sub = "Uygulama dışarıya tek bayt gönderemez."
+    override val privacyHeroTitle = "Sunucu yok. Takip yok."
+    override val privacyFeature1Title = "Tamamen yerel çalışma"
+    override val privacyFeature1Sub = "Tüm algılama ve istatistikler yalnızca cihazında işlenir."
     override val privacyFeature2Title = "Verin telefonundan asla çıkmaz"
     override val privacyFeature2Sub = "Sunucu yok, telemetri yok, hesap yok."
     override val privacyFeature3Title = "Açık kaynak ve şeffaf"
     override val privacyFeature3Sub = "Kodun tamamını GitHub'da inceleyebilirsin."
 
     override val accessibilityStepTitle = "Tek izin: Erişilebilirlik"
-    override val accessibilityStepSub = "Yalnızca Instagram'da hangi ekranda olduğunu anlar. Mesajlarını veya içeriğini okumaz."
+    override val accessibilityStepSub = "Yalnızca Instagram'da Reels ekranını ve video geçişlerini anlar. Mesajlarını kaydetmez veya paylaşmaz."
     override val accessibilityDisclosureTitle = "Açık ve Belirgin Beyan (Google Play Uyumluluğu)"
-    override val accessibilityDisclosureBody = "Outloop, yalnızca Instagram uygulamasında Reels sekmesini ve video oynatıcıyı tespit edip otomatik olarak geri dönmek için Android Erişilebilirlik API'sini (AccessibilityService) kullanır. Bu hizmet mesajlarınızı, tuş vuruşlarınızı veya ekran metinlerinizi asla okumaz; hiçbir kişisel veriyi toplamaz ve cihazınızdan dışarı aktarmaz."
+    override val accessibilityDisclosureBody = "Outloop, yalnızca Instagram uygulamasında Reels sekmesini ve video geçişlerini cihaz belleğinde anlık olarak tespit edip Farkındalık Kapısı göstermek veya otomatik geri dönmek için Android Erişilebilirlik API'sini (AccessibilityService) kullanır. Bu hizmet özel mesajlarınızı, şifrelerinizi veya tuş vuruşlarınızı asla kaydetmez; hiçbir kişisel veriyi toplamaz ve cihazınızdan dışarı aktarmaz."
     override val step1Text = "Ayarlar'ı aç"
     override val step2Text = "Outloop'u seç"
     override val step3Text = "Servisi aç"
@@ -828,12 +810,12 @@ object EnglishStrings : Strings {
     override val howItWorksTitle = "How it Works & Privacy"
     override val howItWorksSub = "100% offline & local data privacy"
     override val howItWorksDialogTitle = "How it Works & Privacy Guarantee"
-    override val howItWorksPoint1Title = "Zero Internet & Full Privacy"
-    override val howItWorksPoint1Desc = "The app has zero internet permissions. No data, viewing history, or personal info is ever sent to any server."
+    override val howItWorksPoint1Title = "Serverless & Full Privacy"
+    override val howItWorksPoint1Desc = "The app operates completely without external servers. No viewing history, usage stats, or personal data is ever transmitted."
     override val howItWorksPoint2Title = "System-Level Detection"
-    override val howItWorksPoint2Desc = "Android Accessibility Service only detects when the Reels tab or viewer is active. It never reads your messages or posts."
+    override val howItWorksPoint2Desc = "Android Accessibility Service transiently checks when the Reels tab or video player transitions occur in memory. It never stores or shares your private messages or personal data."
     override val howItWorksPoint3Title = "Focus Time Modeling"
-    override val howItWorksPoint3Desc = "Saved focus time is reliably projected using an industry-standard 45-second average per blocked Reel attempt."
+    override val howItWorksPoint3Desc = "Saved focus time is estimated using your personal viewing average and a 45-second baseline per blocked Reel attempt."
     override val resetStatsTitle = "Reset Statistics"
     override val resetStatsSub = "Clear counters and history"
     override val resetStatsDialogTitle = "Reset Statistics"
@@ -866,12 +848,6 @@ object EnglishStrings : Strings {
     override val mindfulGatewayHeader = "MINDFUL GATEWAY"
     override val mindfulGatewayTitle = "Mindful Gateway"
     override val mindfulGatewaySub = "10s pause before Reels"
-    override val barrierTypeTitle = "Barrier Type"
-    override val barrierTypeBreathIntent = "Breath & Intent (Recommended)"
-    override val barrierTypeMath = "Cognitive Spark (Math)"
-    override val barrierTypeTyping = "Mindful Sentence (Strict Mode)"
-    override val nightCompassionTitle = "Night Compassion Mode"
-    override val nightCompassionSub = "Restful sleep focus after 23:00"
     override val previewGatewayButton = "Preview"
 
     override val gatewayPauseTitle = "A short pause."
@@ -894,9 +870,6 @@ object EnglishStrings : Strings {
     override val gatewayNightSub = "Resting is better than pushing a tired mind."
     override val gatewayNightSleep = "Turn off screen / Sleep"
     override val gatewayNight5Min = "Watch 5 mins then close"
-    override val gatewayMathPrompt = "Solve to refocus your mind:"
-    override val gatewayTypingPrompt = "Type to anchor your intention:"
-    override val gatewayTypingSentence = "I choose to spend my attention and time consciously right now."
     override val gatewayWindowExpiredTitle = "Mindful Window Expired ⏱️"
     override fun gatewayWindowExpiredDesc(plan: String) = if (plan.isNotBlank()) "As planned: $plan" else "Your mindful time is complete."
 
@@ -939,18 +912,18 @@ object EnglishStrings : Strings {
     override val introFeature3Title = "Smart Daily Quotas"
     override val introFeature3Sub = "Set daily duration and video limits to stay in control of your digital habits."
 
-    override val privacyHeroTitle = "Zero internet. Zero tracking."
-    override val privacyFeature1Title = "No internet permission at all"
-    override val privacyFeature1Sub = "The app cannot send a single byte externally."
+    override val privacyHeroTitle = "No servers. Zero tracking."
+    override val privacyFeature1Title = "100% on-device processing"
+    override val privacyFeature1Sub = "All detection and statistics stay strictly on your phone."
     override val privacyFeature2Title = "Your data never leaves your phone"
-    override val privacyFeature2Sub = "No servers, no telemetry, no accounts."
+    override val privacyFeature2Sub = "No external servers, no telemetry, no accounts."
     override val privacyFeature3Title = "Open source & transparent"
     override val privacyFeature3Sub = "Inspect the full codebase on GitHub."
 
     override val accessibilityStepTitle = "Only one permission: Accessibility"
-    override val accessibilityStepSub = "Detects which screen is active in Instagram only. Never reads messages or private content."
+    override val accessibilityStepSub = "Detects Reels screens and transitions in Instagram only. Never stores or shares your messages."
     override val accessibilityDisclosureTitle = "Prominent Disclosure (Google Play Compliance)"
-    override val accessibilityDisclosureBody = "Outloop uses the Android AccessibilityService API strictly to detect the Instagram Reels tab and video player, and automatically navigate back to protect your focus. This service never reads your personal messages, keystrokes, or screen text; it collects zero personal data and has no internet access."
+    override val accessibilityDisclosureBody = "Outloop uses the Android AccessibilityService API strictly to transiently detect Instagram Reels screens and video transitions in device memory, and show a Mindful Gateway or navigate back to protect your focus. This service never logs or stores your private messages, passwords, or keystrokes, and never transmits any personal data off your device."
     override val step1Text = "Open Settings"
     override val step2Text = "Select Outloop"
     override val step3Text = "Turn on Service"

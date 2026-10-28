@@ -74,8 +74,28 @@ data class ProfileRule(
     )
 )
 
+data class ActionTargetsRule(
+    val backIds: List<String> = listOf(
+        "com.instagram.android:id/action_bar_button_back",
+        "com.instagram.android:id/back_button",
+        "com.instagram.android:id/action_bar_back",
+        "com.instagram.android:id/action_bar_left_button"
+    ),
+    val backDescriptions: List<String> = listOf(
+        "geri", "back", "kapat", "close", "yukarı git", "navigate up"
+    ),
+    val homeIds: List<String> = listOf(
+        "com.instagram.android:id/feed_tab",
+        "com.instagram.android:id/tab_home",
+        "com.instagram.android:id/action_bar_home"
+    ),
+    val homeDescriptions: List<String> = listOf(
+        "ana sayfa", "home", "akış", "feed"
+    )
+)
+
 data class RuleSet(
-    val version: Int = 6,
+    val version: Int = 7,
     val minAppVersion: String = "0.1.0",
     val feed: FeedRule = FeedRule(),
     val reelsTab: ReelsTabRule = ReelsTabRule(),
@@ -83,7 +103,8 @@ data class RuleSet(
     val story: StoryRule = StoryRule(),
     val directMessages: DirectMessagesRule = DirectMessagesRule(),
     val explore: ExploreRule = ExploreRule(),
-    val profile: ProfileRule = ProfileRule()
+    val profile: ProfileRule = ProfileRule(),
+    val actionTargets: ActionTargetsRule = ActionTargetsRule()
 ) {
     companion object {
         val DEFAULT = RuleSet()
@@ -142,6 +163,14 @@ data class RuleSet(
                     contentIds = profileObj?.optStringList("contentIds") ?: DEFAULT.profile.contentIds
                 )
 
+                val actionObj = json.optJSONObject("actionTargets")
+                val actionTargets = ActionTargetsRule(
+                    backIds = actionObj?.optStringList("backIds") ?: DEFAULT.actionTargets.backIds,
+                    backDescriptions = actionObj?.optStringList("backDescriptions") ?: DEFAULT.actionTargets.backDescriptions,
+                    homeIds = actionObj?.optStringList("homeIds") ?: DEFAULT.actionTargets.homeIds,
+                    homeDescriptions = actionObj?.optStringList("homeDescriptions") ?: DEFAULT.actionTargets.homeDescriptions
+                )
+
                 RuleSet(
                     version = version,
                     minAppVersion = minAppVersion,
@@ -151,7 +180,8 @@ data class RuleSet(
                     story = story,
                     directMessages = dm,
                     explore = explore,
-                    profile = profile
+                    profile = profile,
+                    actionTargets = actionTargets
                 )
             } catch (e: Exception) {
                 DEFAULT

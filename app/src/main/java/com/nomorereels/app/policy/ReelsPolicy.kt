@@ -40,7 +40,30 @@ enum class DmReelMode(
 
     /** Arayüzde çip / etiket olarak kullanılacak kısa ad. */
     val shortTitle: String
-        get() = when (this) {
+        get() = localizedShortTitle(isEnglish = false)
+
+    fun localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
+        FOLLOW_GLOBAL -> "Follow Global Mode"
+        BLOCK_ALL -> "Block All"
+        SINGLE_REEL -> "Just One Reel"
+        COUNT_QUOTA -> "X Reels (Daily Quota)"
+        TIME_QUOTA -> "X Minutes (Daily Time)"
+        ASK_WITH_FRICTION -> "Mindful Hold (5s)"
+        FREE -> "Unrestricted"
+    }
+
+    fun localizedDescription(isEnglish: Boolean): String = if (!isEnglish) description else when (this) {
+        FOLLOW_GLOBAL -> "Follows the general protection mode on the home screen."
+        BLOCK_ALL -> "Never allows Reels to open; exits immediately."
+        SINGLE_REEL -> "Allows the first opened video; exits as soon as you swipe to a 2nd Reel."
+        COUNT_QUOTA -> "Allows up to your daily count limit; blocks once reached."
+        TIME_QUOTA -> "Allows up to your daily minute limit; blocks once reached."
+        ASK_WITH_FRICTION -> "Shows a 5-second hold prompt when a Reel opens. Allows a single video if approved."
+        FREE -> "Does not intervene in Reels opened from this region."
+    }
+
+    fun localizedShortTitle(isEnglish: Boolean): String = if (!isEnglish) {
+        when (this) {
             FOLLOW_GLOBAL -> "Genel moda uy"
             BLOCK_ALL -> "Komple Yasak"
             SINGLE_REEL -> "Sadece 1 Tane"
@@ -49,6 +72,17 @@ enum class DmReelMode(
             ASK_WITH_FRICTION -> "5 sn Onaylı"
             FREE -> "Serbest"
         }
+    } else {
+        when (this) {
+            FOLLOW_GLOBAL -> "Follow Global"
+            BLOCK_ALL -> "Block All"
+            SINGLE_REEL -> "Just 1 Reel"
+            COUNT_QUOTA -> "Count Quota"
+            TIME_QUOTA -> "Time Quota"
+            ASK_WITH_FRICTION -> "5s Hold"
+            FREE -> "Free"
+        }
+    }
 
     companion object {
         fun fromName(name: String?, defaultMode: DmReelMode = SINGLE_REEL): DmReelMode {
@@ -71,6 +105,17 @@ enum class PolicyDecision(
     BLOCK_DAILY_COUNT_LIMIT("Engellendi (Günlük Reel Kotanız Doldu!)"),
     BLOCK_DAILY_TIME_LIMIT("Engellendi (Günlük Reels Süreniz Doldu!)"),
     ASK_MINDFUL_FRICTION("Farkındalık Onayı Bekleniyor (5 Sn Basılı Tut)");
+
+    fun localizedReason(isEnglish: Boolean): String = if (!isEnglish) reasonText else when (this) {
+        ALLOW -> "Allowed"
+        BLOCK_IMMEDIATELY -> "Blocked (Reels Feed)"
+        BLOCK_AFTER_SWIPE -> "Blocked (Swiped to 2nd Reel!)"
+        BLOCK_AFTER_TIMEOUT -> "Blocked (Single Reel Time Expired)"
+        BLOCK_BEDTIME -> "Blocked (Bedtime Focus · Sleep Time!)"
+        BLOCK_DAILY_COUNT_LIMIT -> "Blocked (Daily Reel Count Reached!)"
+        BLOCK_DAILY_TIME_LIMIT -> "Blocked (Daily Reel Time Reached!)"
+        ASK_MINDFUL_FRICTION -> "Awaiting Mindful Hold (Hold 5s)"
+    }
 
     val shouldBlock: Boolean
         get() = this == BLOCK_IMMEDIATELY ||

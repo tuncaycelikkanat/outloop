@@ -9,11 +9,17 @@ import android.content.Intent
 import android.graphics.Color
 import android.widget.RemoteViews
 import com.nomorereels.app.R
+import com.nomorereels.app.data.AppLanguage
 import com.nomorereels.app.data.QuotaStore
 import com.nomorereels.app.data.SettingsStore
 import com.nomorereels.app.policy.DmReelMode
 import com.nomorereels.app.service.ReelsAccessibilityService
 import com.nomorereels.app.ui.MainActivity
+import com.nomorereels.app.ui.i18n.AppStrings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * Ana ekran için sıfır dokunuşla kalan kotayı, aktif modu ve engellenen Reel sayısını
@@ -26,11 +32,18 @@ class QuotaAppWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        SettingsStore.init(context)
-        QuotaStore.init(context)
-
-        for (appWidgetId in appWidgetIds) {
-            updateWidget(context, appWidgetManager, appWidgetId)
+        val appContext = context.applicationContext
+        val pendingResult = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                SettingsStore.awaitInit(appContext)
+                QuotaStore.awaitInit(appContext)
+                for (appWidgetId in appWidgetIds) {
+                    updateWidget(appContext, appWidgetManager, appWidgetId)
+                }
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 
@@ -41,71 +54,99 @@ class QuotaAppWidgetProvider : AppWidgetProvider() {
     ) {
         val views = RemoteViews(context.packageName, R.layout.widget_quota)
 
-        val isServiceActive = ReelsAccessibilityService.isServiceActive.value
-        val isSnoozeActive = SettingsStore.isSnoozeActiveNow()
+        val isServiceActive =
+            ReelsAccessibilityService.isServiceActive.value ||
+                com.nomorereels.app.service.ServiceHealthMonitor.isAccessibilityPermissionGranted(context)
+        val isMasterEnabled = SettingsStore.protectionMasterEnabled.value
+        val isSnoozeActive = SettingsStore.isSnoozeEffective()
         val generalMode = SettingsStore.generalMode.value
-        val blockCount = maxOf(
-            ReelsAccessibilityService.actionExecutor.blockCount.value,
-            QuotaStore.todayBlockCount.value
-        )
+        val isEnglish = SettingsStore.appLanguage.value == AppLanguage.EN
+        val strings = AppStrings.get(SettingsStore.appLanguage.value)
+
+        val blockCount = QuotaStore.todayBlockCount.value
         val todayCount = QuotaStore.todayReelCount.value
         val countLimit = QuotaStore.dailyCountLimit.value
         val todayMinutes = (QuotaStore.todayTimeSpentSeconds.value / 60).toInt()
         val timeLimitMinutes = QuotaStore.dailyTimeLimitMinutes.value
+        val blockedText = if (isEnglish) "$blockCount Reels blocked today" else "Bugün $blockCount Reel engellendi"
 
         when {
             !isServiceActive -> {
-                views.setTextViewText(R.id.tv_widget_badge, "KORUMA KAPALI")
+                views.setTextViewText(R.id.tv_widget_badge, if (isEnglish) "PROTECTION OFF" else "KORUMA KAPALI")
                 views.setTextColor(R.id.tv_widget_badge, Color.parseColor("#CF4040"))
-                views.setTextViewText(R.id.tv_widget_primary, "Servis Kapalı")
-                views.setTextViewText(R.id.tv_widget_secondary, "Açmak için dokunun")
+                views.setTextViewText(R.id.tv_widget_primary, if (isEnglish) "Service Inactive" else "Servis Kapalı")
+                views.setTextViewText(R.id.tv_widget_secondary, if (isEnglish) "Tap to enable" else "Açmak için dokunun")
+            }
+            !isMasterEnabled -> {
+                views.setTextViewText(R.id.tv_widget_badge, if (isEnglish) "PAUSED" else "DURAKLATILDI")
+                views.setTextColor(R.id.tv_widget_badge, Color.parseColor("#E08A1E"))
+                views.setTextViewText(R.id.tv_widget_primary, if (isEnglish) "Protection Paused" else "Koruma Duraklatıldı")
+                views.setTextViewText(R.id.tv_widget_secondary, if (isEnglish) "Tap to resume" else "Devam etmek için dokunun")
             }
             isSnoozeActive -> {
                 val remMins = SettingsStore.getSnoozeRemainingMinutes()
-                views.setTextViewText(R.id.tv_widget_badge, "MOLA DEVREDE")
+                views.setTextViewText(R.id.tv_widget_badge, if (isEnglish) "SNOOZE ACTIVE" else "MOLA DEVREDE")
                 views.setTextColor(R.id.tv_widget_badge, Color.parseColor("#E08A1E"))
-                views.setTextViewText(R.id.tv_widget_primary, "Kalan: $remMins dk")
-                views.setTextViewText(R.id.tv_widget_secondary, "Süre bitince koruma geri döner")
+                views.setTextViewText(
+                    R.id.tv_widget_primary,
+                    if (isEnglish) "Remaining: $remMins min" else "Kalan: $remMins dk"
+                )
+                views.setTextViewText(
+                    R.id.tv_widget_secondary,
+                    if (isEnglish) "Protection resumes automatically" else "Süre bitince koruma geri döner"
+                )
             }
             generalMode == DmReelMode.BLOCK_ALL -> {
-                views.setTextViewText(R.id.tv_widget_badge, "KORUMA AKTİF")
+                views.setTextViewText(R.id.tv_widget_badge, if (isEnglish) "PROTECTION ACTIVE" else "KORUMA AKTİF")
                 views.setTextColor(R.id.tv_widget_badge, Color.parseColor("#2E9E5B"))
-                views.setTextViewText(R.id.tv_widget_primary, "Komple Yasak")
-                views.setTextViewText(R.id.tv_widget_secondary, "Bugün $blockCount Reel engellendi")
+                views.setTextViewText(R.id.tv_widget_primary, strings.blockAllTitle)
+                views.setTextViewText(R.id.tv_widget_secondary, blockedText)
             }
             generalMode == DmReelMode.SINGLE_REEL -> {
-                views.setTextViewText(R.id.tv_widget_badge, "KORUMA AKTİF")
+                views.setTextViewText(R.id.tv_widget_badge, if (isEnglish) "PROTECTION ACTIVE" else "KORUMA AKTİF")
                 views.setTextColor(R.id.tv_widget_badge, Color.parseColor("#2E9E5B"))
-                views.setTextViewText(R.id.tv_widget_primary, "Sadece 1 Tane")
-                views.setTextViewText(R.id.tv_widget_secondary, "İlk serbest · $blockCount engellendi")
+                views.setTextViewText(R.id.tv_widget_primary, strings.singleReelTitle)
+                views.setTextViewText(
+                    R.id.tv_widget_secondary,
+                    if (isEnglish) "1st allowed · $blockCount blocked" else "İlk serbest · $blockCount engellendi"
+                )
             }
             generalMode == DmReelMode.COUNT_QUOTA -> {
-                views.setTextViewText(R.id.tv_widget_badge, "KOTA DEVREDE")
+                views.setTextViewText(R.id.tv_widget_badge, if (isEnglish) "QUOTA ACTIVE" else "KOTA DEVREDE")
                 views.setTextColor(R.id.tv_widget_badge, Color.parseColor("#2E9E5B"))
                 views.setTextViewText(R.id.tv_widget_primary, "$todayCount / $countLimit Reel")
-                views.setTextViewText(R.id.tv_widget_secondary, "Bugün $blockCount Reel engellendi")
+                views.setTextViewText(R.id.tv_widget_secondary, blockedText)
             }
             generalMode == DmReelMode.TIME_QUOTA -> {
-                views.setTextViewText(R.id.tv_widget_badge, "SÜRE KOTASI")
+                views.setTextViewText(R.id.tv_widget_badge, if (isEnglish) "TIME QUOTA" else "SÜRE KOTASI")
                 views.setTextColor(R.id.tv_widget_badge, Color.parseColor("#2E9E5B"))
-                views.setTextViewText(R.id.tv_widget_primary, "$todayMinutes / $timeLimitMinutes dk")
-                views.setTextViewText(R.id.tv_widget_secondary, "Bugün $blockCount Reel engellendi")
+                views.setTextViewText(
+                    R.id.tv_widget_primary,
+                    if (isEnglish) "$todayMinutes / $timeLimitMinutes min" else "$todayMinutes / $timeLimitMinutes dk"
+                )
+                views.setTextViewText(R.id.tv_widget_secondary, blockedText)
             }
             else -> {
-                views.setTextViewText(R.id.tv_widget_badge, "KORUMA AKTİF")
+                views.setTextViewText(R.id.tv_widget_badge, if (isEnglish) "PROTECTION ACTIVE" else "KORUMA AKTİF")
                 views.setTextColor(R.id.tv_widget_badge, Color.parseColor("#2E9E5B"))
-                views.setTextViewText(R.id.tv_widget_primary, generalMode.title)
-                views.setTextViewText(R.id.tv_widget_secondary, "Bugün $blockCount Reel engellendi")
+                views.setTextViewText(R.id.tv_widget_primary, strings.modeTitle(generalMode))
+                views.setTextViewText(R.id.tv_widget_secondary, blockedText)
             }
         }
 
-        // Dokunulduğunda uygulamayı aç
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        // Servis kapalıysa doğrudan Erişilebilirlik Ayarları'nı, açıksa uygulamayı aç
+        val intent = if (!isServiceActive) {
+            Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+        } else {
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
         }
         val pendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            appWidgetId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )

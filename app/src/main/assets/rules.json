@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "minAppVersion": "0.1.0",
   "screens": {
     "feed": {
@@ -67,5 +67,20 @@
         "media_set_row_content_identifier"
       ]
     }
+  },
+  "actionTargets": {
+    "backIds": [
+      "com.instagram.android:id/action_bar_button_back",
+      "com.instagram.android:id/back_button",
+      "com.instagram.android:id/action_bar_back",
+      "com.instagram.android:id/action_bar_left_button"
+    ],
+    "backDescriptions": ["geri", "back", "kapat", "close", "yukarı git", "navigate up"],
+    "homeIds": [
+      "com.instagram.android:id/feed_tab",
+      "com.instagram.android:id/tab_home",
+      "com.instagram.android:id/action_bar_home"
+    ],
+    "homeDescriptions": ["ana sayfa", "home", "akış", "feed"]
   }
 }

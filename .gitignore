@@ -25,6 +25,7 @@ signing.properties
 # Local audit reports and scratch files
 warden_reports/
 WARDEN_EXECUTIVE_REPORT.md
+scratch/
 *.log
 captures/
 .navigation/

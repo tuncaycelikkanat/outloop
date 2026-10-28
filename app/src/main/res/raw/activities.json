@@ -1,0 +1,2252 @@
+[
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "Bir Bardak Soğuk Su",
+    "titleEn": "A Cold Glass of Water",
+    "descTr": "Suyu yudum yudum iç ve serinliğin boğazından inişine odaklan; susuzluk hissi çoğu zaman kaydırma dürtüsünü tetikler.",
+    "descEn": "Sip mindfully and feel the cool sensation; mild dehydration often triggers restless screen-checking.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Göz Sağlığı",
+    "categoryEn": "Eye Health",
+    "titleTr": "20-20-20 Göz Kuralı",
+    "titleEn": "20-20-20 Eye Rule",
+    "descTr": "Ekrana bakmayı bırak; 20 saniye boyunca en az 6 metre (20 feet) uzaktaki bir nesneye bakarak göz kaslarını rahatlat.",
+    "descEn": "Stop looking at screens; gaze at an object 20 feet away for 20 seconds to release optical eye strain.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Sinir Sistemi",
+    "categoryEn": "Nervous System",
+    "titleTr": "3 Derin Diyafram Nefesi",
+    "titleEn": "3 Deep Diaphragmatic Breaths",
+    "descTr": "Burnundan 4 saniyede al, 4 saniye tut, 6 saniyede ver. Biyolojik dürtü dalgaları genellikle ilk 90 saniyede kendiliğinden söner.",
+    "descEn": "Inhale for 4 seconds, hold for 4, exhale for 6. Biological urge waves typically subside on their own within 90 seconds.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Farkındalık",
+    "categoryEn": "Mindfulness",
+    "titleTr": "Pencereden Gökyüzü",
+    "titleEn": "Sky Through the Window",
+    "descTr": "Pencereye git ve sadece gökyüzüne, bulutlara veya ağaçlara bak. Zihnindeki sonsuz pencereleri kapat.",
+    "descEn": "Look out the window at the sky, clouds, or trees. Close the endless tabs in your mind.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden Farkındalığı",
+    "categoryEn": "Body Awareness",
+    "titleTr": "Omuz ve Boyun Esnetme",
+    "titleEn": "Shoulder & Neck Stretch",
+    "descTr": "Omuzlarını kulaklarına kadar çek, 3 saniye sık ve aniden serbest bırak. Ekran karşısında biriken gerginliği at.",
+    "descEn": "Shrug shoulders up to your ears, hold 3 seconds, and drop them completely. Release tension built up from screens.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Düşünceyi İsimlendir",
+    "titleEn": "Name the Thought",
+    "descTr": "Şu an zihninde dönen ana düşünceyi bir kelimeyle etiketle: 'planlama', 'endişe' veya 'sıkıntı'. Yargılamadan izle.",
+    "descEn": "Label your current dominant thought with one word: 'planning', 'worry', or 'boredom'. Observe without judgment.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Physical Space",
+    "titleTr": "Masa Üstü Mini Detoks",
+    "titleEn": "Desk Mini Reset",
+    "descTr": "Masanın üzerinde dikkatinizi dağıtan rastgele 3 eşyayı kaldır veya ait olduğu yere koy. Görsel sakinlik yarat.",
+    "descEn": "Remove or put away 3 distracting items from your desk to instantly restore visual calm.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "5 Duyuyu Fark Et",
+    "titleEn": "Notice 5 Senses",
+    "descTr": "Gördüğün 1 şey, duyduğun 1 ses, dokunduğun 1 doku ve aldığın 1 kokuyu fark et. Şimdiye ve buraya dön.",
+    "descEn": "Notice 1 thing you see, 1 sound you hear, 1 texture you touch, and 1 scent you smell. Ground yourself here and now.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Ergonomi",
+    "categoryEn": "Ergonomics",
+    "titleTr": "Bilek ve Parmak Esnetme",
+    "titleEn": "Wrist & Finger Stretch",
+    "descTr": "Telefon tutmaktan yorulan parmaklarını tek tek aç, bileklerini dairesel olarak çevir.",
+    "descEn": "Gently stretch your fingers and rotate your wrists to relieve strain from holding your phone.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "Yüzünü Soğuk Suyla Yıkama",
+    "titleEn": "Cold Water Face Splash",
+    "descTr": "Lavaboya gidip yüzüne soğuk su çarp. Ani sıcaklık değişimi otonom sinir sistemini hemen sakinleştirir.",
+    "descEn": "Splash cold water on your face. The rapid thermal shift immediately triggers the soothing mammalian dive reflex.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Topraklanma",
+    "categoryEn": "Grounding",
+    "titleTr": "Ayak Tabanlarını Hissetme",
+    "titleEn": "Feel Your Soles",
+    "descTr": "Ayakkabılarını çıkar veya tabanlarını yere tam bas. Yerin seni taşıdığını ve sağlamlığını 60 saniye hisset.",
+    "descEn": "Press your feet firmly flat on the floor. Sense the solid ground supporting your weight for 60 seconds.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Sinir Sistemi",
+    "categoryEn": "Nervous System",
+    "titleTr": "Fizyolojik İç Çekiş",
+    "titleEn": "Physiological Sigh",
+    "descTr": "Burnundan peş peşe iki kez derin nefes al, ardından ağzından uzun ve yavaşça ver. Akciğer alveollerini açar.",
+    "descEn": "Take two quick sniffs through the nose, then one long slow exhale through the mouth to rapidly reset heart rate.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Bir Dakika Sessizlik",
+    "titleEn": "One Minute of Silence",
+    "descTr": "Hiçbir uyaran olmadan sadece 60 saniye otur. Zihninin durulmasına izin ver.",
+    "descEn": "Sit for just 60 seconds without any stimulation. Allow your mind to settle naturally.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Göz Sağlığı",
+    "categoryEn": "Eye Health",
+    "titleTr": "Avuç İçiyle Göz Dinlendirme",
+    "titleEn": "Palming Eyes",
+    "descTr": "Avuçlarını birbirine sürterek ısıt ve göz kapaklarının üzerine koy. Karanlıkta göz kaslarının gevşemesini hisset.",
+    "descEn": "Rub your palms together until warm, cup them gently over closed eyes, and rest in total darkness.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Gerilim Azaltma",
+    "categoryEn": "Tension Relief",
+    "titleTr": "Çene ve Dil Kökünü Gevşet",
+    "titleEn": "Jaw & Tongue Release",
+    "descTr": "Dişlerini birbirinden ayır, dilini damağından indir ve çene kaslarını tamamen serbest bırak.",
+    "descEn": "Part your teeth, unglue your tongue from the roof of your mouth, and drop your jaw tension.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Omurga & Postür",
+    "categoryEn": "Spine & Posture",
+    "titleTr": "Omurgayı Dikleştir",
+    "titleEn": "Lengthen the Spine",
+    "descTr": "Başının tepesinden göğe doğru bir ip seni çekiyormuş gibi omurganı dikleştir ve derin bir nefes al.",
+    "descEn": "Imagine an invisible thread pulling the crown of your head upwards, elongating your spine.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "Elleri Yavaşça Yıkama",
+    "titleEn": "Mindful Handwash",
+    "descTr": "Ilık su ve sabunla ellerini yavaşça yıka, köpüğün ve suyun akışını tüm dikkatinle hisset.",
+    "descEn": "Wash your hands mindfully with warm water and soap, paying full attention to the sensation and aroma.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden Farkındalığı",
+    "categoryEn": "Body Awareness",
+    "titleTr": "Kalp Atışını Dinle",
+    "titleEn": "Feel Your Heartbeat",
+    "descTr": "Elini göğsünün üzerine koy ve avucunun altındaki ritmik kalp atışını 1 dakika boyunca hisset.",
+    "descEn": "Place a hand over your chest and feel the steady rhythm of your heartbeat for one quiet minute.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Şakak Masajı",
+    "categoryEn": "Temple Massage",
+    "titleTr": "Şakaklara Dairesel Masaj",
+    "titleEn": "Circular Temple Massage",
+    "descTr": "Parmak uçlarınla şakaklarına çok hafif dairesel hareketlerle masaj yap, zihinsel baskıyı yumuşat.",
+    "descEn": "Use two fingers to gently massage your temples in slow circles, easing mental strain.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Nefes",
+    "categoryEn": "Breathing",
+    "titleTr": "Kare Nefes Başlangıcı",
+    "titleEn": "Quick Box Breathing",
+    "descTr": "4 saniye nefes al, 4 saniye tut, 4 saniye ver, 4 saniye tut. Zihindeki kaosu anında yatıştır.",
+    "descEn": "Inhale for 4, hold for 4, exhale for 4, hold for 4. Rapidly restores mental order.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Farkındalık",
+    "categoryEn": "Mindfulness",
+    "titleTr": "Ekranı Yüzüstü Çevir",
+    "titleEn": "Flip Screen Downwards",
+    "descTr": "Telefonunu masaya ekranı aşağı bakacak şekilde koy ve dikkatinin yeniden sana dönmesini kutla.",
+    "descEn": "Place your phone face down and acknowledge the reclaim of your sovereign attention.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Ayak Parmaklarını Esnet",
+    "titleEn": "Toe Stretch",
+    "descTr": "Ayak parmaklarını yukarı doğru ger, sonra kıvır. Ayak tabanlarındaki dolaşımı canlandır.",
+    "descEn": "Curl your toes tightly, then fan them wide open to stimulate blood flow in your feet.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Göz Sağlığı",
+    "categoryEn": "Eye Health",
+    "titleTr": "Büyük Daire Göz Hareketi",
+    "titleEn": "Eye Roll Exercise",
+    "descTr": "Gözlerini başını oynatmadan yavaşça saat yönünde ve tersinde tam daire çevir.",
+    "descEn": "Slowly roll your eyes in a wide full circle clockwise, then counterclockwise without moving your head.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Şükran Cümlesi",
+    "titleEn": "One Gratitude Note",
+    "descTr": "Şu an hayatında iyi giden tek bir şeyi zihninde belirle ve ona içten bir teşekkür et.",
+    "descEn": "Silently identify one simple thing that is going well right now and offer quiet appreciation.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "Kolları Gökyüzüne Kaldır",
+    "titleEn": "Reach for the Sky",
+    "descTr": "İki kolunu yukarı uzat, parmaklarını kenetle ve tavana doğru iyice esne.",
+    "descEn": "Interlace your fingers, press your palms up toward the ceiling, and enjoy a long stretch.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "Ortamdaki Sesleri Say",
+    "titleEn": "Count Ambient Sounds",
+    "descTr": "Gözlerini kapat ve çevrenden gelen 3 farklı sesi sadece dinle; yorum yapma, sadece duy.",
+    "descEn": "Close your eyes and isolate 3 distinct sounds around you. Listen without commentary.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Gerilim Azaltma",
+    "categoryEn": "Tension Relief",
+    "titleTr": "Alın Çizgilerini Düzelt",
+    "titleEn": "Smooth the Forehead",
+    "descTr": "Farkında olmadan çattığın kaşlarını fark et ve alnını genişçe gevşet.",
+    "descEn": "Notice the tension between your brows and intentionally smooth your forehead smooth.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Nefes",
+    "categoryEn": "Breathing",
+    "titleTr": "Uzun Veriş Nefesi",
+    "titleEn": "Extended Exhale",
+    "descTr": "Nefes alırken 3'e kadar say, verirken 6'ya kadar say. Uzun veriş kalp atım hızını doğrudan yavaşlatır.",
+    "descEn": "Count to 3 as you inhale, and count to 6 as you exhale. Longer exhales trigger the rest response.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Physical Space",
+    "titleTr": "Ekrana Dokunmama Molası",
+    "titleEn": "No-Touch Pause",
+    "descTr": "Ellerini dizlerine koy ve hiçbir teknolojik alete 2 dakika boyunca dokunmama kararı al.",
+    "descEn": "Rest your hands on your lap and commit to touching zero digital devices for two solid minutes.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Farkındalık",
+    "categoryEn": "Mindfulness",
+    "titleTr": "Nefesin Giriş Çıkış Yeri",
+    "titleEn": "Breath at the Nostrils",
+    "descTr": "Havanın burnunun ucundan girişindeki serinliği ve çıkışındaki ılıklığı fark et.",
+    "descEn": "Notice the cool sensation at the rim of your nostrils on the in-breath and warmth on the out-breath.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Göğüs Kafesini Aç",
+    "titleEn": "Open Chest Stretch",
+    "descTr": "Ellerini arkanda kenetle, göğsünü öne çıkar ve omuz küreklerini birbirine yaklaştır.",
+    "descEn": "Clasp your hands behind your back, gently lift your chest, and squeeze shoulder blades together.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Bu An Yeterli Düşüncesi",
+    "titleEn": "This Moment is Enough",
+    "descTr": "Kendine fısılda: 'Şu an yapmam gereken başka hiçbir acil şey yok. Buradayım.'",
+    "descEn": "Whisper to yourself: 'Right now, there is nowhere I need to rush. I am right here.'",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Göz Sağlığı",
+    "categoryEn": "Eye Health",
+    "titleTr": "Hızlı Göz Kırpma",
+    "titleEn": "Rapid Blinking",
+    "descTr": "Ekran kurutan gözlerini 15-20 kez hızlıca kırpıştırarak doğal gözyaşı tabakasını yenile.",
+    "descEn": "Blink rapidly 15-20 times to naturally rehydrate and refresh your dry eyes.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "Parmak Uçlarında Yüksel",
+    "titleEn": "Calf Raises on Toes",
+    "descTr": "Ayakta parmak uçlarına çıkıp inerek bacak kaslarını ve kan akışını uyandır.",
+    "descEn": "Rise onto your tiptoes and slowly lower down 10 times to boost lower body circulation.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Gerilim Azaltma",
+    "categoryEn": "Tension Relief",
+    "titleTr": "Dudakları Titretme",
+    "titleEn": "Horse Lips Flutter",
+    "descTr": "Nefes verirken dudaklarını gevşekçe 'brrr' diye titret; yüz kaslarındaki donukluğu dağıtır.",
+    "descEn": "Gently blow out air through relaxed lips to make a vibration, softening facial stiffness.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "Dokunma Dikkati",
+    "titleEn": "Texture Awareness",
+    "descTr": "Giydiğin kumaşın dokusunu parmak uçlarınla yavaşça hisset; yumuşak mı, pürüzlü mü?",
+    "descEn": "Feel the texture of your clothing fabric with your fingertips. Is it smooth, coarse, or warm?",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Nefes",
+    "categoryEn": "Breathing",
+    "titleTr": "Bilinçli Tek Nefes",
+    "titleEn": "One Conscious Breath",
+    "descTr": "Sadece tek bir nefesi başından sonuna kadar tüm dikkatinle takip et.",
+    "descEn": "Follow just one single in-breath and out-breath from start to finish with undivided presence.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Physical Space",
+    "titleTr": "Klavyeyi Sil",
+    "titleEn": "Wipe Your Keyboard",
+    "descTr": "Bir mendille klavyeni veya ekranını temizle; temiz bir yüzey ferahlık hissi verir.",
+    "descEn": "Wipe down your keyboard or screen; a clean surface clears subtle subconscious clutter.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Kendine Nazik Olma",
+    "titleEn": "Self-Kindness Pause",
+    "descTr": "Zor bir gün geçiriyorsan elini kalbine koy ve 'Elimden gelenin en iyisini yapıyorum' de.",
+    "descEn": "Place a soothing hand over your heart and silently say: 'I am doing the best I can today.'",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Bel Çevirme Egzersizi",
+    "titleEn": "Seated Spinal Twist",
+    "descTr": "Sandalyede otururken gövdeni yavaşça sağa çevir, sonra sola dönerek omurganı gevşet.",
+    "descEn": "Sit tall and gently twist your torso to the right, then to the left to release spinal tension.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Doğa & Dikkat",
+    "categoryEn": "Nature & Attention",
+    "titleTr": "Bir Yaprağa Yakından Bak",
+    "titleEn": "Inspect a Plant Leaf",
+    "descTr": "Evdeki bir bitkinin yaprağındaki damarları ve yeşilin tonlarını 1 dakika incele.",
+    "descEn": "Study the intricate veins and shades of green on a houseplant leaf for one mindful minute.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Gerilim Azaltma",
+    "categoryEn": "Tension Relief",
+    "titleTr": "Karın Kaslarını Bırak",
+    "titleEn": "Unclench Your Belly",
+    "descTr": "İçeri çektiğin karın kaslarını tamamen gevşet; karnının nefesle birlikte doğal şişmesine izin ver.",
+    "descEn": "Release your tightened abdominal muscles and let your belly soften completely.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "Bilek Sallama",
+    "titleEn": "Shake Out Your Hands",
+    "descTr": "Ellerini ve kollarını gevşekçe salla; birikmiş statik gerilimi havaya saç.",
+    "descEn": "Vigorously shake out your hands and arms to discharge nervous energy.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Şu Anı Fark Et",
+    "titleEn": "Acknowledge the Here",
+    "descTr": "Şu an hangi odadasın, saat kaç, ne hissediyorsun? Kısa bir gerçeklik kontrolü yap.",
+    "descEn": "Ground in reality: Which room are you in, what time is it, how does your body feel?",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Nefes",
+    "categoryEn": "Breathing",
+    "titleTr": "Burundan Sakin Nefes",
+    "titleEn": "Quiet Nasal Breathing",
+    "descTr": "Ağzını kapa, sadece burun deliklerinden sessiz ve yumuşak nefesler alıp ver.",
+    "descEn": "Close your mouth and breathe entirely through your nose in steady, silent rhythms.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Göz Sağlığı",
+    "categoryEn": "Eye Health",
+    "titleTr": "Uzak Noktaya Odaklanma",
+    "titleEn": "Distant Horizon Focus",
+    "descTr": "Odanın en uzak köşesine veya ufka bak, bakışlarını yumuşat.",
+    "descEn": "Focus your eyes on the furthest visible point in the room or horizon, softening your gaze.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Topraklanma",
+    "categoryEn": "Grounding",
+    "titleTr": "Ağırlığını Hisset",
+    "titleEn": "Feel Your Gravity",
+    "descTr": "Sandalyenin altında vücudunun yaptığı basıncı ve ağırlığını bilinçli olarak fark et.",
+    "descEn": "Direct attention to the exact points where your body meets the chair or cushions.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Kulak Memesi Masajı",
+    "titleEn": "Earlobe Massage",
+    "descTr": "Kulak memelerini baş ve işaret parmaklarınla hafifçe ovala; akupresür noktalarını uyarır.",
+    "descEn": "Gently pinch and massage your earlobes in circular motions to stimulate calming acupressure points.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Sonraki Adımı Belirle",
+    "titleEn": "Name One Next Action",
+    "descTr": "Telefona geri dönmek yerine bugün yapacağın en küçük ve net tek adımı seç.",
+    "descEn": "Instead of picking up your phone, identify the single clearest small step you can take next.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "Temiz Bir Yudum Çay/Kahve",
+    "titleEn": "One Pure Sip",
+    "descTr": "Yanındaki içecekten dikkatini hiçbir şeye vermeden tek bir yudum al ve tadını hisset.",
+    "descEn": "Take one sip of whatever you are drinking with zero multitasking, tasting every note.",
+    "bracket": "MIN_1_3"
+  },
+  {
+    "categoryTr": "Hava & Canlılık",
+    "categoryEn": "Fresh Air & Vitality",
+    "titleTr": "Balkona Çıkıp Derin Hava Alma",
+    "titleEn": "Step Outside for Fresh Air",
+    "descTr": "Balkona veya kapı önüne çık. Derin nefes alarak ciğerlerini taze havayla doldur ve ufka bak.",
+    "descEn": "Step onto a balcony or porch. Fill your lungs with crisp outdoor air and gaze into the distance.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Çevre & Ferahlık",
+    "categoryEn": "Environment Reset",
+    "titleTr": "Odayı Tamamen Havalandırma",
+    "titleEn": "Aerate the Entire Room",
+    "descTr": "Pencereleri ardına kadar aç, içeri taze oksijen girmesini sağla. Oksijen seviyesi zihni anında açar.",
+    "descEn": "Open all windows wide to let fresh oxygen flood the space. Proper airflow immediately lifts brain fog.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Ritüel",
+    "categoryEn": "Mindful Ritual",
+    "titleTr": "Hızlı Bitki Çayı Demleme",
+    "titleEn": "Brew a Mindful Herbal Tea",
+    "descTr": "Papatya, nane veya adaçayı demle. Suyun kaynamasını ve kokunun yayılmasını sabırla izle.",
+    "descEn": "Brew chamomile, mint, or green tea. Patiently observe the water boil and the aroma rise.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beden & Esneme",
+    "categoryEn": "Body & Stretch",
+    "titleTr": "5 Dakikalık Esneme Serisi",
+    "titleEn": "5-Minute Full Body Stretch",
+    "descTr": "Bacaklarını, kollarını ve sırtını sırayla esnet. Durgun kanı hareketlendirip kasları rahatlat.",
+    "descEn": "Stretch your legs, arms, and back sequentially. Move stagnant blood and release muscle tightness.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Zihin Boşaltma",
+    "categoryEn": "Mind Clearing",
+    "titleTr": "Zihin Dökümü (Brain Dump)",
+    "titleEn": "Quick Paper Brain Dump",
+    "descTr": "Bir kağıt al ve kafandaki tüm yarım kalmış işleri, kaygıları rastgele 5 dakika boyunca yaz.",
+    "descEn": "Grab pen and paper and scribble every pending thought or worry freely for 5 minutes without editing.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Sinir Sistemi",
+    "categoryEn": "Nervous System",
+    "titleTr": "5 Dakika Kutu Nefesi",
+    "titleEn": "5-Minute Box Breathing",
+    "descTr": "4 saniye al, 4 tut, 4 ver, 4 tut ritmini 5 dakika sürdür. Zihinsel karmaşayı saniyeler içinde durdurur.",
+    "descEn": "Maintain 4-second box breathing cycles for 5 full minutes to soothe hyperactive thoughts.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Fiziksel Düzen",
+    "categoryEn": "Physical Space",
+    "titleTr": "Çalışma Masasını Sıfırlama",
+    "titleEn": "Desk Clutter Clear",
+    "descTr": "Masanın üzerindeki boş bardakları kaldır, gereksiz kağıtları çöpe at ve yüzeyi sil.",
+    "descEn": "Clear away empty mugs, discard loose scraps, and wipe clean your workspace surface.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Sosyal Bağ",
+    "categoryEn": "Connection",
+    "titleTr": "Sevdiğin Birine Kısa Bir Selam",
+    "titleEn": "Send a Warm Greeting",
+    "descTr": "Uzun süredir konuşmadığın bir dostuna 'Aklıma geldin, nasılsın?' diye samimi bir mesaj yaz.",
+    "descEn": "Send a genuine message to a friend you haven't talked to lately just to say hello and wish them well.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Hareket",
+    "categoryEn": "Movement",
+    "titleTr": "Hızlı Koridor Yürüyüşü",
+    "titleEn": "Brisk Indoor Walk",
+    "descTr": "Evde veya ofiste hızlı adımlarla koridorda 5 dakika yürü. Bacak kaslarını çalıştır.",
+    "descEn": "Walk briskly back and forth across your room or hallway for 5 minutes to restore blood circulation.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Müzik & Sakinlik",
+    "categoryEn": "Music & Calm",
+    "titleTr": "Bir Enstrümantal Parça Dinleme",
+    "titleEn": "Listen to an Acoustic Track",
+    "descTr": "Kulaklıklarını tak, sakin bir piyano veya akustik gitar parçasını gözlerin kapalı dinle.",
+    "descEn": "Put on headphones, close your eyes, and immerse yourself in one soothing instrumental song.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beslenme",
+    "categoryEn": "Nourishment",
+    "titleTr": "Limonlu Ilık Su Hazırlama",
+    "titleEn": "Warm Lemon Water",
+    "descTr": "Bir bardak ılık suya yarım limon sık. Yudumlayarak iç, sindirimi ve bağışıklığı destekle.",
+    "descEn": "Squeeze half a lemon into warm water and sip it slowly to hydrate and support digestion.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Göz Sağlığı",
+    "categoryEn": "Eye Health",
+    "titleTr": "Kapsamlı Göz Egzersizi",
+    "titleEn": "Complete Eye Mobility Workout",
+    "descTr": "Gözlerini yukarı-aşağı, sağa-sola hareket ettir, ardından çapraz odaklanma çalışmaları yap.",
+    "descEn": "Move your eyes up and down, left and right, then focus near and far to exercise ocular muscles.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Netlik",
+    "categoryEn": "Clarity",
+    "titleTr": "Günlük 3 Önceliği Yazma",
+    "titleEn": "Pick Top 3 Daily Priorities",
+    "descTr": "Bugün gerçekten bitmesi gereken en kritik 3 görevi bir yapışkan nota yaz ve önüne yapıştır.",
+    "descEn": "Write down the 3 most crucial things that must be completed today on a single sticky note.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Doğa",
+    "categoryEn": "Nature",
+    "titleTr": "Ev Bitkilerini Sulama",
+    "titleEn": "Water Your Houseplants",
+    "descTr": "Evdeki saksıları kontrol et, toprağı kuru olanlara su ver ve sararmış yaprakları temizle.",
+    "descEn": "Check your indoor potted plants, water the dry ones, and gently remove yellowed leaves.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Meditasyon",
+    "categoryEn": "Meditation",
+    "titleTr": "5 Dakikalık Sessiz Oturuş",
+    "titleEn": "5-Minute Silent Meditation",
+    "descTr": "Sessiz bir köşede dik otur, sadece nefesine odaklan. Aklına gelen düşüncelere takılmadan geçmelerine izin ver.",
+    "descEn": "Sit upright in a quiet spot and anchor awareness purely on the flow of your breathing.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Dolaşım & Rahatlama",
+    "categoryEn": "Circulation",
+    "titleTr": "Bacakları Duvara Yaslama",
+    "titleEn": "Legs-Up-The-Wall Pose",
+    "descTr": "Sırtüstü uzan ve bacaklarını 90 derece duvara daya. Bacaklardaki kan gövdeye dönsün, yorgunluk aksın.",
+    "descEn": "Lie on your back and elevate your legs against a wall to reverse venous gravity and deeply relax.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Mini Düzen",
+    "categoryEn": "Mini Organization",
+    "titleTr": "Cüzdan veya Çanta Ayıklama",
+    "titleEn": "Wallet/Bag Declutter",
+    "descTr": "Cüzdanındaki eski fişleri, kartvizitleri çıkar ve çantanın içindeki gereksiz yükleri boşalt.",
+    "descEn": "Clear old receipts and unnecessary junk from your wallet or daily bag.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Şükran",
+    "categoryEn": "Gratitude",
+    "titleTr": "3 Şükran Notu",
+    "titleEn": "Write 3 Gratitudes",
+    "descTr": "Kağıda bugün varlığı için minnettar olduğun 3 somut şeyi nedenleriyle birlikte yaz.",
+    "descEn": "Write down 3 specific things you are genuinely grateful for today along with why.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Mindful Yeme",
+    "categoryEn": "Mindful Eating",
+    "titleTr": "Bir Meyveyi Yavaşça Yeme",
+    "titleEn": "Slow Mindful Fruit",
+    "descTr": "Bir elma veya mandalinayı yavaşça soy, dilimle; kokusunu ve dokusunu fark ederek ye.",
+    "descEn": "Peel an apple or tangerine slowly, observing the scent, texture, and bursts of flavor.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Physical Space",
+    "titleTr": "Yatağı Toplama",
+    "titleEn": "Make Your Bed",
+    "descTr": "Yatağını düzelt, çarşafı gerginleştir ve yastıkları kabart. Güne düzenli bir zemin hazırla.",
+    "descEn": "Tuck in sheets, smooth the duvet, and fluff pillows for an immediate sense of accomplishment.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Ses & Nefes",
+    "categoryEn": "Vocal & Breath",
+    "titleTr": "Om / Hım Sesiyle Rahatlama",
+    "titleEn": "Vocal Humming Relaxation",
+    "descTr": "Nefes verirken boğazında 'hımmm' sesi titreştir. Vagus sinirini uyararak kalp ritmini dengeler.",
+    "descEn": "Hum a low, continuous pitch on every exhale. The vibration stimulates the vagus nerve.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Kedi-İnek (Cat-Cow) Esnemesi",
+    "titleEn": "Cat-Cow Spine Warmup",
+    "descTr": "Eller ve dizler üzerine geçerek omurganı nefesle birlikte dalgalandır; bel ağrılarını dindir.",
+    "descEn": "Come onto hands and knees and ripple your spine with inhales and exhales to unlock stiffness.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Kişisel Alan",
+    "categoryEn": "Personal Space",
+    "titleTr": "Dolap Askılarını Düzeltme",
+    "titleEn": "Straighten 5 Hangers",
+    "descTr": "Gardıroptan dağınık duran 5 kıyafeti düzgünce askıya as veya katla.",
+    "descEn": "Neatly hang or fold 5 garments that were strewn around your bedroom.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Pozitif Bir Anıyı Hatırla",
+    "titleEn": "Relive a Warm Memory",
+    "descTr": "Gözlerini kapat ve kendini son derece huzurlu hissettiğin bir tatil veya buluşma anına git.",
+    "descEn": "Close your eyes and mentally step back into a peaceful vacation or cherished memory.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "10 Adet Squat veya Şınav",
+    "titleEn": "10 Gentle Bodyweight Reps",
+    "descTr": "10 yavaş squat yaparak bacaklarını ve kalçanı uyandır; tembelliği tek hamlede dağıt.",
+    "descEn": "Do 10 slow bodyweight squats or wall pushups to flood your brain with alertness.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "Doğal Bir Koku Koklama",
+    "titleEn": "Inhale a Natural Scent",
+    "descTr": "Kahve çekirdeği, lavanta yağı veya taze nane yaprağını burnuna yaklaştırıp derin nefes al.",
+    "descEn": "Inhale the aroma of coffee beans, lavender oil, or fresh mint to trigger olfactory presence.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Physical Space",
+    "titleTr": "Ayakkabıları Düzenleme",
+    "titleEn": "Straighten the Entryway",
+    "descTr": "Kapı önünde dağınık duran ayakkabıları rafa diz ve girişi ferahlat.",
+    "descEn": "Line up shoes by the doorway and clear entryway obstacles for a calm welcome home.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Bugünün Niyetini Belirle",
+    "titleEn": "Set a Daily Intention",
+    "descTr": "Günün geri kalanını hangi hisle yaşamak istiyorsun? 'Sakinlik', 'sabır', 'odak'. Seç ve yaz.",
+    "descEn": "Pick one anchor word for the rest of your day: 'calm', 'patience', or 'focus'.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Ergonomi",
+    "categoryEn": "Ergonomics",
+    "titleTr": "Sandalye ve Ekran Ayarı",
+    "titleEn": "Ergonomic Alignment Check",
+    "descTr": "Koltuğunun yüksekliğini, sırt desteğini ve ekran mesafesini ergonomik kurallara göre ayarla.",
+    "descEn": "Adjust your chair height, lumbar support, and monitor angle to prevent chronic slouching.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Nefes",
+    "categoryEn": "Breathing",
+    "titleTr": "Nadi Shodhana (Dönüşümlü Nefes)",
+    "titleEn": "Alternate Nostril Breathing",
+    "descTr": "Sağ burun deliğini kapatıp soldan al, soldan verip sağdan al. Beynin iki yarımküresini dengeler.",
+    "descEn": "Gently alternate breathing through left and right nostrils to restore neurological equilibrium.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beslenme",
+    "categoryEn": "Nourishment",
+    "titleTr": "Çiğ Kuruyemiş Atıştırma",
+    "titleEn": "Handful of Raw Nuts",
+    "descTr": "5-6 adet çiğ badem veya ceviz ye. Sağlıklı yağlar beyin fonksiyonlarını besler.",
+    "descEn": "Eat a mindful palmful of raw walnuts or almonds; healthy fats sustain calm energy.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Farkındalık",
+    "categoryEn": "Mindfulness",
+    "titleTr": "Vücut Taraması (Mini)",
+    "titleEn": "Mini Body Scan",
+    "descTr": "Başının tepesinden ayak parmaklarına kadar vücudundaki tüm duyumları 5 dakikada tara.",
+    "descEn": "Scan sensations from the crown of your head to the tips of your toes in 5 minutes.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "Ayak Tabanı Topu Masajı",
+    "titleEn": "Tennis Ball Foot Roll",
+    "descTr": "Bir tenis topunu ayak tabanının altında ileri geri yuvarla; fasyayı gevşet.",
+    "descEn": "Roll a tennis or massage ball under your foot arch to loosen plantar fascia tension.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Physical Space",
+    "titleTr": "Mutfak Tezgahını Sil",
+    "titleEn": "Wipe Down Kitchen Counter",
+    "descTr": "Mutfak tezgahını hızlıca silip kurulayarak ferah ve kullanıma hazır bir alan yarat.",
+    "descEn": "Wipe down your kitchen countertops with a warm cloth for an immediate clean slate.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Öğrenme",
+    "categoryEn": "Learning",
+    "titleTr": "Sözlükten Yeni Bir Kelime",
+    "titleEn": "Discover a Word in a Dictionary",
+    "descTr": "Fiziksel bir sözlüğü rastgele aç ve hiç bilmediğin ilginç bir kelimenin anlamına bak.",
+    "descEn": "Flip open a paper dictionary and learn one intriguing, obscure word.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Beklentisiz Dinlenme",
+    "titleEn": "The Art of Doing Nothing",
+    "descTr": "Hiçbir hedef veya yapılacak iş olmadan sadece pencere kenarında 5 dakika vakit geçir.",
+    "descEn": "Practice the Dutch art of 'niksen'—simply lounging by the window with no agenda.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Bilek ve Ayak Bileği Çemberleri",
+    "titleEn": "Ankle & Joint Mobility",
+    "descTr": "Otururken her iki ayak bileğini 20 kez saat yönünde, 20 kez tersinde çevir.",
+    "descEn": "Rotate each ankle in wide circles 20 times to promote lower limb circulation.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "Işığı Ayarla",
+    "titleEn": "Adjust Ambient Lighting",
+    "descTr": "Gözü yoran parlak tavan ışığını kapat, loş ve sıcak bir masa lambasını aç.",
+    "descEn": "Dim harsh overhead fluorescent lights and switch on a warm, indirect accent lamp.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Farkındalık",
+    "categoryEn": "Mindfulness",
+    "titleTr": "Zihindeki Açık Pencereleri Kapat",
+    "titleEn": "Close Mental Tabs",
+    "descTr": "Zihninde sürekli dönen ama bugün çözemeyeceğin konuları zihinsel bir çekmeceye kilitle.",
+    "descEn": "Mentally visualize locking unsolvable lingering dilemmas into an archive drawer for now.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Göz Sağlığı",
+    "categoryEn": "Eye Health",
+    "titleTr": "Ilık Kompres",
+    "titleEn": "Warm Towel on Eyes",
+    "descTr": "Ilık suyla ıslatılmış bir bezi göz kapaklarına koyup 5 dakika uzan.",
+    "descEn": "Drape a warm, damp cloth across your closed eyes and rest deeply for 5 minutes.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "Merdiven Çıkıp İnme",
+    "titleEn": "Climb 2 Flights of Stairs",
+    "descTr": "Asansör yerine merdivenleri iki kat çıkıp inerek kalp atımını canlandır.",
+    "descEn": "Walk up and down two flights of stairs to get your heart pumping invigorating blood.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Physical Space",
+    "titleTr": "Geri Dönüşüm Kutusu Ayıklama",
+    "titleEn": "Sort Recycling Scraps",
+    "descTr": "Evdeki kağıt ve plastik atıkları toplayıp geri dönüşüm kutusuna yerleştir.",
+    "descEn": "Gather recyclable papers and bottles and sort them neatly into their bins.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Sosyal Bağ",
+    "categoryEn": "Connection",
+    "titleTr": "Evcil Hayvana İlgi",
+    "titleEn": "Pet an Animal Mindfully",
+    "descTr": "Varsa evcil hayvanını 5 dakika boyunca dikkatin başka hiçbir yerde olmadan sev.",
+    "descEn": "Stroke your dog or cat with total immersion, feeling their fur and breathing rhythm.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Nefes",
+    "categoryEn": "Breathing",
+    "titleTr": "Doğal Nefesi İzleme",
+    "titleEn": "Observe Natural Inflow",
+    "descTr": "Nefesi değiştirmeye çalışmadan, sadece bedenin kendi kendine nasıl nefes aldığını seyret.",
+    "descEn": "Without manipulating your breathing, simply observe how the body breathes itself.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Öz Şefkat Molası",
+    "titleEn": "Self-Compassion Pause",
+    "descTr": "Günün getirdiği yorgunluk ve hatalar için kendine kızmak yerine anlayış göster.",
+    "descEn": "Forgive yourself for minor slips today and treat yourself like a kind friend would.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Boyun Yan Esnetme",
+    "titleEn": "Side Neck Release",
+    "descTr": "Sağ kulağını sağ omuzuna yaklaştır, 30 saniye bekle; sonra sol tarafı esnet.",
+    "descEn": "Gently drop right ear toward right shoulder, hold 30s, and mirror on the left.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Physical Space",
+    "titleTr": "Kitaplığı Düzeltme",
+    "titleEn": "Align a Bookshelf Row",
+    "descTr": "Kitaplığındaki bir raftaki kitapları dikleştir ve boy sırasına göre hizala.",
+    "descEn": "Straighten one shelf of books and dust off their spines.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Müzik & Sakinlik",
+    "categoryEn": "Music & Calm",
+    "titleTr": "Doğa Sesleri Açma",
+    "titleEn": "Play Forest Sounds",
+    "descTr": "Yağmur veya rüzgar sesi açarak odanın atmosferini bir anda sakinleştir.",
+    "descEn": "Play 5 minutes of soothing rainfall or forest birdsong to enrich background ambience.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "Dokunarak Tanıma",
+    "titleEn": "Tactile Exploration",
+    "descTr": "Gözlerini kapa ve masadaki bir objeyi sadece dokunarak en ince detayına kadar tanı.",
+    "descEn": "Close your eyes and explore an ordinary desk object purely through touch.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Canlılık",
+    "categoryEn": "Vitality",
+    "titleTr": "Gülümseme ve Yüz Rahatlatma",
+    "titleEn": "Soft Half-Smile",
+    "descTr": "Dudaklarının kenarını hafifçe yukarı kaldır (yarım tebessüm); beyne güvenlik sinyali gönderir.",
+    "descEn": "Adopt a gentle Buddha half-smile; neural feedback sends immediate calm signals to the brain.",
+    "bracket": "MIN_5"
+  },
+  {
+    "categoryTr": "Okuma & İlham",
+    "categoryEn": "Reading & Insight",
+    "titleTr": "Bir Kitaptan 5-10 Sayfa Okuma",
+    "titleEn": "Read 5-10 Book Pages",
+    "descTr": "Sosyal medya hap bilgileri yerine derin bir kurgu veya düşünce kitabından birkaç sayfa oku.",
+    "descEn": "Trade shallow online snippets for 5-10 pages of a thoughtful book or engrossing novel.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Hareket & Doğa",
+    "categoryEn": "Outdoor Movement",
+    "titleTr": "Mahallede Tempolu Yürüyüş",
+    "titleEn": "Brisk Neighborhood Walk",
+    "descTr": "Telefonunu cebine veya evde bırak, sokağa çık ve tempolu 15 dakika yürü.",
+    "descEn": "Leave your phone behind and take an invigorating 15-minute walk around your block.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Kahve Ritüeli",
+    "categoryEn": "Coffee Ritual",
+    "titleTr": "Özenli Filtre Kahve Demleme",
+    "titleEn": "Mindful Pourover Coffee",
+    "descTr": "Çekirdekleri kokla, suyu yavaşça dök. Kahve yapımını bir dikkat meditasyonuna dönüştür.",
+    "descEn": "Grind fresh beans, inhale the rich roast, and pour water in patient concentric circles.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "İçgörü",
+    "categoryEn": "Journaling",
+    "titleTr": "Günlük Tutma (15 Dk)",
+    "titleEn": "15-Minute Journaling",
+    "descTr": "Bugün seni en çok ne zorladı, neyi iyi yaptın? Düşüncelerini filtrelemeden kağıda dök.",
+    "descEn": "Write honestly about what challenged you today and what went well, clearing your subconscious.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Beslenme",
+    "categoryEn": "Nourishment",
+    "titleTr": "Taze Meyve Tabağı Hazırlama",
+    "titleEn": "Fresh Fruit & Yogurt Plate",
+    "descTr": "Meyveleri güzelce dilimle, yoğurt ve tohumlarla süsle; kendine özenli bir tabak hazırla.",
+    "descEn": "Slice crisp fruits, sprinkle nuts and seeds over yogurt, and serve yourself with care.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Meditasyon",
+    "categoryEn": "Meditation",
+    "titleTr": "Rehberli Farkındalık Seansı",
+    "titleEn": "15-Minute Guided Meditation",
+    "descTr": "Gözlerini kapat ve 15 dakika boyunca nefesine ve vücut hissiyatına odaklan.",
+    "descEn": "Sit comfortably and immerse in a 15-minute unhurried breath and body meditation.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Fiziksel Düzen",
+    "categoryEn": "Organization",
+    "titleTr": "Bir Çekmeceyi Düzenleme",
+    "titleEn": "Organize One Junk Drawer",
+    "descTr": "Evdeki o meşhur dağınık çekmeceyi tamamen boşalt, gereksizleri at ve düzenle yerleştir.",
+    "descEn": "Empty one cluttered drawer completely, toss the useless items, and organize the rest.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Sosyal Bağ",
+    "categoryEn": "Social Connection",
+    "titleTr": "Bir Dostla Telefon Sohbeti",
+    "titleEn": "Phone Call with an Old Friend",
+    "descTr": "Mesajlaşmak yerine sevdiğin bir dostunu ara ve samimi bir 10-15 dakika sohbet et.",
+    "descEn": "Skip texting and call someone you care about to hear their actual voice and share warmth.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Müzik & Sanat",
+    "categoryEn": "Music & Art",
+    "titleTr": "Enstrüman Pratiği",
+    "titleEn": "Play a Musical Instrument",
+    "descTr": "Gitar, piyano veya flüt; bildiğin bir melodiyi 15 dakika boyunca keyifle çal.",
+    "descEn": "Pick up an acoustic guitar or sit at the piano to practice a melodic passage with love.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Beden & Yenilenme",
+    "categoryEn": "Body Care",
+    "titleTr": "Dinlendirici Sıcak Duş",
+    "titleEn": "Relaxing Warm Shower",
+    "descTr": "Suyun sıcaklığını bedeninde hisset, tüm günün zihinsel yorgunluğunu akıt.",
+    "descEn": "Let warm cascades of water dissolve muscle knots and mental fatigue from your day.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Öğrenme",
+    "categoryEn": "Learning",
+    "titleTr": "Yeni Bir Dilde 5 İfade Öğrenme",
+    "titleEn": "Learn 5 Foreign Expressions",
+    "descTr": "İlgilendiğin bir dilde günlük hayatta kullanılan 5 faydalı ifadeyi ve telaffuzunu öğren.",
+    "descEn": "Study 5 authentic conversational phrases in a new language and practice saying them out loud.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Yaratıcılık",
+    "categoryEn": "Creativity",
+    "titleTr": "Serbest Kağıt Karalama",
+    "titleEn": "Freehand Sketching / Doodling",
+    "descTr": "Güzel çizme baskısı olmadan sadece çizgi ve desenlerle kağıdı doldur.",
+    "descEn": "Doodle geometric patterns or organic shapes with a pen, freeing creative spontaneity.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Doğa & Çevre",
+    "categoryEn": "Nature & Care",
+    "titleTr": "Balkon Bitkileri Bakımı",
+    "titleEn": "Balcony Garden Pruning",
+    "descTr": "Saksıların toprağını havalandır, kuru yaprakları buda ve bitkilerine bakım yap.",
+    "descEn": "Gently aerate plant soil, prune dried leaves, and wipe dust from green foliage.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Sirkadiyen Ritim",
+    "categoryEn": "Circadian Rhythm",
+    "titleTr": "Doğal Güneş Işığı Banyosu",
+    "titleEn": "Natural Sunlight Exposure",
+    "descTr": "Dışarıda veya güneş alan bir pencerede 15 dakika otur, D vitamini ve melatonin dengeni yenile.",
+    "descEn": "Sit in direct natural sunlight for 15 minutes to synchronize your circadian clock.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Kendi Kendine Bacak Masajı",
+    "titleEn": "Self-Leg & Foot Massage",
+    "descTr": "Doğal bir yağ ile yorgun bacak kaslarını ve tabanlarını dairesel hareketlerle ov.",
+    "descEn": "Use a little natural lotion to massage your calf muscles and tired arches.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Strateji",
+    "categoryEn": "Strategy",
+    "titleTr": "Haftalık Plan İncelemesi",
+    "titleEn": "Weekly Blueprint Review",
+    "descTr": "Önündeki günlerin takvimine bak, yoğun günleri hafiflet ve dinlenme zamanları planla.",
+    "descEn": "Review your upcoming calendar, reschedule non-essentials, and guard restorative downtime.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Kültür & Zihin",
+    "categoryEn": "Culture",
+    "titleTr": "Bir Podcast Dinleme",
+    "titleEn": "Listen to a Deep Podcast",
+    "descTr": "Bilim, felsefe veya tarih üzerine kaliteli bir podcast bölümünü dikkatle dinle.",
+    "descEn": "Listen attentively to an educational podcast episode exploring philosophy, science, or history.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Yoga",
+    "categoryEn": "Yoga",
+    "titleTr": "Güneşe Selam (Surya Namaskar)",
+    "titleEn": "Sun Salutation Yoga Flow",
+    "descTr": "3-4 tur Güneşe Selam serisi yaparak tüm omurganı ve eklemlerini canlandır.",
+    "descEn": "Flow through 3-4 rounds of Sun Salutations to awaken your entire kinetic chain.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Fiziksel Düzen",
+    "categoryEn": "Organization",
+    "titleTr": "Gardırop Askılarını Düzenleme",
+    "titleEn": "Wardrobe Section Refresh",
+    "descTr": "Dolabındaki bir askılık bölümünü renklerine veya türüne göre yeniden düzenle.",
+    "descEn": "Reorganize one section of your closet by category or color palette.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Yaratıcı Yazı",
+    "categoryEn": "Creative Writing",
+    "titleTr": "Kısa Bir Şiir veya Not Yazma",
+    "titleEn": "Write a Brief Poem or Haiku",
+    "descTr": "3 kıtalık kısa bir şiir veya bugün hissettiklerini anlatan edebi bir paragraf karala.",
+    "descEn": "Compose a three-line haiku or an evocative paragraph capturing an emotional nuance.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Sosyal",
+    "categoryEn": "Social",
+    "titleTr": "Komşuya veya Yakınına İkram",
+    "titleEn": "Share a Treat with a Neighbor",
+    "descTr": "Evde pişen bir keki veya çayı komşuna ikram et; küçük nezaketler günü güzelleştirir.",
+    "descEn": "Offer a slice of cake or fresh fruit to a neighbor; micro-kindness connects communities.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "15 Dakika Pilates Mat Egzersizi",
+    "titleEn": "15-Minute Mat Pilates",
+    "descTr": "Karın merkezini (core) güçlendiren 5 temel pilates hareketini kontrollü uygula.",
+    "descEn": "Complete a focused 15-minute core stability routine on an exercise mat.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Kişisel Bakım",
+    "categoryEn": "Self Care",
+    "titleTr": "Tırnak ve El Bakımı",
+    "titleEn": "Hand & Nail Care Ritual",
+    "descTr": "Tırnaklarını törpüle, besleyici bir kremle ellerine özen göster.",
+    "descEn": "Trim, file, and moisturize your hands and nails with unhurried attentiveness.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Öğrenme",
+    "categoryEn": "Learning",
+    "titleTr": "Tarihi Bir Olayı Okuma",
+    "titleEn": "Read an Encyclopedia Entry",
+    "descTr": "Tarihte bugün ne olduğunu veya merak ettiğin tarihi bir figürün hayatını araştır.",
+    "descEn": "Look up an engaging historical event or biography and absorb the broader human context.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Organization",
+    "titleTr": "Banyo Aynası ve Tezgahını Parlatma",
+    "titleEn": "Polish Mirror and Basin",
+    "descTr": "Banyo aynasını ve lavaboyu tertemiz yap; parlayan bir yüzey zihinsel netlik katar.",
+    "descEn": "Clean your bathroom mirror and counter until spotless for an immediate feeling of order.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Şükran Mektubu Taslağı",
+    "titleEn": "Draft a Gratitude Letter",
+    "descTr": "Hayatında sana emeği geçen bir öğretmen veya dostuna teşekkür mektubu taslağı hazırla.",
+    "descEn": "Draft a letter of appreciation to an influential mentor, teacher, or dear friend.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Müzik",
+    "categoryEn": "Music",
+    "titleTr": "Tüm Bir Albümün 3 Parçasını Dinleme",
+    "titleEn": "Active Album Listening",
+    "descTr": "Şarkı atlamadan bir albümün ilk 3 parçasını sözlerini inceleyerek dinle.",
+    "descEn": "Listen to three consecutive tracks from a timeless vinyl or concept album without skipping.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Doğa & Bitki",
+    "categoryEn": "Nature",
+    "titleTr": "Bitki Çoğaltma (Suda Kök Eğitimi)",
+    "titleEn": "Propagate a Plant Cutting",
+    "descTr": "Bir sarmaşık veya paşa kılıcından dal kesip suya koy; yeni bir kökleniş başlat.",
+    "descEn": "Take a healthy cutting from a houseplant and place it in water to root.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Köpük Rulo (Foam Roller) Masajı",
+    "titleEn": "Foam Rolling Tight Muscles",
+    "descTr": "Sırtını ve bacak kaslarını köpük rulo üzerinde gezdirerek miyofasiyal düğümleri çöz.",
+    "descEn": "Roll tight quads, glutes, and upper back over a foam roller to release knots.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Zihin & Fikir",
+    "categoryEn": "Brainstorming",
+    "titleTr": "Fikir Haritası (Mind Map) Çıkarma",
+    "titleEn": "Draw a Concept Mind Map",
+    "descTr": "Kafandaki bir proje veya hayal için merkezden dallanan bir zihin haritası çiz.",
+    "descEn": "Create a radiating hand-drawn mind map for a project or personal aspiration.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Mutfak",
+    "categoryEn": "Cooking",
+    "titleTr": "Ev Yapımı Sağlıklı Sos Hazırlama",
+    "titleEn": "Blend a Fresh Salad Dressing",
+    "descTr": "Zeytinyağı, limon, hardal ve baharatlarla akşama özel taze bir salata sosu hazırla.",
+    "descEn": "Whisk together extra virgin olive oil, lemon, garlic, and herbs for a clean homemade dressing.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Organization",
+    "titleTr": "Kitapları Tozdan Arındırma",
+    "titleEn": "Dust Books and Shelves",
+    "descTr": "En sevdiğin kitapları raftan indir, tozlarını al ve sevdiğin alıntıları hatırla.",
+    "descEn": "Take books off the shelf, dust their covers, and revisit favorite underlined passages.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Göz & Zihin",
+    "categoryEn": "Rest",
+    "titleTr": "Göz Bandıyla 15 Dk Power Nap",
+    "titleEn": "15-Minute Recharging Power Nap",
+    "descTr": "Göz bandını tak, alarmını 15 dakikaya kur ve derin bir dinlenmeye dal.",
+    "descEn": "Put on an eye mask, set an alarm for 15 minutes, and drift into a restorative power nap.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Öğrenme",
+    "categoryEn": "Learning",
+    "titleTr": "Dünya Haritasını İnceleme",
+    "titleEn": "Explore a World Atlas",
+    "descTr": "Haritada hiç gitmediğin bir ülkeyi seç; coğrafyasını ve komşularını incele.",
+    "descEn": "Study a paper atlas or global map, exploring remote coastlines and mountain chains.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Sanat",
+    "categoryEn": "Art",
+    "titleTr": "Mandala Boyama",
+    "titleEn": "Color a Detailed Mandala",
+    "descTr": "Bir boyama kitabında renk kombinasyonlarına odaklanarak bir sayfayı doldur.",
+    "descEn": "Focus your attention on shading a geometric mandala with colored pencils.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Boyun ve Omuz Masaj Aleti Kullanımı",
+    "titleEn": "Neck Acupressure Release",
+    "descTr": "Boyun arkasına masaj aleti veya iki tenis topu koyup gerginliği boşalt.",
+    "descEn": "Lie on two tennis balls placed at the base of your skull to ease suboccipital tension.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Sosyal",
+    "categoryEn": "Social",
+    "titleTr": "Ailene Kısa Bir Video/Ses Notu",
+    "titleEn": "Voice Note to Loved Ones",
+    "descTr": "Anne, baba veya kardeşine içten bir ses kaydı göndererek gününün nasıl geçtiğini sor.",
+    "descEn": "Send a genuine 2-minute voice message to family telling them you love and miss them.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Fiziksel Düzen",
+    "categoryEn": "Declutter",
+    "titleTr": "Buzdolabı Rafını Düzenleme",
+    "titleEn": "Organize One Fridge Shelf",
+    "descTr": "Buzdolabındaki tek bir rafı çıkar, yıka ve son kullanma tarihleri geçenleri ayıkla.",
+    "descEn": "Wipe down one refrigerator shelf and discard forgotten condiments.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Nefes",
+    "categoryEn": "Breathing",
+    "titleTr": "Wim Hof Temel Nefes Turu",
+    "titleEn": "One Wim Hof Breathing Round",
+    "descTr": "30 derin nefes alıp ver, ardından nefesini tut. Hücresel oksijenlenmeyi artır.",
+    "descEn": "Complete one 30-breath cycle followed by a mindful retention to oxygenate tissues.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Yaratıcılık",
+    "categoryEn": "Creativity",
+    "titleTr": "Haiku Yazma Egzersizi",
+    "titleEn": "Write 2 Nature Haikus",
+    "descTr": "5-7-5 hece kuralına göre doğayı veya mevsimi anlatan iki küçük haiku yaz.",
+    "descEn": "Craft two traditional 5-7-5 syllable haiku poems celebrating autumn or rain.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Kişisel Gelişim",
+    "categoryEn": "Self Growth",
+    "titleTr": "Kişisel Değerlerini Listele",
+    "titleEn": "Clarify Core Values",
+    "descTr": "Dürüstlük, cesaret, dinginlik, merak; senin için en vazgeçilmez 5 değeri belirle.",
+    "descEn": "Select your top 5 non-negotiable core life values and write down what they mean to you.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Body & Vitality",
+    "titleTr": "İp Atlama / Zıplama",
+    "titleEn": "10 Minutes of Light Jump Rope",
+    "descTr": "Tempolu ip atlayarak veya hafif zıplayarak lenf drenajını hızlandır.",
+    "descEn": "Jump rope or rebound lightly to stimulate lymphatic drainage and boost alertness.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Organization",
+    "titleTr": "Çalışma Masası Kablolarını Toplama",
+    "titleEn": "Tame Cable Clutter",
+    "descTr": "Masanın arkasındaki sarkan kabloları klips veya cırt cırtla derli toplu hale getir.",
+    "descEn": "Bundle tangled charging cords with velcro ties behind your workspace.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "İçgörü",
+    "categoryEn": "Reflection",
+    "titleTr": "Haftanın Kazanımları",
+    "titleEn": "Weekly Small Wins Audit",
+    "descTr": "Bu hafta sessizce başardığın ama kutlamadığın 5 küçük başarıyı listele.",
+    "descEn": "List 5 quiet accomplishments you achieved this week that you forgot to celebrate.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Mutfak",
+    "categoryEn": "Cooking",
+    "titleTr": "Taze Baharat Ayıklama",
+    "titleEn": "Wash and Prep Fresh Herbs",
+    "descTr": "Maydanoz veya dereotunu yıka, kurut ve kavanoza hazırla; kokusu tüm mutfağa yayılsın.",
+    "descEn": "Wash and stem fresh parsley or dill, storing them neatly in glass jars.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Mind & Peace",
+    "titleTr": "Çakralara Odaklanma",
+    "titleEn": "Subtle Energy Alignment",
+    "descTr": "Omurgan boyunca 7 ana enerji merkezini imgeleyerek nefesini her birine yönlendir.",
+    "descEn": "Envision the energy centers along your spine and breathe warm light into each.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Öğrenme",
+    "categoryEn": "Learning",
+    "titleTr": "Bir Ted Konuşması Dinleme",
+    "titleEn": "15-Minute Curated TED Talk",
+    "descTr": "Ufuk açıcı bir bilim insanının veya düşünürün 15 dakikalık konuşmasını izle.",
+    "descEn": "Watch an inspiring, thought-provoking 15-minute presentation on psychology or science.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Kalça Açıcı Güvercin Pozu (Pigeon Pose)",
+    "titleEn": "Pigeon Pose Hip Opener",
+    "descTr": "Hareketsiz oturmanın sıkıştırdığı kalça kaslarını her iki bacak için 3'er dakika esnet.",
+    "descEn": "Hold gentle pigeon pose for 3 minutes per side to unlock chronically tight hip flexors.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Organization",
+    "titleTr": "Elektronik Cihazları Silme",
+    "titleEn": "Disinfect Mobile Tech",
+    "descTr": "Telefon, kulaklık ve tablet ekranlarını alkolsüz dezenfektan bezle temizle.",
+    "descEn": "Clean and sanitize phone screens, earbuds, and keyboards thoroughly.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Duyusal Farkındalık",
+    "categoryEn": "Sensory Awareness",
+    "titleTr": "Ayakları Ilık Suya Koyma",
+    "titleEn": "Warm Epsom Salt Foot Soak",
+    "descTr": "Bir leğene ılık su ve biraz tuz koyup ayaklarını dinlendir; bütün vücut gevşesin.",
+    "descEn": "Soak feet in a basin of warm water with Epsom salt to instantly unwind.",
+    "bracket": "MIN_15"
+  },
+  {
+    "categoryTr": "Okuma & Odak",
+    "categoryEn": "Deep Reading",
+    "titleTr": "30 Dakika Kesintisiz Kitap Okuma",
+    "titleEn": "30 Minutes of Immersive Reading",
+    "descTr": "Telefonu başka bir odaya bırak. Çayını al ve 30 dakika boyunca kitaba dal.",
+    "descEn": "Leave your phone in another room. Grab tea and lose yourself in a real book for 30 minutes.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Kardiyo & Doğa",
+    "categoryEn": "Cardio & Nature",
+    "titleTr": "Açık Havada Koşu veya Tempolu Yürüyüş",
+    "titleEn": "Outdoor Run or Power Walk",
+    "descTr": "Parkta veya sahilde 30 dakika koşarak endorfin salgıla ve ciğerlerini aç.",
+    "descEn": "Hit the park or waterfront for a 30-minute jog or power walk to flood your brain with endorphins.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Mutfak & Sağlık",
+    "categoryEn": "Cooking & Health",
+    "titleTr": "Taze Sebzelerle Sağlıklı Bir Yemek Pişirme",
+    "titleEn": "Cook a Wholesome Homemade Meal",
+    "descTr": "Taze sebzeleri doğra, zeytinyağıyla sotele; kendi hazırladığın besleyici bir öğün yarat.",
+    "descEn": "Chop vibrant seasonal vegetables and cook a nourishing, fresh meal from scratch.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Beden & Esneklik",
+    "categoryEn": "Body & Flexibility",
+    "titleTr": "Kapsamlı Mobilite ve Esneme Seansı",
+    "titleEn": "Comprehensive Mobility Session",
+    "descTr": "Boyundan ayak bileklerine kadar tüm eklemleri hareket ettiren 30 dakikalık tam vücut seansı.",
+    "descEn": "Work through a 30-minute head-to-toe joint mobility and deep flexibility sequence.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "İlişkiler",
+    "categoryEn": "Relationships",
+    "titleTr": "Yüz Yüze Derin Sohbet",
+    "titleEn": "Face-to-Face Quality Chat",
+    "descTr": "Eşin, çocuğun veya bir dostunla telefonlar olmadan 30 dakika boyunca kahve içip sohbet et.",
+    "descEn": "Sit across from a partner, child, or close friend for an uninterrupted 30-minute conversation.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Yaratıcılık",
+    "categoryEn": "Creativity",
+    "titleTr": "Hobi veya Zanaat Projesine Zaman",
+    "titleEn": "Hands-On Crafting or Hobby",
+    "descTr": "Ahşap, resim, örgü, maket veya tamirat; ellerini kullanarak somut bir şey üret.",
+    "descEn": "Work with your hands on woodworking, painting, knitting, modeling, or restoration.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Öğrenme",
+    "categoryEn": "Learning",
+    "titleTr": "Kapsamlı Bir Ders / Masterclass İzleme",
+    "titleEn": "Complete a Structured Masterclass",
+    "descTr": "Kodlama, tasarım veya tarih üzerine 30 dakikalık yapılandırılmış bir video ders tamamla.",
+    "descEn": "Complete an in-depth 30-minute lecture module on coding, design, or world history.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Fiziksel Düzen",
+    "categoryEn": "Home Care",
+    "titleTr": "Tek Bir Odayı Baştan Aşağı Temizleme",
+    "titleEn": "Deep Clean One Living Space",
+    "descTr": "Yatak odasını veya salonu süpür, sil, havalandır ve eşyaları kusursuz yerleştir.",
+    "descEn": "Vacuum, dust, mop, and meticulously reset your entire bedroom or living area.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Doğa & Zihin",
+    "categoryEn": "Nature & Mind",
+    "titleTr": "Doğa Parkında Ağaçlar Arasında Yürüyüş",
+    "titleEn": "Walk Among Trees in a Park",
+    "descTr": "Şehrin gürültüsünden uzaklaş, toprak patikada ağaçların kokusunu içine çek.",
+    "descEn": "Stroll along an unpaved nature trail, inhaling pine scent and forest quietude.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Kişisel Vizyon",
+    "categoryEn": "Personal Vision",
+    "titleTr": "Gelecek 6 Ayı Planlama",
+    "titleEn": "Map Out Your Next 6 Months",
+    "descTr": "Kariyer, sağlık ve ilişkilerde nereye varmak istediğini bir deftere detaylıca yaz.",
+    "descEn": "Map out clear milestones for your health, career, and personal growth for the upcoming half-year.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Kültür",
+    "categoryEn": "Culture",
+    "titleTr": "Kapsamlı Bir Belgesel İzleme",
+    "titleEn": "Watch an Enlightening Documentary",
+    "descTr": "Doğa, evren veya sanat tarihi hakkında 30-40 dakikalık kaliteli bir belgesel izle.",
+    "descEn": "Watch a beautifully shot documentary exploring biodiversity, cosmology, or human history.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Sosyal",
+    "categoryEn": "Social",
+    "titleTr": "Bir Kafede Arkadaşla Buluşma",
+    "titleEn": "Sit Down for Coffee with a Friend",
+    "descTr": "Sessiz bir kafede buluşup göz teması kurarak hayatı konuşun.",
+    "descEn": "Meet a friend at a quiet local cafe and enjoy genuine presence without glancing at notifications.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Body",
+    "titleTr": "Tam Bir Yoga Vinyasa Dersi",
+    "titleEn": "Full Vinyasa Yoga Class",
+    "descTr": "Nefes ve hareketi birleştiren 30 dakikalık akıcı bir yoga serisiyle güçlen.",
+    "descEn": "Flow through a balanced 30-minute Vinyasa practice cultivating breath, balance, and core strength.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Entelektüel",
+    "categoryEn": "Intellectual",
+    "titleTr": "Derin Bir Makale İncelemesi",
+    "titleEn": "Deep Dive into Longform Journalism",
+    "descTr": "Akademik veya derinlemesine araştırılmış uzun bir makaleyi notlar alarak oku.",
+    "descEn": "Read a richly researched longform investigative piece, annotating key insights.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Dijital Detoks",
+    "categoryEn": "Digital Declutter",
+    "titleTr": "Fotoğraf Arşivi Temizliği",
+    "titleEn": "Purge 100 Clutter Photos",
+    "descTr": "Telefonundaki bulanık, gereksiz ekran görüntülerini sil; anılarını sadeleştir.",
+    "descEn": "Delete 100 duplicate screenshots and blurry photos, keeping only meaningful memories.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Dinlenme",
+    "categoryEn": "Rest",
+    "titleTr": "Müzikle Sessizce Uzanma (Niksen)",
+    "titleEn": "Conscious Deep Rest to Ambient Music",
+    "descTr": "Gözlerini kapat, sakin ambient müzik eşliğinde hiçbir şey üretmeden sadece var ol.",
+    "descEn": "Lie flat on your rug or sofa listening to ambient soundscapes with zero agenda.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Nostalji & Sevgi",
+    "categoryEn": "Nostalgia & Love",
+    "titleTr": "El Yazısıyla Mektup Yazma",
+    "titleEn": "Handwrite a Heartfelt Letter",
+    "descTr": "Sevdiğin birine fiziksel bir kağıda tükenmez kalemle içten bir mektup yaz.",
+    "descEn": "Pick up fine stationery and pen a thoughtful letter to someone who shaped your life.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Öz Bakım",
+    "categoryEn": "Self Care",
+    "titleTr": "Kapsamlı Cilt ve Vücut Bakımı",
+    "titleEn": "Deliberate Skincare Ritual",
+    "descTr": "Peeling, maske ve nemlendiriciyle kendine şefkatli bir bakım seansı hediye et.",
+    "descEn": "Treat yourself to a gentle scrub, hydrating mask, and restorative skincare routine.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Fikir Üretimi",
+    "categoryEn": "Brainstorming",
+    "titleTr": "Büyük Beyin Fırtınası Seansı",
+    "titleEn": "Generative Brainstorming Session",
+    "descTr": "Yeni bir iş, proje veya yaşam fikri için boş kağıtları onlarca fikirle doldur.",
+    "descEn": "Brainstorm freely across blank paper sheets, generating raw concepts for a project.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Düşünce",
+    "categoryEn": "Philosophy",
+    "titleTr": "Stoacı Felsefe Okuması",
+    "titleEn": "Read Stoic Philosophy",
+    "descTr": "Marcus Aurelius veya Seneca'dan pasajlar oku ve hayatındaki yansımalarını düşün.",
+    "descEn": "Read passages from Marcus Aurelius or Seneca and reflect on personal equanimity.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Müzik",
+    "categoryEn": "Music",
+    "titleTr": "Yeni Bir Parçayı Baştan Sona Çalışma",
+    "titleEn": "Learn a Complete Song on Guitar",
+    "descTr": "Gitarında veya piyanoda bir şarkının akorlarını ve ritmini baştan sona oturt.",
+    "descEn": "Master the chord transitions and rhythm of a complete song on your instrument.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Beslenme",
+    "categoryEn": "Baking",
+    "titleTr": "Evde Sağlıklı Ekmek / Granola Yapımı",
+    "titleEn": "Bake Fresh Granola from Scratch",
+    "descTr": "Yulaf, bal, kuruyemiş ve tarçınla fırında mis kokulu taze granola pişir.",
+    "descEn": "Roast rolled oats, raw nuts, honey, and cinnamon in the oven for fragrant homemade granola.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Fiziksel Düzen",
+    "categoryEn": "Declutter",
+    "titleTr": "Gardırop Detoksu (1 Bölüm)",
+    "titleEn": "Closet Detox (One Shelf)",
+    "descTr": "Artık giymediğin kıyafetleri ayır, bağış kutusuna koy; dolabına nefes aldır.",
+    "descEn": "Sort through clothes you haven't worn in a year and pack them for charity donation.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Fitness",
+    "titleTr": "30 Dakika Vücut Ağırlığı Antrenmanı",
+    "titleEn": "Calisthenics Conditioning",
+    "descTr": "Şınav, lunge, plank ve dip hareketleriyle tüm kas gruplarını terlet.",
+    "descEn": "Power through a focused 30-minute bodyweight routine with pushups, squats, and planks.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Bahçe & Doğa",
+    "categoryEn": "Gardening",
+    "titleTr": "Toprakla Temas ve Saksı Değişimi",
+    "titleEn": "Repot Plants with Fresh Soil",
+    "descTr": "Kökleri büyüyen bir bitkiyi daha geniş saksıya taze toprakla aktar.",
+    "descEn": "Transplant a root-bound houseplant into a larger pot with rich, fragrant soil.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Kişisel Finans",
+    "categoryEn": "Personal Finance",
+    "titleTr": "Aylık Bütçe ve Harcama İncelemesi",
+    "titleEn": "Mindful Monthly Budget Review",
+    "descTr": "Gereksiz abonelikleri iptal et, tasarruf hedeflerini güncelle ve finansal huzur yakala.",
+    "descEn": "Review recurring bank subscriptions, cancel unwanted services, and align spending with values.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Sosyal",
+    "categoryEn": "Community",
+    "titleTr": "Gönüllü Bir İşe Başvuru / Katkı",
+    "titleEn": "Sign Up for Community Volunteering",
+    "descTr": "Çevrende destek olabileceğin bir sivil toplum kuruluşu veya barınak araştır.",
+    "descEn": "Research and register for local shelter volunteering or community mutual aid.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Meditation",
+    "titleTr": "30 Dakika Sessiz Oturuş",
+    "titleEn": "30-Minute Vipassana Sit",
+    "descTr": "Gözler kapalı, bedensel duyumları yargısızca izleyen derin bir farkındalık seansı.",
+    "descEn": "Engage in an unbroken 30-minute silent meditation, anchoring in somatic equanimity.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Dil Becerisi",
+    "categoryEn": "Language Skills",
+    "titleTr": "Yabancı Dilde Bir Makale Çevirisi",
+    "titleEn": "Translate an Article into English",
+    "descTr": "İlgilendiğin dilde kısa bir paragrafı özenle çevir ve kelime hazneni zenginleştir.",
+    "descEn": "Carefully translate an engaging foreign language essay, expanding vocabulary.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Yaratıcılık",
+    "categoryEn": "Creativity",
+    "titleTr": "Suluboya veya Akrilik Resim",
+    "titleEn": "Watercolor Landscape Painting",
+    "descTr": "Renkleri suyla karıştır ve kağıt üzerinde serbest renk geçişleri yarat.",
+    "descEn": "Blend transparent watercolors across heavy paper, experimenting with soft brushstrokes.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Fiziksel Düzen",
+    "categoryEn": "Home Care",
+    "titleTr": "Kiler ve Baharat Dolabı Düzenleme",
+    "titleEn": "Organize Pantry & Spices",
+    "descTr": "Baharat kavanozlarını etiketle, kilerdeki kuru gıdaları cam kavanozlara aktar.",
+    "descEn": "Label spice jars, wipe down shelves, and organize grains into clear airtight canisters.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Kişisel Gelişim",
+    "categoryEn": "Self Reflection",
+    "titleTr": "Yaşamın 10 Alanını Puanlama",
+    "titleEn": "Wheel of Life Self-Assessment",
+    "descTr": "Kariyer, aile, sağlık, neşe, finans vb. alanlarda kendini 1-10 arası puanla.",
+    "descEn": "Rate the primary areas of your life on a 1-10 scale and identify one key growth focus.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Recovery",
+    "titleTr": "Sıcak Banyo ve Epsom Tuzu Seansı",
+    "titleEn": "Epsom Salt Soaking Bath",
+    "descTr": "Küveti sıcak suyla doldur, magnezyum tuzu ekle ve 30 dakika kaslarını gevşet.",
+    "descEn": "Soak in a warm tub enriched with magnesium salts to soothe deep muscular soreness.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Yazarlık",
+    "categoryEn": "Writing",
+    "titleTr": "Bir Hikaye Taslağı Yazma",
+    "titleEn": "Draft an Original Short Story",
+    "descTr": "Kafandaki bir karakteri ve çatışmayı 30 dakika boyunca kesintisiz yazarak kurgula.",
+    "descEn": "Draft the opening scene of a fictional short story without self-censoring.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Müzik",
+    "categoryEn": "Music",
+    "titleTr": "Enstrümantal Çalma Listesi Derleme",
+    "titleEn": "Curate a Deep Focus Playlist",
+    "descTr": "Çalışırken sana ilham veren sakin parçalardan oluşan 30 şarkılık özel bir liste yap.",
+    "descEn": "Curate a 30-track instrumental playlist tuned specifically for deep cognitive focus.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Mutfak",
+    "categoryEn": "Cooking",
+    "titleTr": "Kemik / Sebze Suyu Kaynatma",
+    "titleEn": "Simmer a Pot of Nourishing Stock",
+    "descTr": "Sebze saplarını ve baharatları tencereye koyup yavaş ateşte kaynamaya bırak.",
+    "descEn": "Simmer fresh vegetable trimmings, herbs, and aromatics into rich golden stock.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Öğrenme",
+    "categoryEn": "Astronomy",
+    "titleTr": "Gökyüzü ve Yıldız Haritası İnceleme",
+    "titleEn": "Night Sky Star Constellations",
+    "descTr": "Bu ay gökyüzünde hangi takımyıldızların ve gezegenlerin göründüğünü öğren.",
+    "descEn": "Learn to identify major seasonal constellations and visible planetary coordinates.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Maintenance",
+    "titleTr": "Bisiklet Temizliği ve Yağlama",
+    "titleEn": "Clean and Lube Bicycle Chain",
+    "descTr": "Bisikletinin zincirini temizle, viteslerini kontrol et ve lastik basınçlarını ayarla.",
+    "descEn": "Degrease your bike chain, apply fresh lubricant, and calibrate tire pressure.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Sosyal",
+    "categoryEn": "Social",
+    "titleTr": "Büyüklere Hatır Sorma Ziyareti / Görüşmesi",
+    "titleEn": "Meaningful Call with an Elder",
+    "descTr": "Büyükanne, büyükbaba veya saygı duyduğun bir büyüğünle eski günleri konuş.",
+    "descEn": "Have an affectionate video call with an elder family member, asking about their youth.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Beden & Canlılık",
+    "categoryEn": "Endurance",
+    "titleTr": "30 Dakika Tempolu Bisiklet",
+    "titleEn": "30-Minute Outdoor Cycling",
+    "descTr": "Sahil veya bisiklet yolunda rüzgarı yüzünde hissederek pedal çevir.",
+    "descEn": "Pedal along an open cycle track, feeling the breeze and cadence of your motion.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Zihin & Huzur",
+    "categoryEn": "Clarity",
+    "titleTr": "Zihinsel Dağınıklığı Listeleme ve Yakma",
+    "titleEn": "Worry Burn Ritual",
+    "descTr": "Seni sıkan tüm kaygıları bir kağıda yaz, sonra güvenli bir şekilde ateşte yak.",
+    "descEn": "Write down chronic nagging worries on scrap paper, then safely burn it as a symbol of release.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Fiziksel Alan",
+    "categoryEn": "Home Repair",
+    "titleTr": "Evde Ufak Bir Tamirat Yapma",
+    "titleEn": "Fix That Broken Household Item",
+    "descTr": "Gıcırdayan kapıyı yağla, gevşeyen vidayı sık veya yanmayan ampulü değiştir.",
+    "descEn": "Oil a squeaky door hinge, tighten a wobbly chair leg, or replace a dead bulb.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Doğa & Farkındalık",
+    "categoryEn": "Nature Awareness",
+    "titleTr": "Kuş Gözlemi (Birdwatching)",
+    "titleEn": "30 Minutes of Birdwatching",
+    "descTr": "Bir ağacın altına otur, çevredeki kuş türlerini ve ötüşlerini dikkatle dinle.",
+    "descEn": "Sit beneath park trees with binoculars or keen eyes, identifying local bird species.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Mutfak",
+    "categoryEn": "Healthy Prep",
+    "titleTr": "Haftalık Sağlıklı Atıştırmalıklar",
+    "titleEn": "Prep Healthy Weekly Snacks",
+    "descTr": "Havuç ve salatalıkları çubuk doğra, kuruyemiş porsiyonları hazırla.",
+    "descEn": "Chop carrot sticks, portion raw nut bags, and prep healthy snacks for the week.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Öğrenme",
+    "categoryEn": "Skill Building",
+    "titleTr": "Klavyede Hızlı On Parmak Pratiği",
+    "titleEn": "Touch Typing Mastery",
+    "descTr": "Bakar yazmayı bırakıp on parmak yazma egzersizleriyle yazma hızını geliştir.",
+    "descEn": "Practice touch typing without looking down, refining your words-per-minute speed.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Kişisel Alan",
+    "categoryEn": "Organization",
+    "titleTr": "Eski Faturaları ve Evrakları İmha Etme",
+    "titleEn": "Shred Outdated Sensitive Papers",
+    "descTr": "Yıllardır biriken eski belgeleri yırt ve geri dönüşüme gönder.",
+    "descEn": "Shred obsolete documents, outdated receipts, and expired guarantees.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Sanat",
+    "categoryEn": "Visual Arts",
+    "titleTr": "Fotoğrafçılık Kompozisyon Çalışması",
+    "titleEn": "Compositional Photography Walk",
+    "descTr": "Yalnızca ışık, gölge ve simetriye odaklanarak mahallede 10 özenli kare çek.",
+    "descEn": "Take an intentional walk looking purely for symmetry, light contrasts, and shadows.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "İçgörü",
+    "categoryEn": "Reflection",
+    "titleTr": "Affetme ve Serbest Bırakma Notu",
+    "titleEn": "Forgiveness Writing Session",
+    "descTr": "İçinde kırgınlık taşıdığın bir duruma dair duygularını kağıda dök ve yükü hafiflet.",
+    "descEn": "Process lingering resentment on paper, choosing emotional freedom over bitterness.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Posture",
+    "titleTr": "Boyun ve Sırt Postür Egzersizleri",
+    "titleEn": "Thoracic Spine Posture Correction",
+    "descTr": "Kamburluğu düzeltmek için sırt ekstansiyonu ve göğüs açıcı hareketler yap.",
+    "descEn": "Perform targeted thoracic extension and rhomboid drills to reverse desk slouching.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Dinginlik",
+    "categoryEn": "Peace",
+    "titleTr": "Mum Işığında Çay Keyfi",
+    "titleEn": "Candlelit Herbal Tea Evening",
+    "descTr": "Odadaki elektrikli ışıkları kapat, sadece bir mum yakıp sessizce çayını yudumla.",
+    "descEn": "Turn off electric lamps, light a single beeswax candle, and sip herbal tea in peace.",
+    "bracket": "MIN_30"
+  },
+  {
+    "categoryTr": "Derin Okuma",
+    "categoryEn": "Deep Reading",
+    "titleTr": "Tam Bir Kitap Bölümünü Bitirme",
+    "titleEn": "Read Half a Meaningful Book",
+    "descTr": "Bildirimler olmadan 1 saat boyunca bir kitaba gömül; hayal gücünü ve odak kaslarını yeniden inşa et.",
+    "descEn": "Sink into an unbroken 60-minute reading marathon; nourish deep cognitive stamina.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Doğa & Canlılık",
+    "categoryEn": "Outdoor Exploration",
+    "titleTr": "Doğa Yürüyüşü (Hiking / Orman Banyosu)",
+    "titleEn": "Forest Bathing & Trail Hiking",
+    "descTr": "Şehrin dışına veya bir koruya git. Ağaçların arasında 1 saat yürüyerek doğayla yeniden bütünleş.",
+    "descEn": "Hike a wooded nature preserve, immersing your senses in the therapeutic atmosphere of trees.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Kişisel Gelişim",
+    "categoryEn": "Lifelong Learning",
+    "titleTr": "Yeni Bir Dili Kapsamlı Çalışma",
+    "titleEn": "Dedicated Language Immersion",
+    "descTr": "Gramer, dinleme ve telaffuz egzersizleriyle bir saat boyunca yabancı diline seviye atlat.",
+    "descEn": "Dedicate a solid hour to structured language learning with grammar drills and listening.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Güç & Sağlık",
+    "categoryEn": "Strength & Health",
+    "titleTr": "Kapsamlı Spor Salonu Antrenmanı",
+    "titleEn": "Full Body Resistance Workout",
+    "descTr": "Isınma, temel ağırlık hareketleri ve esnemeyle vücudunun gücünü artıran 1 saatlik seans.",
+    "descEn": "Complete an energizing strength-training session, challenging major muscle groups.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Derin Bağlar",
+    "categoryEn": "Deep Connection",
+    "titleTr": "Eski Bir Dostla Uzun Yürüyüş ve Buluşma",
+    "titleEn": "Long Walk & Talk with a Close Friend",
+    "descTr": "Telefonları unutarak yan yana saatlerce yürüyüp hayatın derinliklerini paylaşın.",
+    "descEn": "Spend an unhurried hour walking side by side with a trusted friend, talking openly.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Üretkenlik & Tutku",
+    "categoryEn": "Creative Production",
+    "titleTr": "Kendi Projende Somut İlerleme",
+    "titleEn": "Deep Work on a Passion Project",
+    "descTr": "Yazı, kod, tasarım veya beste; her zaman ertelediğin o projede 1 saatlik derin blok çalış.",
+    "descEn": "Pour focused, uninterrupted creative labor into your personal software, art, or writing.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Mutfak Sanatı",
+    "categoryEn": "Culinary Craft",
+    "titleTr": "Yeni ve Özenli Bir Tarif Deneme",
+    "titleEn": "Cook a Complex Gourmet Recipe",
+    "descTr": "Daha önce hiç yapmadığın geleneksel veya dünya mutfağından bir yemeği sabırla pişir.",
+    "descEn": "Challenge yourself with an elaborate, authentic recipe requiring technique and patience.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Kültürel Deneyim",
+    "categoryEn": "Culture & Discovery",
+    "titleTr": "Müze veya Sanat Galerisi Ziyareti",
+    "titleEn": "Visit a Local Museum or Gallery",
+    "descTr": "En yakın müzeye veya sergiye git; eserlerin önünde durup insanlık tarihini ve sanatı hisset.",
+    "descEn": "Walk quietly through exhibition halls, contemplating brushstrokes, sculptures, and history.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Macera & Kardiyo",
+    "categoryEn": "Outdoor Adventure",
+    "titleTr": "Bisikletle Şehir veya Doğa Keşfi",
+    "titleEn": "15-20km Exploratory Bike Ride",
+    "descTr": "Daha önce gitmediğin sokaklara veya sahil şeridine doğru uzun bir bisiklet turu yap.",
+    "descEn": "Pedal 15-20 km exploring quiet backroads, waterfront paths, and unseen neighborhoods.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Kişisel Vizyon",
+    "categoryEn": "Life Architecture",
+    "titleTr": "Kapsamlı Hayat ve Değerler İncelemesi",
+    "titleEn": "Comprehensive Life Audit",
+    "descTr": "Sağlık, kariyer, ilişkiler ve finans durumunu bir deftere şeffafça yaz; yönünü yeniden çiz.",
+    "descEn": "Audit your priorities, habits, and trajectory in a journal, resetting intentional direction.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Dijital Özgürlük",
+    "categoryEn": "Digital Freedom",
+    "titleTr": "Telefonu Evde Bırakıp Dışarı Çıkma",
+    "titleEn": "Walk Outside with Zero Electronics",
+    "descTr": "Telefonunu tamamen evde bırak ve dışarı çık. Bildirimsiz olmanın tarifsiz hafifliğini tat.",
+    "descEn": "Step outdoors leaving your phone on the charger at home. Experience true untethered presence.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Bağlılık & Sevgi",
+    "categoryEn": "Family Time",
+    "titleTr": "Aileyle Bölünmemiş Kaliteli Zaman",
+    "titleEn": "Undivided Family Play & Conversation",
+    "descTr": "Ekransız bir masa oyunu, sohbet veya birlikte yemek; ailenle tam varoluş yaşa.",
+    "descEn": "Play board games, tell stories, or cook together with family, free from screen distractions.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Zihinsel Rahatlama",
+    "categoryEn": "Productivity Release",
+    "titleTr": "Ertelediğin O Büyük İşi Bitirme",
+    "titleEn": "Tackle That Long-Dreaded Chore",
+    "descTr": "Aylardır seni huzursuz eden o zor işi (evraklar, tamir, arama) tek oturuşta hallet.",
+    "descEn": "Knock out that heavy task you've avoided for months in one decisive focused burst.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Sanat & Müzik",
+    "categoryEn": "Musical Mastery",
+    "titleTr": "Enstrümanda Yeni Bir Parça Çalışma",
+    "titleEn": "Deep Instrumental Rehearsal",
+    "descTr": "Notaları veya tabları önüne koy, zor geçişleri tekrar tekrar çalışarak parçayı mükemmelleştir.",
+    "descEn": "Work through challenging chord voicings and passages on your instrument with patient repetition.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "İçsel Dönüşüm",
+    "categoryEn": "Spiritual Depth",
+    "titleTr": "Kişisel Sessizlik İnzivası (Mini Retreat)",
+    "titleEn": "1-Hour Personal Silence Retreat",
+    "descTr": "Konuşmadan, müzik dinlemeden, okumadan sadece nefesinle ve varlığınla 1 saat kal.",
+    "descEn": "Spend 60 minutes in noble silence with no media, books, or devices—just pure presence.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Odaklanma",
+    "categoryEn": "Focus",
+    "titleTr": "Kütüphanede Sessiz Çalışma Seansı",
+    "titleEn": "Silent Library Deep Work Session",
+    "descTr": "Şehirdeki tarihi veya sakin bir kütüphaneye git, kitap kokusu eşliğinde derinleş.",
+    "descEn": "Immerse yourself in a serene historic library room surrounded by deep-working scholars.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Minimalizm",
+    "categoryEn": "Minimalism",
+    "titleTr": "Kapsamlı Eşya Ayıklama ve Bağış",
+    "titleEn": "Major Room Purge & Donation Box",
+    "descTr": "Tüm dolaplarını tara, kullanmadığın onlarca eşyayı kutula ve ihtiyacı olanlara ulaştır.",
+    "descEn": "Purge drawers and closets, packing several boxes of unneeded items for local charities.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Keşif",
+    "categoryEn": "Exploration",
+    "titleTr": "Şehrin Farklı Bir Semtini Yürüyerek Keşfet",
+    "titleEn": "Urban Wander in an Unfamiliar Quarter",
+    "descTr": "Haritasız, sadece gözüne ilginç gelen sokaklara saparak bir semtin ruhunu keşfet.",
+    "descEn": "Wander through a historic neighborhood without navigation apps, letting curiosity guide steps.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Mutfak & Paylaşım",
+    "categoryEn": "Hospitality",
+    "titleTr": "Sevdiklerine Özenli Bir Masa Kurma",
+    "titleEn": "Host an Intimate Dinner for Loved Ones",
+    "descTr": "Mezeleri, ana yemeği ve tatlısıyla sevdiklerin için sıcacık bir sofra hazırla.",
+    "descEn": "Prepare a warm, multi-course homecooked dinner and set the table with love for guests.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Canlı Deneyim",
+    "categoryEn": "Live Culture",
+    "titleTr": "Tiyatro, Opera veya Konser İzleme",
+    "titleEn": "Attend a Live Theater or Classical Concert",
+    "descTr": "Dijital ekran yerine sahnede kanlı canlı icra edilen bir sanat performansını izle.",
+    "descEn": "Experience the acoustic resonance and raw human vitality of a live stage performance.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Bahçıvanlık",
+    "categoryEn": "Gardening",
+    "titleTr": "Bahçe Düzenleme veya Balkon Bostanı",
+    "titleEn": "Build an Urban Herb Garden",
+    "descTr": "Saksılara tohumlar ek, toprağı gübrele ve kendi domates/biber/nane fidelerini dik.",
+    "descEn": "Plant seedling pots with basil, thyme, and cherry tomatoes, nurturing living sustenance.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Gönüllülük",
+    "categoryEn": "Volunteering",
+    "titleTr": "Hayvan Barınağında Gönüllü Çalışma",
+    "titleEn": "Volunteer at an Animal Shelter",
+    "descTr": "Barınaktaki köpekleri gezdirmeye yardımcı ol veya kedilerle vakit geçirip sevgi ver.",
+    "descEn": "Help walk rescue dogs or comfort sheltered cats at a local non-profit animal haven.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Yaratıcı Yazı",
+    "categoryEn": "Creative Writing",
+    "titleTr": "Kendi Hayatının Bir Dönemini Yazma",
+    "titleEn": "Draft a Chapter of Personal Memoir",
+    "descTr": "Çocukluğun, gençliğin veya unutamadığın bir kırılma anını edebi dille kağıda dök.",
+    "descEn": "Write an intimate chapter about a pivotal turning point in your youth or upbringing.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Akademik Merak",
+    "categoryEn": "Curiosity",
+    "titleTr": "Ücretsiz Bir Üniversite Dersine Başlama",
+    "titleEn": "Audit an Open University Course",
+    "descTr": "Harvard veya MIT'nin açık derslerinden bir felsefe veya astrofizik dersini tamamla.",
+    "descEn": "Watch and annotate an open lecture series from top academics on philosophy or physics.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Fotoğrafçılık",
+    "categoryEn": "Photography",
+    "titleTr": "Analog Fotoğraf Makinesiyle Çekim",
+    "titleEn": "Analogue Film Street Photography",
+    "descTr": "Her karenin kıymetli olduğu analog bir makineyle veya bilinçli olarak sokak fotoğrafları çek.",
+    "descEn": "Shoot with intentional restraint using a manual camera, composing every shot with patience.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Beden & Şifa",
+    "categoryEn": "Body Therapy",
+    "titleTr": "Geleneksel Hamam veya Sauna Seansı",
+    "titleEn": "Traditional Sauna & Steam Cleanse",
+    "descTr": "Sıcak buharla terle, vücuttaki toksinleri at ve buz gibi bir duşla yeniden doğ.",
+    "descEn": "Cleanse deeply in a hot steam bath and finish with a refreshing cool hydro plunge.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Sosyal",
+    "categoryEn": "Connection",
+    "titleTr": "Uzak Akrabaları Ziyaret Etme",
+    "titleEn": "Visit Distant Family Relatives",
+    "descTr": "Uzun süredir ertelediğin akraba veya aile büyüğü ziyaretini samimiyetle gerçekleştir.",
+    "descEn": "Pay a heartfelt visit to elderly relatives you haven't seen in months, bringing joy.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Zanaat & Tamir",
+    "categoryEn": "Craftsmanship",
+    "titleTr": "Eski Bir Mobilyayı Zımparalama ve Boyama",
+    "titleEn": "Sand & Restore a Wooden Furniture Piece",
+    "descTr": "Eski bir sehpa veya sandalyeyi zımparala, ahşap yağıyla koruyup yeniden canlandır.",
+    "descEn": "Sand down an aged wooden stool, apply protective natural wax, and bring back its grain.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Edebiyat",
+    "categoryEn": "Literature",
+    "titleTr": "Bir Şairin Bütün Şiirlerini Okuma",
+    "titleEn": "Read an Entire Anthology of Poetry",
+    "descTr": "Nazım Hikmet, Rilke veya Mevlana'nın bir kitabını baştan sona hissederek oku.",
+    "descEn": "Immerse yourself cover-to-cover in the collected poems of Rilke, Hafiz, or Mary Oliver.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Endurance",
+    "titleTr": "10 Kilometrelik Doğa Yürüyüşü",
+    "titleEn": "10-Kilometer Scenic Trail Trek",
+    "descTr": "Sırt çantana suyunu koy ve patikada 10 kilometrelik bir rotayı tamamla.",
+    "descEn": "Pack your daypack with trail snacks and complete a refreshing 10k nature loop.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Bilişsel Güç",
+    "categoryEn": "Cognitive Strategy",
+    "titleTr": "Satrançta Zorlayıcı Karşılaşmalar",
+    "titleEn": "Over-the-Board Chess Matches",
+    "descTr": "Fiziksel tahta üzerinde bir arkadaşınla veya klasik problemlerle satranç oyna.",
+    "descEn": "Set up a physical wooden board and deliberate over deep chess positional challenges.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Ev Konforu",
+    "categoryEn": "Home Sanctuary",
+    "titleTr": "Tüm Evi Baştan Sona Detaylı Temizleme",
+    "titleEn": "Deep Residential Sanctuary Reset",
+    "descTr": "Halıları sil, camları parlat, perdeleri yıka; evini huzur dolu bir tapınağa çevir.",
+    "descEn": "Clean your entire home from ceiling to floorboards, creating a spotless sanctuary.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Kişisel Defter",
+    "categoryEn": "Legacy",
+    "titleTr": "Sevdiklerine Bırakacağın Tavsiyeler Defteri",
+    "titleEn": "Compile a Wisdom & Lessons Journal",
+    "descTr": "Hayatta öğrendiğin en acı ve tatlı dersleri ileride çocuklarına/sevdiklerine kalacak şekilde yaz.",
+    "descEn": "Write down core hard-won life wisdom and philosophical lessons to leave behind for family.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Beslenme",
+    "categoryEn": "Meal Prep",
+    "titleTr": "Tüm Haftanın Sağlıklı Yemeklerini Pişirme",
+    "titleEn": "Batch Cook Wholesome Weekly Meals",
+    "descTr": "Hafta içi sağlıklı beslenmek için 3-4 farklı sağlıklı yemeği porsiyonlayıp dolaba koy.",
+    "descEn": "Batch cook hearty lentil stews, roasted root veg, and grains for the upcoming busy week.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Doğa & Sakinlik",
+    "categoryEn": "Wilderness",
+    "titleTr": "Sahilde Dalga Seslerini Dinleyerek Oturma",
+    "titleEn": "Ocean Waves Contemplation",
+    "descTr": "Deniz kenarında kayalara oturup dalgaların kıyıya vuruşunu bir saat boyunca izle.",
+    "descEn": "Sit near the water's edge on coastal rocks, letting wave rhythms soothe your subconscious.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Toplumsal Fayda",
+    "categoryEn": "Community",
+    "titleTr": "Çevre ve Sahil Çöp Temizliği",
+    "titleEn": "Coastal or Park Litter Cleanup",
+    "descTr": "Bir çöp poşeti ve eldiven al, sahilde veya ormanda insanların bıraktığı çöpleri topla.",
+    "descEn": "Grab heavy gloves and a bag to clean up plastic debris from a beach or hiking area.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Zihin & Felsefe",
+    "categoryEn": "Philosophy",
+    "titleTr": "Büyük Düşünürlerin Orijinal Metinleri",
+    "titleEn": "Study Primary Philosophical Treatises",
+    "descTr": "Platon, Spinoza veya Kant'ın orijinal bir eserinden bir bölümü sindirerek incele.",
+    "descEn": "Read and dissect a seminal chapter from Plato, Spinoza, or Kant in its full original depth.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Sanat & El Emeği",
+    "categoryEn": "Ceramics & Clay",
+    "titleTr": "Kille / Seramikle Şekillendirme",
+    "titleEn": "Clay Sculpting and Pottery",
+    "descTr": "Ellerinle kile şekil ver, bir kase veya figür yap; çamurun dokusunu ve sabrını hisset.",
+    "descEn": "Shape pottery clay with your hands, grounding awareness in moldable physical earth.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Kişisel Finans",
+    "categoryEn": "Wealth Building",
+    "titleTr": "Yatırım ve Finansal Özgürlük Planı",
+    "titleEn": "Long-Term Wealth & Independence Plan",
+    "descTr": "Önümüzdeki 5 yılın tasarruf, yatırım ve pasif gelir stratejisini detaylandır.",
+    "descEn": "Map your long-term compounding investments, assets, and path toward genuine freedom.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Sosyal",
+    "categoryEn": "Social",
+    "titleTr": "Eski Fotoğraf Albümlerini Aileyle İnceleme",
+    "titleEn": "Revisit Physical Photo Albums",
+    "descTr": "Tozlu aile albümlerini çıkarıp geçmiş nesillerin anılarını birlikte yad edin.",
+    "descEn": "Flip through classic vintage family photo albums, sharing anecdotes and memories.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Beden",
+    "categoryEn": "Swimming",
+    "titleTr": "Açık Deniz veya Havuzda Yüzme",
+    "titleEn": "Continuous Lap Swimming",
+    "descTr": "Suyun içinde yerçekimsizliği hisset ve tempolu yüzerek tüm kaslarını çalıştır.",
+    "descEn": "Swim steady, mindful laps in open water or a pool, feeling effortless aquatic rhythm.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Kişisel Bakım",
+    "categoryEn": "Holistic Wellness",
+    "titleTr": "Tam Kapsamlı Masaj Seansı",
+    "titleEn": "Full Body Therapeutic Massage",
+    "descTr": "Profesyonel bir masaj veya derin gevşeme terapisiyle birikmiş kronik düğümleri aç.",
+    "descEn": "Gift yourself a therapeutic deep-tissue massage to release long-held bodily tensions.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Keşif",
+    "categoryEn": "Nature Stargazing",
+    "titleTr": "Gece Yıldız ve Gökyüzü Gözlemi",
+    "titleEn": "Remote Night Sky Stargazing",
+    "descTr": "Şehir ışıklarından uzakta bir tepeye çık, samanyolunu ve kayan yıldızları seyret.",
+    "descEn": "Drive away from city glare and gaze up at the vast Milky Way and silent starry expanse.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Müzik & Sanat",
+    "categoryEn": "Songwriting",
+    "titleTr": "Kendi Şarkını veya Melodini Besteleme",
+    "titleEn": "Compose an Original Melody or Song",
+    "descTr": "Sözleri ve armoniyi birleştirerek tamamen sana ait özgün bir müzik parçası üret.",
+    "descEn": "Harmonize lyrics and chords to compose an authentic original acoustic piece of music.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Yaratıcılık",
+    "categoryEn": "Visual Storytelling",
+    "titleTr": "Kısa Bir Video veya Fotoğraf Belgeseli",
+    "titleEn": "Assemble a Photo Essay",
+    "descTr": "Bir temayı seç ve fotoğraflarınla hikaye anlatan 10 fotoğraflık bir kompozisyon oluştur.",
+    "descEn": "Assemble an expressive photo essay documenting daily human life or urban contrasts.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Eğitim",
+    "categoryEn": "Mentorship",
+    "titleTr": "Genç Birine Mentörlük / Ders Verme",
+    "titleEn": "Mentor a Younger Colleague",
+    "descTr": "Deneyimlerini ve bildiklerini samimiyetle genç bir öğrenciye veya meslektaşına aktar.",
+    "descEn": "Offer dedicated mentoring time to a young student or colleague starting out.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Mutfak",
+    "categoryEn": "Fermentation",
+    "titleTr": "Evde Turşu veya Kombucha Kurma",
+    "titleEn": "Fermentation Craft: Pickles & Kombucha",
+    "descTr": "Doğal fermantasyonla probiyotik turşu, sirke veya kombucha mayala; sabrı öğren.",
+    "descEn": "Sterilize glass jars and prepare small-batch fermented vegetables, kraut, or kombucha.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Beden & Zihin",
+    "categoryEn": "Martial Arts",
+    "titleTr": "Tai Chi veya Dövüş Sanatları Pratiği",
+    "titleEn": "Tai Chi Moving Meditation",
+    "descTr": "Yavaş ve akıcı hareketlerle enerjiyi yönlendiren geleneksel bir Tai Chi formu uygula.",
+    "descEn": "Practice slow, continuous Tai Chi movement sequences, cultivating internal balance.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Fiziksel Düzen",
+    "categoryEn": "Archiving",
+    "titleTr": "Kişisel Kütüphane Kataloğu Çıkarma",
+    "titleEn": "Catalog Your Personal Library",
+    "descTr": "Evindeki kitapları konularına göre diz, favori listelerini oluştur ve notlandır.",
+    "descEn": "Organize your personal book collection by genre and catalogue must-read recommendations.",
+    "bracket": "MIN_60_PLUS"
+  },
+  {
+    "categoryTr": "Büyük Vizyon",
+    "categoryEn": "Life Purpose",
+    "titleTr": "Hayat Amacı ve Miras Beyanı (Life Manifesto)",
+    "titleEn": "Draft Your Sovereign Life Manifesto",
+    "descTr": "Nasıl bir insan olmak, geride ne bırakmak istiyorsun? Kendi yaşam manifestonu kaleme al.",
+    "descEn": "Write down the core virtues and principles you will stand by for the rest of your days.",
+    "bracket": "MIN_60_PLUS"
+  }
+]

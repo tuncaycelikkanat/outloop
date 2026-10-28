@@ -216,6 +216,11 @@ class NavigationTracker {
         return (nowMs - reelSessionStartTimeMs) > maxDurationMs
     }
 
+    fun markExitInitiated() {
+        hasSwipedToNextReel = false
+        isNewReelSwiped = false
+    }
+
     private fun clearReelSession() {
         reelOriginScreen = null
         initialReelFingerprint = ReelContentFingerprint()

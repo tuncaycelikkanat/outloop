@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Yalnızca farkındalık / engelleme katmanı ve Google Play faturalandırma için kullanılır; uygulama sunucusuzdur -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- Overlay'ler erişilebilirlik penceresi üzerinden çizilir; ek pencere/pil izni gerekmez. Uygulama sunucusuzdur -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name="com.nomorereels.app.OutloopApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"

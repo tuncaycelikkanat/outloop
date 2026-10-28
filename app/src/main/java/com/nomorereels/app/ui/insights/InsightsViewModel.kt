@@ -13,10 +13,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 private data class InsightsCounts(
-    val inMemoryBlockCount: Int,
     val persistedBlockCount: Int,
     val todayReelCount: Int,
-    val todayTimeSpentSeconds: Long
+    val todayTimeSpentSeconds: Long,
+    val todayGatewayDismiss: Int,
+    val totalGatewayDismiss: Int
 )
 
 private data class InsightsQuotas(
@@ -33,12 +34,13 @@ class InsightsViewModel(
 ) : AndroidViewModel(application) {
 
     private val countsFlow = combine(
-        ReelsAccessibilityService.actionExecutor.blockCount,
         quotaStore.todayBlockCount,
         quotaStore.todayReelCount,
-        quotaStore.todayTimeSpentSeconds
-    ) { inMemory, persisted, reelCount, timeSpent ->
-        InsightsCounts(inMemory, persisted, reelCount, timeSpent)
+        quotaStore.todayTimeSpentSeconds,
+        quotaStore.todayGatewayDismissCount,
+        quotaStore.totalGatewayDismissCount
+    ) { persisted, reelCount, timeSpent, todayDismiss, totalDismiss ->
+        InsightsCounts(persisted, reelCount, timeSpent, todayDismiss, totalDismiss.toInt())
     }
 
     private val quotasFlow = combine(
@@ -54,13 +56,33 @@ class InsightsViewModel(
         countsFlow,
         quotasFlow,
         heatmapStore.matrix,
-        quotaStore.dailyHistory
-    ) { generalMode, counts, quotas, matrix, dailyHistory ->
-        val totalBlock = maxOf(counts.inMemoryBlockCount, counts.persistedBlockCount)
+        combine(quotaStore.dailyHistory, quotaStore.dailyBlocksHistory) { h, b -> h to b }
+    ) { generalMode, counts, quotas, matrix, (dailyHistory, blocksHistory) ->
+        val totalBlock = counts.persistedBlockCount
         val minutesSpent = (counts.todayTimeSpentSeconds / 60L).toInt()
+        val todaySavedMin = quotaStore.estimateSavedSecondsForBlocks(totalBlock) / 60L
+
+        val todayDate = java.time.LocalDate.now()
+        val todayStr = todayDate.toString()
+        val weekBlocks = (0..6).sumOf { offset ->
+            val d = todayDate.minusDays(offset.toLong()).toString()
+            if (d == todayStr) maxOf(blocksHistory[d] ?: 0, totalBlock) else (blocksHistory[d] ?: 0)
+        }
+        val monthBlocks = (0..29).sumOf { offset ->
+            val d = todayDate.minusDays(offset.toLong()).toString()
+            if (d == todayStr) maxOf(blocksHistory[d] ?: 0, totalBlock) else (blocksHistory[d] ?: 0)
+        }
+        val weeklySavedMin = maxOf(todaySavedMin, quotaStore.estimateSavedSecondsForBlocks(weekBlocks) / 60L)
+        val monthlySavedMin = maxOf(weeklySavedMin, quotaStore.estimateSavedSecondsForBlocks(monthBlocks) / 60L)
+
         InsightsUiState(
             generalMode = generalMode,
             blockCount = totalBlock,
+            todaySavedMinutes = todaySavedMin,
+            weeklySavedMinutes = weeklySavedMin,
+            monthlySavedMinutes = monthlySavedMin,
+            todayGatewayDismissCount = counts.todayGatewayDismiss,
+            totalGatewayDismissCount = maxOf(counts.totalGatewayDismiss, counts.todayGatewayDismiss),
             todayReelCount = counts.todayReelCount,
             dailyCountLimit = quotas.dailyCountLimit,
             todayMinutesSpent = minutesSpent,

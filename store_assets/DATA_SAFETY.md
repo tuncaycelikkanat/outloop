@@ -16,8 +16,7 @@ Google Play Console'da "Uygulama İçeriği -> Veri Güvenliği" (Data Safety) b
 
 ### 2. İzinler ve Özel İfadeler
 - **android.permission.INTERNET:** Bulunmaz.
-- **android.permission.BIND_ACCESSIBILITY_SERVICE:** Yalnızca yerel arayüz tetiklemesi ve pencere tespiti için kullanılır, hiçbir veri kaydedilmez.
-- **Google Play Billing (Fatura):** Bağış/Kahve ısmarlama işlemleri tamamen Google Play'in kendi güvenli ödeme penceresi tarafından yönetilir, Outloop hiçbir kart veya ödeme bilgisi görmez ve saklamaz.
+- **Geliştiriciye Destek:** Harici web bağlantıları (Kreosus / BuyMeACoffee / GitHub Sponsors) üzerinden tamamen kullanıcının standart web tarayıcısında gerçekleşir; uygulama hiçbir kart, ödeme veya finansal veri görmez, işlemez ve saklamaz.
 
 ---
 

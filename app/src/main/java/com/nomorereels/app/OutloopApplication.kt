@@ -15,6 +15,10 @@ class OutloopApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        com.nomorereels.app.data.LocalDiagnosticsStore.installCrashHandler(this)
+        com.nomorereels.app.ui.MindfulActivities.init(this)
+        com.nomorereels.app.ui.MindfulQuotes.init(this)
+        com.nomorereels.app.ui.PracticalSuggestions.init(this)
         container = DefaultAppContainer(this)
     }
 }

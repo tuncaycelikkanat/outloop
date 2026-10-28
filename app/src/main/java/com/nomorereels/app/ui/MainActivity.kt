@@ -32,10 +32,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -73,7 +75,8 @@ import com.nomorereels.app.ui.today.TodayViewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val donationManager by lazy { DonationManager(this) }
+    private val donationManager: DonationManager
+        get() = (application as com.nomorereels.app.OutloopApplication).container.donationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -135,11 +138,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        donationManager.endConnection()
-    }
 }
 
 // ============================================================================
@@ -152,10 +150,11 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
     val context = LocalContext.current
 
     val hasCompletedOnboarding by SettingsStore.hasCompletedOnboarding.collectAsState()
-    var onboardingStep by remember { mutableIntStateOf(0) }
-    var showAppWalkthrough by remember { mutableStateOf(false) }
-    var walkthroughStep by remember { mutableIntStateOf(0) }
-    var currentTab by remember { mutableStateOf(NmrBottomTab.BUGUN) }
+    var onboardingStep by rememberSaveable { mutableIntStateOf(0) }
+    var showAppWalkthrough by rememberSaveable { mutableStateOf(false) }
+    var walkthroughStep by rememberSaveable { mutableIntStateOf(0) }
+    var currentTabName by rememberSaveable { mutableStateOf(NmrBottomTab.BUGUN.name) }
+    val currentTab = NmrBottomTab.entries.firstOrNull { it.name == currentTabName } ?: NmrBottomTab.BUGUN
 
     val appLanguage by SettingsStore.appLanguage.collectAsState()
     val isServiceActive by ReelsAccessibilityService.isServiceActive.collectAsState()
@@ -184,12 +183,8 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
 
     val isSupporter by SettingsStore.isSupporter.collectAsState()
     val supporterDonationCount by SettingsStore.supporterDonationCount.collectAsState()
-    val productDetailsMap = donationManager?.productDetailsMap?.collectAsState()?.value ?: emptyMap()
-
-    val donationItems = remember(productDetailsMap, donationManager) {
-        (donationManager?.defaultItems ?: emptyList()).map { item ->
-            item.copy(productDetails = productDetailsMap[item.productId])
-        }
+    val donationItems = remember(donationManager) {
+        donationManager?.defaultItems ?: emptyList()
     }
 
     LaunchedEffect(donationManager) {
@@ -302,6 +297,9 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .zIndex(if (isCurrent) 1f else 0f)
+                                        .then(
+                                            if (!isCurrent) Modifier.clearAndSetSemantics {} else Modifier
+                                        )
                                         .graphicsLayer {
                                             this.alpha = alpha
                                             translationY = if (isCurrent || alpha > 0.01f) 0f else 99999f
@@ -311,7 +309,7 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
                                         NmrBottomTab.BUGUN -> {
                                             TodayScreen(
                                                 viewModel = todayViewModel,
-                                                onNavigateToProtection = { currentTab = NmrBottomTab.KORUMA },
+                                                onNavigateToProtection = { currentTabName = NmrBottomTab.KORUMA.name },
                                                 onStartSnoozeClick = { showSnoozeDialog = true }
                                             )
                                         }
@@ -349,7 +347,7 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
 
                     NmrBottomNavigationBar(
                         currentTab = currentTab,
-                        onTabSelected = { currentTab = it }
+                        onTabSelected = { currentTabName = it.name }
                     )
                 }
             }
@@ -399,8 +397,6 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
 
         if (showMindfulGatewayDialog) {
             MindfulGatewayDialog(
-                barrierType = settingsViewModel.uiState.value.mindfulBarrierType,
-                isNightMode = SettingsStore.isBedtimeActiveNow(),
                 onDismiss = { showMindfulGatewayDialog = false },
                 onApproved = { durationMinutes, microPlan ->
                     showMindfulGatewayDialog = false

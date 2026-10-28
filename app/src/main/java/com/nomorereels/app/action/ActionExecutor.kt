@@ -14,15 +14,22 @@ import android.os.VibratorManager
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import com.nomorereels.app.data.SettingsStore
+import com.nomorereels.app.detection.RuleSet
 import com.nomorereels.app.detection.ScreenType
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+
+enum class ExitReelsResult {
+    PERFORMED,
+    ALREADY_EXITING,
+    FAILED
+}
 
 class ActionExecutor(
     private val serviceProvider: () -> AccessibilityService?,
-    private val cooldownMs: Long = 1200L
+    private val cooldownMs: Long = 500L
 ) {
+    @Volatile
+    var rules: RuleSet = RuleSet.DEFAULT
+
     private val mainHandler = Handler(Looper.getMainLooper())
     private var lastActionTime: Long = 0L
     private var recentAttempts = 0
@@ -34,13 +41,19 @@ class ActionExecutor(
     private var lastExitTime: Long = 0L
 
     val isExiting: Boolean
-        get() = isExitInProgress || (System.currentTimeMillis() - lastExitTime < 1800L)
+        get() = isExitInProgress || (System.currentTimeMillis() - lastExitTime < EXIT_IN_FLIGHT_MS)
 
-    private val _blockCount = MutableStateFlow(0)
-    val blockCount: StateFlow<Int> = _blockCount.asStateFlow()
-
-    fun resetBlockCount() {
-        _blockCount.value = 0
+    /**
+     * Instagram Reels ekranından çıkılıp güvenli bir ekrana (Ana Akış, DM, Keşfet, Profil)
+     * dönüldüğü an çağrılır. Tüm bekleme (cooldown) ve çıkış kilitlerini sıfırlayarak
+     * kullanıcının hemen ardından tekrar Reels'e girmesi durumunda sıfır gecikmeyle
+     * yeniden engelleme ve bildirim gösterilmesini sağlar.
+     */
+    fun onReturnedToNonReels() {
+        recentAttempts = 0
+        isExitInProgress = false
+        lastExitTime = 0L
+        lastActionTime = 0L
     }
 
     /**
@@ -56,20 +69,20 @@ class ActionExecutor(
         val now = System.currentTimeMillis()
 
         if (!force) {
-            // 1. Devre Kesici (Circuit Breaker): 2.5 saniyede 3'ten fazla deneme olursa kullanıcıyı kilitlememek için dur
+            // 1. Önce normal Cooldown kontrolü (aynı geçişin art arda gelen olayları devre kesiciyi şişirmemeli)
+            if (now - lastActionTime < cooldownMs) {
+                Log.d(TAG, "İşlem bekleme süresinde (cooldown aktif), atlandı. Ekran: $screenType")
+                return false
+            }
+
+            // 2. Devre Kesici (Circuit Breaker): 2.5 saniyede 4'ten fazla gerçek deneme olursa kullanıcıyı kilitlememek için dur
             if (now - recentAttemptWindowStart > 2500L) {
                 recentAttemptWindowStart = now
                 recentAttempts = 0
             }
             recentAttempts++
-            if (recentAttempts > 2) {
-                Log.w(TAG, "Devre kesici devrede: Çok sık tetikleme oldu ($recentAttempts), 2 saniye bekleniyor...")
-                return false
-            }
-
-            // 2. Normal Cooldown kontrolü
-            if (now - lastActionTime < cooldownMs) {
-                Log.d(TAG, "İşlem bekleme süresinde (cooldown aktif), atlandı. Ekran: $screenType")
+            if (recentAttempts > 4) {
+                Log.w(TAG, "Devre kesici devrede: Çok sık tetikleme oldu ($recentAttempts), kısa süre bekleniyor...")
                 return false
             }
         }
@@ -80,20 +93,23 @@ class ActionExecutor(
             return false
         }
 
-        val handled = exitReels(screenType, null)
+        val handled = exitReelsWithResult(screenType, null) == ExitReelsResult.PERFORMED
 
         if (handled) {
             lastActionTime = now
-            _blockCount.value += 1
-            try {
-                com.nomorereels.app.data.QuotaStore.incrementBlockCount(service)
-            } catch (_: Exception) {}
-            if (SettingsStore.hapticFeedbackEnabled.value) {
-                performHapticPulse(service)
-            }
+            recordBlockMetricsAndHaptic(service)
         }
 
         return handled
+    }
+
+    fun recordBlockMetricsAndHaptic(context: Context) {
+        try {
+            com.nomorereels.app.data.QuotaStore.incrementBlockCount(context)
+        } catch (_: Exception) {}
+        if (SettingsStore.hapticFeedbackEnabled.value) {
+            performHapticPulse(context)
+        }
     }
 
     private fun performHapticPulse(context: Context) {
@@ -123,40 +139,26 @@ class ActionExecutor(
     }
 
     /**
-     * Kullanıcı "Vazgeç ve Geri Dön" dediğinde veya Reels engellendiğinde,
-     * Reels ekranından kesin ve güvenilir bir şekilde çıkılmasını sağlar:
-     *
-     * 1. REELS_VIEWER (DM, Feed, Keşfet veya Profil'den açılan modal oynatıcı):
-     *    - Üst bardaki geri butonuna tıklar veya GLOBAL_ACTION_BACK tetikler.
-     *    - Kullanıcıyı geldiği ekrana (DM sohbeti, Ana Akış veya Keşfet) geri döndürür.
-     *
-     * 2. REELS_TAB (Instagram alt sekme çubuğundaki Reels sekmesi):
-     *    - Alt sekmedeki "Ana Sayfa" düğümünü bulup tıklar.
-     *    - Düğüm bulunamazsa alt bar Ana Sayfa sekme koordinatına dokunma jesti gönderir.
-     *
-     * 3. Emniyet Ağı (Safety Net):
-     *    - 350ms sonra Instagram hala Reels ekranında mı kontrol edilir.
-     *    - Eğer hala Reels'te kalınmışsa önce kurtarma aksiyonu (Back/Home tab), 700ms'de
-     *      hala çıkılamamışsa GLOBAL_ACTION_HOME ile kullanıcı güvenle ana ekrana çıkarılır.
+     * P1-15: Halihazırda çıkış devam ediyorsa ALREADY_EXITING döndürerek çift sayımı önler.
      */
-    fun exitReels(
+    fun exitReelsWithResult(
         screenType: ScreenType,
         originScreen: ScreenType? = null
-    ): Boolean {
+    ): ExitReelsResult {
         val now = System.currentTimeMillis()
         if (isExiting) {
             Log.d(TAG, "exitReels: Çıkış işlemi zaten devam ediyor, spam önlendi.")
-            return true
+            return ExitReelsResult.ALREADY_EXITING
         }
 
         val service = serviceProvider() ?: run {
             Log.w(TAG, "exitReels: Erişilebilirlik servisi hazır değil.")
-            return false
+            return ExitReelsResult.FAILED
         }
 
         isExitInProgress = true
         lastExitTime = now
-        mainHandler.postDelayed({ isExitInProgress = false }, 1800L)
+        mainHandler.postDelayed({ isExitInProgress = false }, EXIT_IN_FLIGHT_MS)
 
         Log.i(TAG, ">>> REELS'DEN ÇIKILIYOR (exitReels) - Ekran: $screenType, Köken: $originScreen <<<")
 
@@ -164,8 +166,6 @@ class ActionExecutor(
         var handled = false
 
         if (screenType == ScreenType.REELS_VIEWER) {
-            // Modal tam ekran oynatıcı: Nereden açılmış olursa olsun (DM, Feed, Keşfet, Profil vb.)
-            // çıkış yolu Back butonuna tıklamak veya tek bir GLOBAL_ACTION_BACK göndermektir.
             if (igRoot != null) {
                 handled = clickBackButton(igRoot, service)
             }
@@ -174,8 +174,6 @@ class ActionExecutor(
                 Log.i(TAG, "REELS_VIEWER: GLOBAL_ACTION_BACK gönderildi, sonuç: $handled")
             }
         } else if (screenType == ScreenType.REELS_TAB) {
-            // Reels sekmesi: Alt sekme çubuğunda Ana Sayfa'ya geçiş yap.
-            // Asla Back tuşuna basılmaz çünkü Reels sekmesinde Back uygulamadan atabilir.
             if (igRoot != null) {
                 handled = clickHomeTab(igRoot, service)
             }
@@ -183,7 +181,6 @@ class ActionExecutor(
                 handled = dispatchHomeTabTap(service)
             }
         } else {
-            // Belirsiz / UNKNOWN Reels durumu: Önce geri dönmeyi dene, olmazsa Ana Sayfa'ya geç
             if (igRoot != null) {
                 handled = clickBackButton(igRoot, service) || clickHomeTab(igRoot, service)
             }
@@ -194,8 +191,13 @@ class ActionExecutor(
 
         igRoot?.let { com.nomorereels.app.detection.safeRecycle(it) }
 
-        return handled
+        return if (handled) ExitReelsResult.PERFORMED else ExitReelsResult.FAILED
     }
+
+    fun exitReels(
+        screenType: ScreenType,
+        originScreen: ScreenType? = null
+    ): Boolean = exitReelsWithResult(screenType, originScreen) == ExitReelsResult.PERFORMED
 
     private fun findInstagramRootNode(service: AccessibilityService): AccessibilityNodeInfo? {
         try {
@@ -222,12 +224,7 @@ class ActionExecutor(
 
 
     private fun clickBackButton(root: AccessibilityNodeInfo, service: AccessibilityService): Boolean {
-        val backIds = listOf(
-            "com.instagram.android:id/action_bar_button_back",
-            "com.instagram.android:id/back_button",
-            "com.instagram.android:id/action_bar_back",
-            "com.instagram.android:id/action_bar_left_button"
-        )
+        val backIds = rules.actionTargets.backIds
         for (id in backIds) {
             val nodes = root.findAccessibilityNodeInfosByViewId(id)
             if (!nodes.isNullOrEmpty()) {
@@ -252,10 +249,14 @@ class ActionExecutor(
             }
         }
 
-        val backDescriptions = listOf("geri", "back", "kapat", "close", "yukarı git", "navigate up")
+        val screenHeight = service.resources.displayMetrics.heightPixels
+        val backDescriptions = rules.actionTargets.backDescriptions
         val backNode = findNodeRecursive(root) { node ->
-            val desc = node.contentDescription?.toString()?.lowercase() ?: ""
-            backDescriptions.any { desc == it || desc.startsWith(it) }
+            val desc = node.contentDescription?.toString()?.trim()?.lowercase() ?: ""
+            if (desc.isEmpty() || !backDescriptions.any { desc == it }) return@findNodeRecursive false
+            val rect = Rect()
+            node.getBoundsInScreen(rect)
+            rect.width() > 0 && rect.height() > 0 && rect.centerY() < (screenHeight * 0.30f)
         }
         if (backNode != null) {
             try {
@@ -279,12 +280,8 @@ class ActionExecutor(
     }
 
     private fun clickHomeTab(root: AccessibilityNodeInfo, service: AccessibilityService): Boolean {
-        // 1. Bilinen Home view ID'leri ile dene
-        val homeIds = listOf(
-            "com.instagram.android:id/feed_tab",
-            "com.instagram.android:id/tab_home",
-            "com.instagram.android:id/action_bar_home"
-        )
+        // 1. Bilinen Home view ID'leri ile dene (rules.json'dan)
+        val homeIds = rules.actionTargets.homeIds
         for (id in homeIds) {
             val nodes = root.findAccessibilityNodeInfosByViewId(id)
             if (!nodes.isNullOrEmpty()) {
@@ -309,11 +306,15 @@ class ActionExecutor(
             }
         }
 
-        // 2. İçerik açıklaması ile Ana Sayfa sekmesini bul
-        val homeDescriptions = listOf("ana sayfa", "home", "akış", "feed")
+        // 2. P1-12: Tam eşleşme ve ekranın alt %22'lik sekme çubuğu bölgesi kontrolü
+        val screenHeight = service.resources.displayMetrics.heightPixels
+        val homeDescriptions = rules.actionTargets.homeDescriptions
         val matchingNode = findNodeRecursive(root) { node ->
-            val desc = node.contentDescription?.toString()?.lowercase() ?: ""
-            homeDescriptions.any { desc == it || desc.startsWith(it) || desc.contains(it) }
+            val desc = node.contentDescription?.toString()?.trim()?.lowercase() ?: ""
+            if (desc.isEmpty() || !homeDescriptions.any { desc == it }) return@findNodeRecursive false
+            val rect = Rect()
+            node.getBoundsInScreen(rect)
+            rect.width() > 0 && rect.height() > 0 && rect.centerY() > (screenHeight * 0.78f)
         }
 
         if (matchingNode != null) {
@@ -342,12 +343,29 @@ class ActionExecutor(
         val displayMetrics = service.resources.displayMetrics
         val width = displayMetrics.widthPixels.toFloat()
         val height = displayMetrics.heightPixels.toFloat()
+
+        var bottomSystemInset = 0
+        try {
+            val wm = service.getSystemService(Context.WINDOW_SERVICE) as? android.view.WindowManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && wm != null) {
+                val insets = wm.currentWindowMetrics.windowInsets
+                    .getInsetsIgnoringVisibility(android.view.WindowInsets.Type.navigationBars())
+                bottomSystemInset = insets.bottom
+            } else {
+                val resId = service.resources.getIdentifier("navigation_bar_height", "dimen", "android")
+                if (resId > 0) {
+                    bottomSystemInset = service.resources.getDimensionPixelSize(resId)
+                }
+            }
+        } catch (_: Exception) {}
+
+        val tabBarCenterOffsetPx = 24f * displayMetrics.density
         // 5 sekmeli alt barda en soldaki Home ikonu:
         // X = ekran genişliğinin %10'u
-        // Y = ekran yüksekliğinin %96'sı
+        // Y = sistem 3-tuşlu/jest navigasyon çubuğunun hemen üstündeki Instagram alt barının merkezi
         val x = width * 0.10f
-        val y = height * 0.96f
-        Log.i(TAG, "Alt bar varsayılan Ana Sayfa koordinatına jest gönderiliyor: ($x, $y)")
+        val y = (height - bottomSystemInset - tabBarCenterOffsetPx).coerceIn(height * 0.82f, height * 0.96f)
+        Log.i(TAG, "Alt bar varsayılan Ana Sayfa koordinatına jest gönderiliyor: ($x, $y) [bottomInset=$bottomSystemInset]")
         return dispatchTapGesture(service, x, y)
     }
 
@@ -406,5 +424,6 @@ class ActionExecutor(
 
     companion object {
         private const val TAG = "NoMoreReels"
+        const val EXIT_IN_FLIGHT_MS = 400L
     }
 }

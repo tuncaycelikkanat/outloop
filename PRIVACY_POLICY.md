@@ -8,7 +8,7 @@ NoMoreReels ("we", "our", or "the app") is a minimalist digital wellness and foc
 ## 2. Zero Data Collection & Serverless Architecture
 NoMoreReels operates with **zero external servers, zero analytics, zero crash reporters, and zero trackers**. 
 
-Network permissions (`android.permission.INTERNET` and `android.permission.ACCESS_NETWORK_STATE`) are included solely by the Google Play Billing Library (`com.android.billingclient`) to communicate directly with Google Play's payment servers for optional in-app developer tips. The core focus tracking, Reels detection, and accessibility services operate entirely offline on your device and are technically incapable of transmitting any user data.
+The application does **NOT** request or declare network permissions (`android.permission.INTERNET` or `android.permission.ACCESS_NETWORK_STATE`). It operates 100% offline on your device and is technically incapable of transmitting any user data.
 
 ## 3. Use of Android AccessibilityService API
 NoMoreReels uses the Android `AccessibilityService` API strictly to help users manage their screen time and overcome compulsive social media scrolling habits.
@@ -21,12 +21,12 @@ NoMoreReels uses the Android `AccessibilityService` API strictly to help users m
   - The service **never** transmits, shares, or stores any screen content.
 
 ## 4. Other Android Permissions
-- `android.permission.SYSTEM_ALERT_WINDOW`: Used exclusively to display a local, on-device mindful pause screen (breathing friction / quota warning badge) over the screen when focus limits are reached.
+- `android.permission.SYSTEM_ALERT_WINDOW`: Used optionally / via accessibility overlay to display a local, on-device mindful pause screen (breathing friction / quota warning badge) over the screen when focus limits are reached.
 - `android.permission.VIBRATE`: Used exclusively to provide subtle tactile haptic feedback when a block action occurs or when settings are toggled.
 - `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: Requested optionally to prevent aggressive manufacturer battery killers from terminating the on-device accessibility background observer.
 
-## 5. In-App Purchases and Donations
-NoMoreReels offers optional tip jar items to support open-source development. All transactions are securely processed entirely through Google Play's In-App Billing system (`com.android.billingclient`). We do not collect, store, or have access to any payment card or banking details.
+## 5. Voluntary Donations and Support
+NoMoreReels offers optional external links (such as Kreosus, Buy Me a Coffee, and GitHub Sponsors) for users who wish to support open-source development. All donation pages are opened outside the application in your standard web browser. The app itself never collects, handles, or has access to any financial or payment information.
 
 ## 6. Children's Privacy
 NoMoreReels does not collect any personal information from anyone, including children under the age of 13.

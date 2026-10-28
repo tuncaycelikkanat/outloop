@@ -515,4 +515,49 @@ class ScreenClassifierTest {
         assertEquals("reel_two", tracker.initialReelFingerprint.author)
         assertFalse("2. Reel yeni oturumda engellenmeden izlenebilmeli", tracker.hasSwipedToNextReel)
     }
+
+    @Test
+    fun `expanding or collapsing reel caption on the same reel must NOT trigger false swipe detection`() {
+        val tracker = NavigationTracker()
+        tracker.update(ScreenType.DIRECT_MESSAGES)
+
+        val collapsedFp = ReelContentFingerprint(
+            author = "natgeo",
+            caption = "Doğanın inanılmaz anları ve vahşi yaşam... devamı"
+        )
+        tracker.update(ScreenType.REELS_VIEWER, collapsedFp, originHint = ScreenType.DIRECT_MESSAGES, nowMs = 1000L)
+        assertFalse(tracker.hasSwipedToNextReel)
+
+        // 3 saniye sonra kullanıcı "...devamı" yazısına tıklayarak açıklamayı genişletti
+        val expandedFp = ReelContentFingerprint(
+            author = "natgeo",
+            caption = "Doğanın inanılmaz anları ve vahşi yaşam belgeselimizin kamera arkası görüntüleri sizlerle! Daha fazlası için profildeki linke tıklayın."
+        )
+        assertFalse(
+            "Açıklama genişletildiğinde aynı Reel olarak algılanmalı",
+            collapsedFp.isDifferentReelFrom(expandedFp)
+        )
+
+        tracker.update(ScreenType.REELS_VIEWER, expandedFp, originHint = ScreenType.DIRECT_MESSAGES, nowMs = 4000L)
+        assertFalse(
+            "Açıklama genişletme kaydırma (swipe) olarak işaretlenmemeli",
+            tracker.hasSwipedToNextReel
+        )
+
+        // Şimdi gerçekten farklı bir açıklamaya sahip 2. Reel'e kaydırıldı
+        val nextReelFp = ReelContentFingerprint(
+            author = "natgeo",
+            caption = "Okyanusun derinliklerinde keşfedilen yeni mercan resifleri..."
+        )
+        assertTrue(
+            "Farklı açıklamalı yeni Reel farklı olarak algılanmalı",
+            expandedFp.isDifferentReelFrom(nextReelFp)
+        )
+
+        tracker.update(ScreenType.REELS_VIEWER, nextReelFp, originHint = ScreenType.DIRECT_MESSAGES, nowMs = 6000L)
+        assertTrue(
+            "Gerçekten farklı bir Reel'e geçildiğinde kaydırma algılanmalı",
+            tracker.hasSwipedToNextReel
+        )
+    }
 }

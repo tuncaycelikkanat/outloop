@@ -72,7 +72,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nomorereels.app.policy.PolicyDecision
 import com.nomorereels.app.data.HeatmapStore
-import com.nomorereels.app.data.MindfulBarrierType
 import com.nomorereels.app.data.SettingsBackupHelper
 import com.nomorereels.app.data.SettingsStore
 import com.nomorereels.app.service.ReelsAccessibilityService
@@ -125,8 +124,6 @@ fun SettingsScreen(
         onLanguageChange = { viewModel.setLanguage(it) },
         onThemeChange = { viewModel.setThemeMode(it) },
         onMindfulGatewayToggle = { viewModel.setMindfulGatewayEnabled(it) },
-        onMindfulBarrierTypeChange = { viewModel.setMindfulBarrierType(it) },
-        onNightCompassionToggle = { viewModel.setNightCompassionEnabled(it) },
         onOverlayFeedbackToggle = { viewModel.setOverlayFeedbackEnabled(it) },
         onHapticFeedbackToggle = { viewModel.setHapticFeedbackEnabled(it) },
         onPreviewGateway = onPreviewGateway,
@@ -147,8 +144,6 @@ fun SettingsScreenContent(
     onLanguageChange: (NmrLanguage) -> Unit,
     onThemeChange: (NmrThemeMode) -> Unit,
     onMindfulGatewayToggle: (Boolean) -> Unit,
-    onMindfulBarrierTypeChange: (MindfulBarrierType) -> Unit,
-    onNightCompassionToggle: (Boolean) -> Unit,
     onOverlayFeedbackToggle: (Boolean) -> Unit,
     onHapticFeedbackToggle: (Boolean) -> Unit,
     onPreviewGateway: () -> Unit,
@@ -170,7 +165,6 @@ fun SettingsScreenContent(
     val language = uiState.language
     val themeMode = uiState.themeMode
     val mindfulGatewayEnabled = uiState.mindfulGatewayEnabled
-    val nightCompassionEnabled = uiState.nightCompassionEnabled
     val overlayFeedbackEnabled = uiState.overlayFeedbackEnabled
     val hapticFeedbackEnabled = uiState.hapticFeedbackEnabled
     val bedtimeEnabled = uiState.bedtimeEnabled
@@ -397,46 +391,6 @@ fun SettingsScreenContent(
                     )
             ) {
                 Column {
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 54.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(
-                                imageVector = NmrIcons.GeceOdak,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.size(NmrTheme.dimens.iconSize)
-                            )
-                            Column {
-                                Text(
-                                    text = strings.nightCompassionTitle,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                                Text(
-                                    text = strings.nightCompassionSub,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                        Switch(
-                            checked = nightCompassionEnabled,
-                            onCheckedChange = onNightCompassionToggle,
-                            colors = switchColors
-                        )
-                    }
-
                     Spacer(modifier = Modifier.height(10.dp))
 
                     NmrChip(
@@ -871,6 +825,53 @@ fun SettingsScreenContent(
                         )
                         Text(
                             text = strings.backupImportSub,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = Icons.Outlined.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            NmrHairlineDivider()
+
+            val isEnglish = language == NmrLanguage.EN
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 60.dp)
+                    .clickable {
+                        com.nomorereels.app.data.LocalDiagnosticsStore.shareDiagnosticReport(context)
+                    },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(NmrTheme.dimens.iconSize)
+                    )
+                    Column {
+                        Text(
+                            text = if (isEnglish) "Share Diagnostic Log" else "Tanılama Günlüğünü Paylaş",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = if (isEnglish)
+                                "Export local crash & structural transition summary (no personal data)"
+                            else
+                                "Yerel çökme ve yapısal geçiş özetini paylaş (kişisel veri içermez)",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -13,7 +13,6 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -35,8 +34,8 @@ import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import com.nomorereels.app.R
 import com.nomorereels.app.data.AppLanguage
-import com.nomorereels.app.data.MindfulBarrierType
 import com.nomorereels.app.data.SettingsStore
+import com.nomorereels.app.policy.GatewaySpec
 import com.nomorereels.app.policy.PolicyDecision
 import com.nomorereels.app.ui.i18n.AppStrings
 
@@ -113,7 +112,11 @@ class OverlayController(
 
     private var bannerView: View? = null
     private var bannerWindowManager: WindowManager? = null
+    private var bannerParentGroup: android.view.ViewGroup? = null
     private var bannerDismissRunnable: Runnable? = null
+    private var lastBannerSignature: String = ""
+    private var lastBannerShownAtMs: Long = 0L
+
     private var holdTickRunnable: Runnable? = null
     private var pendingReleaseAudioRunnable: Runnable? = null
 
@@ -122,6 +125,23 @@ class OverlayController(
 
     val isSuppressed: Boolean
         get() = System.currentTimeMillis() < suppressionUntilMs
+
+    /**
+     * Reels dışındaki bir ekrana dönüldüğünde sürtünme katmanı bastırma süresini derhal sıfırlar.
+     */
+    fun onReturnedToNonReels() {
+        suppressionUntilMs = 0L
+    }
+
+    /**
+     * Belirtilen süre boyunca bildirim/overlay olaylarını bastırır.
+     */
+    fun suppress(durationMs: Long) {
+        val target = System.currentTimeMillis() + durationMs
+        if (target > suppressionUntilMs) {
+            suppressionUntilMs = target
+        }
+    }
 
     /**
      * DM'den açılan Reel için 5 saniye basılı tutma gerektiren "Bilinçli Sürtünme"
@@ -184,6 +204,9 @@ class OverlayController(
                     PixelFormat.TRANSLUCENT
                 ).apply {
                     gravity = Gravity.CENTER
+                    if (windowType == WindowManager.LayoutParams.TYPE_APPLICATION) {
+                        findActivity(fallbackContext)?.window?.decorView?.windowToken?.let { token = it }
+                    }
                 }
 
                 wm.addView(view, params)
@@ -193,6 +216,7 @@ class OverlayController(
                 Log.i(TAG, "Bilinçli Sürtünme (5 sn basılı tutma) ekranı gösterildi.")
             } catch (e: Exception) {
                 isFrictionOverlayPending = false
+                MediaPauseHelper.releaseAudioFocus(targetContext)
                 Log.e(TAG, "Bilinçli Sürtünme ekranı eklenirken hata: ${e.message}")
             }
         }
@@ -205,7 +229,8 @@ class OverlayController(
      * false ise vazgeçildiğinde Reels'in arkada hemen tekrar çalmasını önlemek için 1.5 sn gecikmeyle bırakılır.
      */
     fun dismissMindfulFrictionOverlay(releaseAudioImmediately: Boolean = false) {
-        suppressionUntilMs = System.currentTimeMillis() + 3000L
+        // Onaylandığında (releaseAudioImmediately = true) bastırma uygulanmaz ki 2. videoya kaydırma anında yakalansın.
+        suppressionUntilMs = if (releaseAudioImmediately) 0L else System.currentTimeMillis() + 800L
         isFrictionOverlayPending = false
 
         pendingReleaseAudioRunnable?.let { mainHandler.removeCallbacks(it) }
@@ -225,7 +250,7 @@ class OverlayController(
             }
         }
 
-        mainHandler.post {
+        val removeTask = Runnable {
             holdTickRunnable?.let { mainHandler.removeCallbacks(it) }
             holdTickRunnable = null
 
@@ -236,11 +261,21 @@ class OverlayController(
 
             if (view != null && wm != null) {
                 try {
-                    wm.removeView(view)
-                } catch (e: Exception) {
-                    Log.w(TAG, "Friction overlay kaldırılırken hata: ${e.message}")
+                    wm.removeViewImmediate(view)
+                } catch (_: Exception) {
+                    try {
+                        wm.removeView(view)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Friction overlay kaldırılırken hata: ${e.message}")
+                    }
                 }
             }
+        }
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            removeTask.run()
+        } else {
+            mainHandler.post(removeTask)
         }
     }
 
@@ -250,9 +285,9 @@ class OverlayController(
      */
     fun showMindfulGatewayOverlay(
         fallbackContext: Context? = null,
-        barrierType: MindfulBarrierType = MindfulBarrierType.BREATH_AND_INTENT,
-        isNightMode: Boolean = false,
         isEnglish: Boolean = false,
+        decision: PolicyDecision? = null,
+        originLabel: String? = null,
         onApproved: (durationMinutes: Int, microPlan: String) -> Unit,
         onCancelAndGoBack: () -> Unit
     ): Boolean {
@@ -264,7 +299,7 @@ class OverlayController(
         if (frictionView != null || isFrictionOverlayPending) return true
 
         val (targetContext, windowType) = resolveOverlayContextAndType(fallbackContext) ?: run {
-            Log.w(TAG, "Overlay gösterilemedi: Uygun servis veya SYSTEM_ALERT_WINDOW izni yok.")
+            Log.w(TAG, "Overlay gösterilemedi: Uygun servis veya pencere bağlamı yok.")
             return false
         }
 
@@ -284,9 +319,9 @@ class OverlayController(
                 val wm = targetContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
                 val view = buildMindfulGatewayView(
                     context = targetContext,
-                    barrierType = barrierType,
-                    isNightMode = isNightMode,
                     isEnglish = isEnglish,
+                    decision = decision,
+                    originLabel = originLabel,
                     onApproved = { duration, plan ->
                         dismissMindfulFrictionOverlay(releaseAudioImmediately = true)
                         onApproved(duration, plan)
@@ -306,6 +341,9 @@ class OverlayController(
                     PixelFormat.TRANSLUCENT
                 ).apply {
                     gravity = Gravity.CENTER
+                    if (windowType == WindowManager.LayoutParams.TYPE_APPLICATION) {
+                        findActivity(fallbackContext)?.window?.decorView?.windowToken?.let { token = it }
+                    }
                 }
 
                 wm.addView(view, params)
@@ -315,6 +353,7 @@ class OverlayController(
                 Log.i(TAG, "Farkındalık Kapısı (Mindful Gateway) ekranı gösterildi.")
             } catch (e: Exception) {
                 isFrictionOverlayPending = false
+                MediaPauseHelper.releaseAudioFocus(targetContext)
                 Log.e(TAG, "Farkındalık Kapısı eklenirken hata: ${e.message}")
             }
         }
@@ -322,220 +361,373 @@ class OverlayController(
     }
 
     /**
-     * Bilinçli pencere süresi dolduğunda seçilen niyetle birlikte nazik hatırlatma banner'ı gösterir.
+     * Bilinçli pencere süresi dolduğunda nazik ve kısa hatırlatma hapı gösterir (microPlan alt metniyle).
      */
     fun showMindfulWindowExpired(
         microPlan: String,
         isEnglish: Boolean = false,
         fallbackContext: Context? = null
     ) {
-        val strings = AppStrings.get(if (isEnglish) AppLanguage.EN else AppLanguage.TR)
-        val title = strings.gatewayWindowExpiredTitle
-        val sub = strings.gatewayWindowExpiredDesc(microPlan)
-        showPunchHolePill(title, sub, Color.parseColor("#274D3E"), fallbackContext, durationMs = 3500L)
+        if (!SettingsStore.overlayFeedbackEnabled.value && fallbackContext == null) return
+        val title = if (isEnglish) "Break's over 🌱" else "Mola bitti, devam 🌱"
+        val sub = microPlan.trim().takeIf { it.isNotEmpty() }
+        showPunchHolePill(title, sub, Color.parseColor("#274D3E"), fallbackContext, durationMs = 3000L)
     }
 
+    private var bannerPillView: View? = null
+    private var bannerTitleView: TextView? = null
+    private var bannerAnimator: ValueAnimator? = null
+    private var isBannerDismissing: Boolean = false
+    private var pendingBannerShowRunnable: Runnable? = null
+
+    /**
+     * Kamera deliği (punch-hole) ve durum çubuğunun (status bar) tam altında,
+     * hiçbir zaman fiziksel kameranın altında kalmayan güvenli, kısa ve tatlı üst hap bildirimini gösterir.
+     */
     fun showPunchHolePill(
         title: String,
         subtitle: String? = null,
         accentColor: Int,
         fallbackContext: Context? = null,
-        durationMs: Long = 2500L
+        durationMs: Long = 2200L,
+        showDelayMs: Long = 0L
     ): Boolean {
-        val (targetContext, windowType) = resolveOverlayContextAndType(fallbackContext) ?: return false
+        val resolved = resolveOverlayContextAndType(fallbackContext)
+        val activityFallback = findActivity(fallbackContext)
+        if (resolved == null && activityFallback == null) {
+            Log.w(TAG, "Üst hap bildirimi gösterilemedi: Aktif servis veya Activity bulunamadı.")
+            return false
+        }
 
-        mainHandler.post {
-            removeBannerImmediate()
+        pendingBannerShowRunnable?.let { mainHandler.removeCallbacks(it) }
+        val task = Runnable {
+            pendingBannerShowRunnable = null
+            val now = System.currentTimeMillis()
+            val displayText = if (!subtitle.isNullOrBlank()) "$title · $subtitle" else title
 
-            try {
-                val wm = targetContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                val view = buildPunchHolePillView(targetContext, title, subtitle, accentColor)
+            // 1. HIZLI YOL: Halihazırda ekranda bir pencere varsa (veya kapanıyorsa),
+            // pencereyi WindowManager'da yıkıp baştan kurma gecikmesini (SurfaceFlinger gecikmesini) önle!
+            // Var olan pencerenin kapanışını iptal et, metnini güncelle ve canlı bir pop animasyonuyla tazele!
+            val existingRoot = bannerView
+            val existingPill = bannerPillView
+            if (fallbackContext == null && existingRoot != null && existingPill != null) {
+                bannerAnimator?.cancel()
+                bannerDismissRunnable?.let { mainHandler.removeCallbacks(it) }
+                isBannerDismissing = false
 
-                val params = WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    windowType,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                    PixelFormat.TRANSLUCENT
-                ).apply {
-                    gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                    y = if (windowType == WindowManager.LayoutParams.TYPE_APPLICATION) dp(targetContext, 24) else dp(targetContext, 12)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                bannerTitleView?.text = displayText
+                lastBannerSignature = displayText
+                lastBannerShownAtMs = now
+
+                // Canlı yenileme animasyonu: hafif pop (0.93 -> 1.0)
+                existingPill.scaleX = 0.93f
+                existingPill.scaleY = 0.93f
+                existingPill.alpha = 0.7f
+                existingPill.translationY = 0f
+                val refreshAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+                    duration = 180L
+                    interpolator = android.view.animation.OvershootInterpolator(1.1f)
+                    addUpdateListener { anim ->
+                        val f = anim.animatedValue as Float
+                        val s = 0.93f + 0.07f * f
+                        existingPill.scaleX = s
+                        existingPill.scaleY = s
+                        existingPill.alpha = (0.7f + 0.3f * f).coerceIn(0f, 1f)
                     }
                 }
+                bannerAnimator = refreshAnim
+                refreshAnim.start()
 
-                view.scaleX = 0.3f
-                view.scaleY = 0.3f
-                view.alpha = 0f
-
-                wm.addView(view, params)
-                bannerView = view
-                bannerWindowManager = wm
-
-                view.animate()
-                    .scaleX(1.0f)
-                    .scaleY(1.0f)
-                    .alpha(1.0f)
-                    .setDuration(220L)
-                    .setInterpolator(android.view.animation.OvershootInterpolator(1.2f))
-                    .start()
-
-                val dismissTask = Runnable {
-                    view.animate()
-                        .scaleX(0.3f)
-                        .scaleY(0.3f)
-                        .alpha(0f)
-                        .setDuration(180L)
-                        .withEndAction { removeBannerImmediate() }
-                        .start()
-                }
+                val dismissTask = buildBannerDismissRunnable(existingPill)
                 bannerDismissRunnable = dismissTask
                 mainHandler.postDelayed(dismissTask, durationMs)
-            } catch (e: Exception) {
-                Log.w(TAG, "Nokta kamera hap bildirimi gösterilemedi: ${e.message}")
+                return@Runnable
             }
+
+            removeBannerImmediate()
+
+            val renderContext = resolved?.first ?: activityFallback ?: return@Runnable
+            val wm = renderContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            val outerPadTop = dp(renderContext, 12)
+            val outerPadBottom = dp(renderContext, 16)
+            val outerPadHorizontal = dp(renderContext, 16)
+            val safeTopPx = (computeSafeTopOffsetPx(renderContext, wm) - outerPadTop).coerceAtLeast(0)
+
+            val (outerContainer, pillView, titleTextView) = buildPunchHolePillWrapper(
+                context = renderContext,
+                text = displayText,
+                accentColor = accentColor,
+                padHorizontal = outerPadHorizontal,
+                padTop = outerPadTop,
+                padBottom = outerPadBottom
+            )
+
+            var addedToWindow = false
+
+            // 1. Öncelik: Erişilebilirlik katmanı (TYPE_ACCESSIBILITY_OVERLAY) veya Activity alt penceresi (TYPE_APPLICATION)
+            if (resolved != null) {
+                try {
+                    val params = buildBannerLayoutParams(resolved.second, safeTopPx).apply {
+                        if (resolved.second == WindowManager.LayoutParams.TYPE_APPLICATION) {
+                            activityFallback?.window?.decorView?.windowToken?.let { token = it }
+                        }
+                    }
+                    wm.addView(outerContainer, params)
+                    bannerView = outerContainer
+                    bannerPillView = pillView
+                    bannerTitleView = titleTextView
+                    bannerWindowManager = wm
+                    addedToWindow = true
+                } catch (e: Exception) {
+                    Log.w(TAG, "Birincil WindowManager üst bildirim hatası (${resolved.second}): ${e.message}")
+                }
+            }
+
+            // 2. Yedek: Uygulama içi önizleme veya servis kapalıyken Activity decorView üzerine doğrudan ekle
+            if (!addedToWindow && activityFallback != null && !activityFallback.isFinishing && !activityFallback.isDestroyed) {
+                try {
+                    val decorGroup = activityFallback.window?.decorView as? android.view.ViewGroup
+                    if (decorGroup != null) {
+                        val lp = FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            Gravity.TOP or Gravity.CENTER_HORIZONTAL
+                        ).apply {
+                            topMargin = safeTopPx
+                        }
+                        outerContainer.isClickable = false
+                        outerContainer.isFocusable = false
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            outerContainer.elevation = dp(renderContext, 24).toFloat()
+                        }
+                        decorGroup.addView(outerContainer, lp)
+                        bannerView = outerContainer
+                        bannerPillView = pillView
+                        bannerTitleView = titleTextView
+                        bannerParentGroup = decorGroup
+                        addedToWindow = true
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Activity decorView üst bildirim ekleme hatası: ${e.message}")
+                }
+            }
+
+            if (!addedToWindow) return@Runnable
+
+            isBannerDismissing = false
+            lastBannerSignature = displayText
+            lastBannerShownAtMs = now
+
+            val startOffsetPx = -dp(renderContext, 10).toFloat()
+            pillView.translationY = startOffsetPx
+            pillView.scaleX = 0.92f
+            pillView.scaleY = 0.92f
+            pillView.alpha = 0f
+
+            val startEnter = {
+                if (bannerPillView === pillView) {
+                    val enterAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+                        duration = 200L
+                        interpolator = android.view.animation.OvershootInterpolator(1.05f)
+                        addUpdateListener { anim ->
+                            val f = anim.animatedValue as Float
+                            pillView.translationY = startOffsetPx * (1f - f)
+                            val s = 0.92f + 0.08f * f
+                            pillView.scaleX = s
+                            pillView.scaleY = s
+                            pillView.alpha = f.coerceIn(0f, 1f)
+                        }
+                    }
+                    bannerAnimator = enterAnim
+                    enterAnim.start()
+
+                    val dismissTask = buildBannerDismissRunnable(pillView)
+                    bannerDismissRunnable = dismissTask
+                    mainHandler.postDelayed(dismissTask, durationMs)
+                }
+            }
+
+            // Pencere eklendikten sonra ilk render geçişinde doğrudan animasyonu başlat (sıfır gecikme)
+            outerContainer.post { startEnter() }
+        }
+
+        if (showDelayMs > 0L) {
+            pendingBannerShowRunnable = task
+            mainHandler.postDelayed(task, showDelayMs)
+        } else {
+            mainHandler.post(task)
         }
         return true
     }
 
+    private fun buildBannerLayoutParams(windowType: Int, safeTopPx: Int): WindowManager.LayoutParams {
+        return WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            windowType,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            y = safeTopPx
+            // Sistem pencere animasyonunu kapat: Instagram'ın geri geçişi sürerken WindowManager
+            // bu animasyonu erteleyip pencereyi yarı saydam bekletiyordu. Animasyonu kendimiz yapıyoruz.
+            windowAnimations = 0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+            }
+        }
+    }
+
+    private fun buildBannerDismissRunnable(pillView: View): Runnable = Runnable {
+        isBannerDismissing = true
+        bannerAnimator?.cancel()
+        val ctx = pillView.context
+        val endOffsetPx = -dp(ctx, 8).toFloat()
+        val exitAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 170L
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { anim ->
+                val f = anim.animatedValue as Float
+                pillView.translationY = endOffsetPx * f
+                val s = 1f - 0.08f * f
+                pillView.scaleX = s
+                pillView.scaleY = s
+                pillView.alpha = (1f - f).coerceIn(0f, 1f)
+            }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    removeBannerImmediate()
+                }
+                override fun onAnimationCancel(animation: android.animation.Animator) {
+                    removeBannerImmediate()
+                }
+            })
+        }
+        bannerAnimator = exitAnim
+        exitAnim.start()
+        // Güvenlik ağı: animasyon durdurulursa veya pencere geçişinde düşerse ekranda takılmasını önle
+        mainHandler.postDelayed({
+            removeBannerImmediate()
+        }, 220L)
+    }
+
     /**
-     * Reels engellendiğinde veya DM'de 2. videoya kaydırma yakalandığında ekranın üst kısmında
-     * dokunmayı engellemeyen (FLAG_NOT_TOUCHABLE) kısa bir farkındalık bildirimi gösterir.
+     * Cihazın ön kamera deliği (displayCutout) ve durum çubuğu (statusBars) yüksekliğini
+     * hesaplayarak bildirimin ASLA kameranın altında kalmamasını sağlayan güvenli üst boşluğu döndürür.
+     */
+    private fun computeSafeTopOffsetPx(context: Context, wm: WindowManager): Int {
+        var safeTop = 0
+
+        // 1. Android 11+ (API 30+): WindowMetrics üzerinden hem statusBar hem displayCutout yüksekliği
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                val windowInsets = wm.currentWindowMetrics.windowInsets
+                val insets = windowInsets.getInsetsIgnoringVisibility(
+                    android.view.WindowInsets.Type.statusBars() or
+                        android.view.WindowInsets.Type.displayCutout()
+                )
+                safeTop = maxOf(safeTop, insets.top)
+                windowInsets.displayCutout?.safeInsetTop?.let {
+                    safeTop = maxOf(safeTop, it)
+                }
+            } catch (_: Exception) {}
+        }
+
+        // 2. Android 10+ (API 29+): Display.getCutout yedek kontrolü
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                @Suppress("DEPRECATION")
+                wm.defaultDisplay?.cutout?.safeInsetTop?.let {
+                    safeTop = maxOf(safeTop, it)
+                }
+            } catch (_: Exception) {}
+        }
+
+        // 3. Klasik Android status_bar_height sistem kaynağı
+        try {
+            val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
+            if (resourceId > 0) {
+                safeTop = maxOf(safeTop, context.resources.getDimensionPixelSize(resourceId))
+            }
+        } catch (_: Exception) {}
+
+        // 4. Kamera deliği olan modern ekranlar için en az 38dp taban + 10dp ferahlık payı (~48dp)
+        val minCameraCutoutHeight = dp(context, 38)
+        return maxOf(safeTop, minCameraCutoutHeight) + dp(context, 10)
+    }
+
+    /**
+     * Reels engellendiğinde veya 2. videoya kaydırıldığında
+     * ekranın üst kısmında kısa, tatlı bir hap bildirimi gösterir.
      */
     fun showBlockBanner(
         decision: PolicyDecision,
         fallbackContext: Context? = null,
-        durationMs: Long = 2400L
+        durationMs: Long = 2200L,
+        showDelayMs: Long = 0L
     ) {
-        val targetCtx = fallbackContext ?: serviceProvider()
-        val (titleText, subText, accentColor) = getBannerStringsAndColor(decision, targetCtx)
-        if (SettingsStore.punchHoleAlertEnabled.value) {
-            showPunchHolePill(titleText, subText, accentColor, fallbackContext, durationMs)
+        if (fallbackContext == null && !SettingsStore.overlayFeedbackEnabled.value) {
             return
         }
-
-        val (targetContext, windowType) = resolveOverlayContextAndType(fallbackContext) ?: return
-
-        mainHandler.post {
-            removeBannerImmediate()
-
-            try {
-                val wm = targetContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                val view = buildCustomBannerView(targetContext, titleText, subText, accentColor)
-
-                val params = WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    windowType,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                    PixelFormat.TRANSLUCENT
-                ).apply {
-                    gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                    y = if (windowType == WindowManager.LayoutParams.TYPE_APPLICATION) dp(targetContext, 24) else dp(targetContext, 56)
-                }
-
-                view.scaleX = 0.3f
-                view.scaleY = 0.3f
-                view.alpha = 0f
-
-                wm.addView(view, params)
-                bannerView = view
-                bannerWindowManager = wm
-
-                view.animate()
-                    .scaleX(1.0f)
-                    .scaleY(1.0f)
-                    .alpha(1.0f)
-                    .setDuration(220L)
-                    .setInterpolator(android.view.animation.OvershootInterpolator(1.2f))
-                    .start()
-
-                val dismissTask = Runnable {
-                    view.animate()
-                        .scaleX(0.3f)
-                        .scaleY(0.3f)
-                        .alpha(0f)
-                        .setDuration(180L)
-                        .withEndAction { removeBannerImmediate() }
-                        .start()
-                }
-                bannerDismissRunnable = dismissTask
-                mainHandler.postDelayed(dismissTask, durationMs)
-            } catch (e: Exception) {
-                Log.w(TAG, "Engelleme bilgi kartı gösterilemedi: ${e.message}")
-            }
-        }
+        val targetCtx = fallbackContext ?: serviceProvider()
+        val (titleText, subText, accentColor) = getBannerStringsAndColor(decision, targetCtx)
+        showPunchHolePill(titleText, subText, accentColor, fallbackContext, durationMs, showDelayMs)
     }
 
     /**
-     * Kota eşiğine yaklaşıldığında (örn. %80'e ulaşıldığında veya son 1 video kaldığında)
-     * ekranın üstünde dokunmayı engellemeyen nazik bir uyarı kartı gösterir.
+     * Kota eşiğine yaklaşıldığında ekranın üstünde dokunmayı engellemeyen kısa bir uyarı hapı gösterir.
      */
     fun showQuotaWarningBanner(
         title: String,
-        message: String,
+        message: String? = null,
         fallbackContext: Context? = null,
-        durationMs: Long = 2800L
+        durationMs: Long = 2400L
     ) {
-        if (SettingsStore.punchHoleAlertEnabled.value) {
-            showPunchHolePill(title, message, Color.parseColor("#D4973B"), fallbackContext, durationMs)
-            return
-        }
-
-        val (targetContext, windowType) = resolveOverlayContextAndType(fallbackContext) ?: return
-
-        mainHandler.post {
-            removeBannerImmediate()
-
-            try {
-                val wm = targetContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                val view = buildCustomBannerView(targetContext, title, message, Color.parseColor("#D4973B"))
-
-                val params = WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    windowType,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                    PixelFormat.TRANSLUCENT
-                ).apply {
-                    gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                    y = dp(targetContext, 64)
-                }
-
-                wm.addView(view, params)
-                bannerView = view
-                bannerWindowManager = wm
-
-                val dismissTask = Runnable { removeBannerImmediate() }
-                bannerDismissRunnable = dismissTask
-                mainHandler.postDelayed(dismissTask, durationMs)
-            } catch (e: Exception) {
-                Log.w(TAG, "Kota uyarı kartı gösterilemedi: ${e.message}")
-            }
-        }
+        if (!SettingsStore.overlayFeedbackEnabled.value && fallbackContext == null) return
+        showPunchHolePill(title, message, Color.parseColor("#D4973B"), fallbackContext, durationMs)
     }
 
     private fun removeBannerImmediate() {
+        pendingBannerShowRunnable?.let { mainHandler.removeCallbacks(it) }
+        pendingBannerShowRunnable = null
         bannerDismissRunnable?.let { mainHandler.removeCallbacks(it) }
         bannerDismissRunnable = null
+        isBannerDismissing = false
+
+        val anim = bannerAnimator
+        bannerAnimator = null
+        if (anim != null) {
+            try {
+                anim.removeAllListeners()
+                anim.cancel()
+            } catch (_: Exception) {}
+        }
 
         val view = bannerView
         val wm = bannerWindowManager
+        val parentGroup = bannerParentGroup
         bannerView = null
+        bannerPillView = null
+        bannerTitleView = null
         bannerWindowManager = null
+        bannerParentGroup = null
 
-        if (view != null && wm != null) {
-            try {
-                wm.removeView(view)
-            } catch (_: Exception) {
+        if (view != null) {
+            if (wm != null) {
+                try {
+                    wm.removeViewImmediate(view)
+                } catch (_: Exception) {
+                    try { wm.removeView(view) } catch (_: Exception) {}
+                }
+            }
+            if (parentGroup != null) {
+                try {
+                    parentGroup.removeView(view)
+                } catch (_: Exception) {}
             }
         }
     }
@@ -545,21 +737,23 @@ class OverlayController(
         mainHandler.post { removeBannerImmediate() }
     }
 
+    private fun findActivity(context: Context?): android.app.Activity? {
+        var ctx = context
+        while (ctx is android.content.ContextWrapper) {
+            if (ctx is android.app.Activity) return ctx
+            ctx = ctx.baseContext
+        }
+        return null
+    }
+
     private fun resolveOverlayContextAndType(fallbackContext: Context?): Pair<Context, Int>? {
         val service = serviceProvider()
         if (service != null) {
             return service to WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
         }
-        var ctx = fallbackContext
-        while (ctx is android.content.ContextWrapper) {
-            if (ctx is android.app.Activity) break
-            ctx = ctx.baseContext
-        }
-        if (ctx is android.app.Activity && !ctx.isFinishing && !ctx.isDestroyed) {
-            return ctx to WindowManager.LayoutParams.TYPE_APPLICATION
-        }
-        if (fallbackContext != null && Settings.canDrawOverlays(fallbackContext)) {
-            return fallbackContext.applicationContext to WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        val act = findActivity(fallbackContext)
+        if (act != null && !act.isFinishing && !act.isDestroyed) {
+            return act to WindowManager.LayoutParams.TYPE_APPLICATION
         }
         return null
     }
@@ -573,9 +767,17 @@ class OverlayController(
         onApproved: () -> Unit,
         onCancel: () -> Unit
     ): View {
+        val isEnglish = SettingsStore.appLanguage.value == AppLanguage.EN
         val root = BackInterceptingFrameLayout(context, onCancel).apply {
             setBackgroundColor(Color.parseColor("#E6000000"))
             setPadding(dp(context, 20), dp(context, 24), dp(context, 20), dp(context, 24))
+            addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {}
+                override fun onViewDetachedFromWindow(v: View) {
+                    holdTickRunnable?.let { mainHandler.removeCallbacks(it) }
+                    holdTickRunnable = null
+                }
+            })
         }
 
         val cardBg = if (isNightMode) COLOR_DARK_SURFACE else COLOR_LIGHT_SURFACE
@@ -601,7 +803,7 @@ class OverlayController(
         }
 
         val badge = TextView(context).apply {
-            text = "FARKINDALIK KAPISI · DM REEL"
+            text = if (isEnglish) "MINDFUL GATEWAY · DM REEL" else "FARKINDALIK KAPISI · DM REEL"
             setTextColor(Color.parseColor(badgeText))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             typeface = getSansBold(context)
@@ -617,7 +819,7 @@ class OverlayController(
         ))
 
         val title = TextView(context).apply {
-            text = "Nefes Al. Otomatik Pilotta mısın?"
+            text = if (isEnglish) "Take a Breath. On Autopilot?" else "Nefes Al. Otomatik Pilotta mısın?"
             setTextColor(Color.parseColor(titleColor))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
             typeface = getSerifBold(context)
@@ -626,12 +828,10 @@ class OverlayController(
         }
         card.addView(title)
 
-        val subtitleText = buildString {
-            append("Bu Reel bir DM sohbetinden açıldı.")
-            if (!reelSummary.isNullOrBlank() && reelSummary != "belirsiz") {
-                append(" ($reelSummary)")
-            }
-            append("\n\nGerçekten izlemek istiyorsan aşağıdaki butona 5 saniye basılı tut. Yalnızca bu videoya izin verilir; 2. videoya kaydırırsan otomatik olarak sohbete dönülür.")
+        val subtitleText = if (isEnglish) {
+            "This Reel was opened from a DM conversation.\n\nIf you truly want to watch it, hold the button below for 5 seconds. Only this single video is allowed; swiping to the 2nd video will return to chat."
+        } else {
+            "Bu Reel bir DM sohbetinden açıldı.\n\nGerçekten izlemek istiyorsan aşağıdaki butona 5 saniye basılı tut. Yalnızca bu videoya izin verilir; 2. videoya kaydırırsan otomatik olarak sohbete dönülür."
         }
 
         val subtitle = TextView(context).apply {
@@ -645,7 +845,6 @@ class OverlayController(
         }
         card.addView(subtitle)
 
-        // İlerleme çubuğu (5 saniye dolumu)
         val progressBar = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 1000
             progress = 0
@@ -670,9 +869,8 @@ class OverlayController(
             bottomMargin = dp(context, 16)
         })
 
-        // 5 Saniye Basılı Tut Butonu
         val holdButton = Button(context).apply {
-            text = "İzlemek İçin 5 Saniye Basılı Tut"
+            text = if (isEnglish) "Hold 5 Seconds to Watch" else "İzlemek İçin 5 Saniye Basılı Tut"
             isAllCaps = false
             setTextColor(Color.parseColor(secondaryBtnText))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
@@ -705,7 +903,11 @@ class OverlayController(
                             progressBar.progress = (ratio * 1000).toInt()
 
                             val remainingSec = ((holdDurationMs - elapsed).coerceAtLeast(0L)) / 1000f
-                            holdButton.text = String.format("Basılı Tutuluyor... %.1f sn", remainingSec)
+                            holdButton.text = if (isEnglish) {
+                                String.format("Holding... %.1f s", remainingSec)
+                            } else {
+                                String.format("Basılı Tutuluyor... %.1f sn", remainingSec)
+                            }
 
                             if (elapsed >= holdDurationMs) {
                                 isHolding = false
@@ -727,7 +929,7 @@ class OverlayController(
                         holdTickRunnable?.let { mainHandler.removeCallbacks(it) }
                         holdTickRunnable = null
                         progressBar.progress = 0
-                        holdButton.text = "Yarıda Bırakıldı · 5 Sn Basılı Tut"
+                        holdButton.text = if (isEnglish) "Released Early · Hold 5s" else "Yarıda Bırakıldı · 5 Sn Basılı Tut"
                         (holdButton.background as? GradientDrawable)?.setColor(Color.parseColor(secondaryBtnBg))
                         holdButton.setTextColor(Color.parseColor(secondaryBtnText))
                     }
@@ -745,9 +947,8 @@ class OverlayController(
             bottomMargin = dp(context, 12)
         })
 
-        // Vazgeç ve Sohbete Dön Butonu (Ana çıkış aksiyonu)
         val cancelButton = Button(context).apply {
-            text = "Vazgeç ve Sohbete Dön"
+            text = if (isEnglish) "Cancel & Return to Chat" else "Vazgeç ve Sohbete Dön"
             isAllCaps = false
             setTextColor(primaryBtnText)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
@@ -780,31 +981,39 @@ class OverlayController(
     @SuppressLint("SetTextI18n")
     private fun buildMindfulGatewayView(
         context: Context,
-        barrierType: MindfulBarrierType = MindfulBarrierType.BREATH_AND_INTENT,
-        isNightMode: Boolean,
         isEnglish: Boolean,
+        decision: PolicyDecision? = null,
+        originLabel: String? = null,
         onApproved: (durationMinutes: Int, microPlan: String) -> Unit,
         onCancel: () -> Unit
     ): View {
-        val strings = AppStrings.get(if (isEnglish) AppLanguage.EN else AppLanguage.TR)
+        val isDark = SettingsStore.isDarkThemeActiveNow(context)
 
-        val cardBg = if (isNightMode) COLOR_DARK_SURFACE else COLOR_LIGHT_SURFACE
-        val cardBorder = if (isNightMode) COLOR_DARK_BORDER else COLOR_LIGHT_BORDER
-        val titleColor = if (isNightMode) COLOR_DARK_TEXT else COLOR_LIGHT_TEXT
-        val textColor = if (isNightMode) COLOR_DARK_MUTED else COLOR_LIGHT_MUTED
-        val badgeBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
-        val badgeText = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
-        val primaryBtnBg = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
-        val primaryBtnText = if (isNightMode) Color.parseColor(COLOR_DARK_SURFACE) else Color.WHITE
-        val breathingCircleBg = if (isNightMode) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
-        val breathingCircleStroke = if (isNightMode) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+        val cardBg = if (isDark) COLOR_DARK_SURFACE else COLOR_LIGHT_SURFACE
+        val cardBorder = if (isDark) COLOR_DARK_BORDER else COLOR_LIGHT_BORDER
+        val titleColor = if (isDark) COLOR_DARK_TEXT else COLOR_LIGHT_TEXT
+        val textColor = if (isDark) COLOR_DARK_MUTED else COLOR_LIGHT_MUTED
+        val badgeBg = if (isDark) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
+        val badgeText = if (isDark) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+        val primaryBtnBg = if (isDark) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+        val primaryBtnText = if (isDark) Color.parseColor(COLOR_DARK_SURFACE) else Color.WHITE
+        val breathingCircleBg = if (isDark) COLOR_DARK_ACCENT else COLOR_LIGHT_ACCENT
+        val breathingCircleStroke = if (isDark) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY
+
+        val snoozeCountToday = SettingsStore.snoozeCountToday.value
+        val isBedtime = SettingsStore.isBedtimeActiveNow()
+        val canApprove = GatewaySpec.canApproveSnooze(isBedtime, snoozeCountToday)
+        val remainingSnoozes = GatewaySpec.remainingDailySnoozes(snoozeCountToday)
 
         var countdownRunnable: Runnable? = null
+        var breathPhaseRunnable: Runnable? = null
         var breathAnim: ValueAnimator? = null
 
         fun cleanupAnim() {
             countdownRunnable?.let { mainHandler.removeCallbacks(it) }
             countdownRunnable = null
+            breathPhaseRunnable?.let { mainHandler.removeCallbacks(it) }
+            breathPhaseRunnable = null
             breathAnim?.cancel()
             breathAnim = null
         }
@@ -815,6 +1024,15 @@ class OverlayController(
         }.apply {
             setBackgroundColor(Color.parseColor("#E60A0F0D"))
             setPadding(dp(context, 20), dp(context, 24), dp(context, 20), dp(context, 24))
+            contentDescription = if (isEnglish) "Mindful Gateway Pause" else "Farkındalık Kapısı Duraklaması"
+            addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    v.announceForAccessibility(contentDescription)
+                }
+                override fun onViewDetachedFromWindow(v: View) {
+                    cleanupAnim()
+                }
+            })
         }
 
         val scroll = ScrollView(context).apply {
@@ -829,16 +1047,12 @@ class OverlayController(
                 cornerRadius = dp(context, 24).toFloat()
                 setStroke(dp(context, 1), Color.parseColor(cardBorder))
             }
-            setPadding(dp(context, 24), dp(context, 28), dp(context, 24), dp(context, 24))
+            setPadding(dp(context, 24), dp(context, 24), dp(context, 24), dp(context, 22))
         }
 
-        // 1. Rozet (Badge)
+        // 1. Bağlamsal Rozet (4.3-4)
         val badge = TextView(context).apply {
-            text = if (isNightMode) {
-                if (isEnglish) "🌙 NIGHT REST MODE" else "🌙 GECE DİNLENME MODU"
-            } else {
-                if (isEnglish) "🌿 MINDFUL PAUSE" else "🌿 FARKINDALIK KAPISI"
-            }
+            text = GatewaySpec.contextualBadgeText(decision, originLabel, isEnglish)
             setTextColor(Color.parseColor(badgeText))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             typeface = getSansBold(context)
@@ -855,46 +1069,35 @@ class OverlayController(
 
         // 2. Başlık (Title)
         val titleView = TextView(context).apply {
-            text = if (isNightMode) {
-                if (isEnglish) "Time to Rest" else "Gece Dinlenme Zamanı"
-            } else {
-                if (isEnglish) "Take a Deep Breath" else "Derin Bir Nefes Al"
-            }
+            text = if (isEnglish) "Take a Deep Breath" else "Derin Bir Nefes Al"
             setTextColor(Color.parseColor(titleColor))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
             typeface = getSerifBold(context)
             gravity = Gravity.CENTER
-            setPadding(0, dp(context, 16), 0, dp(context, 8))
+            setPadding(0, dp(context, 14), 0, dp(context, 6))
         }
         card.addView(titleView)
 
         // 3. Açıklama (Subtitle)
         val subtitleView = TextView(context).apply {
-            text = if (isNightMode) {
-                if (isEnglish)
-                    "Late-night screens disrupt deep sleep. Give your mind permission to recharge."
-                else
-                    "Gece ekran ışığı derin uyku ritmini bozar. Zihnine dinlenmesi için alan açmak ister misin?"
-            } else {
-                if (isEnglish)
-                    "Notice the automatic scrolling reflex. Give yourself a moment to choose consciously."
-                else
-                    "Otomatik kaydırma refleksini fark et. Bilinçli bir seçim yapmak için kendine bir an tanı."
-            }
+            text = if (isEnglish)
+                "Notice the automatic scrolling reflex. Give yourself a moment to choose consciously."
+            else
+                "Otomatik kaydırma refleksini fark et. Bilinçli bir seçim yapmak için kendine bir an tanı."
             setTextColor(Color.parseColor(textColor))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
             typeface = getSansRegular(context)
             gravity = Gravity.CENTER
             setLineSpacing(dp(context, 3).toFloat(), 1.0f)
-            setPadding(0, 0, 0, dp(context, 20))
+            setPadding(0, 0, 0, dp(context, 16))
         }
         card.addView(subtitleView)
 
-        // 4. Nefes Çemberi Animasyonu
+        // 4. Nefes Çemberi Animasyonu + Nefes Ritmi Metni (4.3-5)
         val circleContainer = FrameLayout(context).apply {
-            setPadding(0, dp(context, 4), 0, dp(context, 24))
+            setPadding(0, dp(context, 4), 0, dp(context, 6))
         }
-        val circleSize = dp(context, 80)
+        val circleSize = dp(context, 74)
         val circleView = View(context).apply {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
@@ -902,7 +1105,7 @@ class OverlayController(
                 setStroke(dp(context, 3), Color.parseColor(breathingCircleStroke))
             }
         }
-        val innerCircleSize = dp(context, 40)
+        val innerCircleSize = dp(context, 36)
         val innerCircleView = View(context).apply {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
@@ -913,20 +1116,44 @@ class OverlayController(
         circleContainer.addView(innerCircleView, FrameLayout.LayoutParams(innerCircleSize, innerCircleSize, Gravity.CENTER))
         card.addView(circleContainer)
 
-        breathAnim = ValueAnimator.ofFloat(0.75f, 1.15f).apply {
-            duration = 2200L
-            repeatMode = ValueAnimator.REVERSE
-            repeatCount = ValueAnimator.INFINITE
-            interpolator = AccelerateDecelerateInterpolator()
-            addUpdateListener { anim ->
-                val scale = anim.animatedValue as Float
-                circleView.scaleX = scale
-                circleView.scaleY = scale
+        var isInhale = true
+        val breathPhaseLabel = TextView(context).apply {
+            text = GatewaySpec.breathingPhaseText(isInhale, isEnglish)
+            setTextColor(Color.parseColor(badgeText))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            typeface = getSansBold(context)
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, dp(context, 12))
+        }
+        card.addView(breathPhaseLabel)
+
+        val phaseTask = object : Runnable {
+            override fun run() {
+                isInhale = !isInhale
+                breathPhaseLabel.text = GatewaySpec.breathingPhaseText(isInhale, isEnglish)
+                mainHandler.postDelayed(this, 2200L)
             }
-            start()
+        }
+        breathPhaseRunnable = phaseTask
+        mainHandler.postDelayed(phaseTask, 2200L)
+
+        val animatorsEnabled = try { ValueAnimator.areAnimatorsEnabled() } catch (_: Throwable) { true }
+        if (animatorsEnabled) {
+            breathAnim = ValueAnimator.ofFloat(0.75f, 1.15f).apply {
+                duration = 2200L
+                repeatMode = ValueAnimator.REVERSE
+                repeatCount = ValueAnimator.INFINITE
+                interpolator = AccelerateDecelerateInterpolator()
+                addUpdateListener { anim ->
+                    val scale = anim.animatedValue as Float
+                    circleView.scaleX = scale
+                    circleView.scaleY = scale
+                }
+                start()
+            }
         }
 
-        // 5. Birincil Buton: "Vazgeç ve Geri Dön" (Normal, belirgin buton)
+        // 5. Birincil Buton: "Vazgeç ve Geri Dön"
         val btnCancel = Button(context).apply {
             text = if (isEnglish) "Put Phone Down & Return" else "Vazgeç ve Geri Dön"
             isAllCaps = false
@@ -948,61 +1175,129 @@ class OverlayController(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply {
-            topMargin = dp(context, 4)
-            bottomMargin = dp(context, 12)
+            topMargin = dp(context, 8)
+            bottomMargin = dp(context, 14)
         })
 
-        // 6. İkincil Eylem: "5 dakika izin ver"
-        // (10 saniye kilitli, buton değil düz metin gibi, kendini belli etmeyen)
-        var remainingSeconds = 10
-        val continueText = TextView(context).apply {
-            text = if (isEnglish) "Allow 5 minutes (${remainingSeconds}s)" else "5 dakika izin ver (${remainingSeconds}s)"
-            setTextColor(Color.parseColor(textColor).let {
-                Color.argb(160, Color.red(it), Color.green(it), Color.blue(it))
-            })
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            typeface = getSansRegular(context)
-            gravity = Gravity.CENTER
-            setPadding(dp(context, 16), dp(context, 10), dp(context, 16), dp(context, 10))
-            isClickable = false
-            isEnabled = false
-        }
+        // 6. İkincil Eylem: Bedtime / Günlük Sınır Kontrolü + Süre Seçimi & 3 Hak Sayacı
+        val lockReason = GatewaySpec.lockReasonText(isBedtime, snoozeCountToday, isEnglish)
+        if (!canApprove || lockReason != null) {
+            val lockView = TextView(context).apply {
+                text = lockReason ?: ""
+                setTextColor(Color.parseColor(textColor))
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+                typeface = getSansRegular(context)
+                gravity = Gravity.CENTER
+                setPadding(dp(context, 8), dp(context, 6), dp(context, 8), dp(context, 4))
+            }
+            card.addView(lockView)
+        } else {
+            var selectedDuration = GatewaySpec.DEFAULT_DURATION_MINUTES
+            var remainingSeconds = GatewaySpec.computeInitialWaitSeconds(snoozeCountToday)
 
-        val runnable = object : Runnable {
-            override fun run() {
-                remainingSeconds--
-                if (remainingSeconds > 0) {
-                    continueText.text = if (isEnglish)
-                        "Allow 5 minutes (${remainingSeconds}s)"
-                    else
-                        "5 dakika izin ver (${remainingSeconds}s)"
-                    mainHandler.postDelayed(this, 1000L)
-                } else {
-                    continueText.text = if (isEnglish) "Allow 5 minutes" else "5 dakika izin ver"
-                    continueText.isEnabled = true
-                    continueText.isClickable = true
-                    continueText.setTextColor(Color.parseColor(primaryBtnBg))
-                    continueText.paintFlags = continueText.paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
+            lateinit var continueText: TextView
+
+            fun updateContinueLabel() {
+                continueText.text = GatewaySpec.allowActionText(
+                    durationMinutes = selectedDuration,
+                    remainingSeconds = remainingSeconds,
+                    remainingSnoozes = remainingSnoozes,
+                    isEnglish = isEnglish
+                )
+            }
+
+            // Süre seçimi satırı (3 / 5 / 10 dk)
+            val durationRow = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER
+            }
+            val durationChipViews = mutableListOf<Pair<Int, TextView>>()
+            fun refreshDurationChips() {
+                durationChipViews.forEach { (mins, tv) ->
+                    val selected = mins == selectedDuration
+                    tv.background = GradientDrawable().apply {
+                        setColor(if (selected) Color.parseColor(badgeBg) else Color.TRANSPARENT)
+                        cornerRadius = dp(context, 12).toFloat()
+                        setStroke(dp(context, 1), Color.parseColor(if (selected) primaryBtnBg else cardBorder))
+                    }
+                    tv.setTextColor(Color.parseColor(if (selected) badgeText else textColor))
+                    tv.typeface = if (selected) getSansBold(context) else getSansRegular(context)
                 }
             }
-        }
-        countdownRunnable = runnable
-        mainHandler.postDelayed(runnable, 1000L)
-
-        continueText.setOnClickListener {
-            if (remainingSeconds <= 0) {
-                cleanupAnim()
-                onApproved(5, if (isEnglish) "Mindful Pause" else "Bilinçli Mola")
+            GatewaySpec.DURATION_OPTIONS.forEach { mins ->
+                val chip = TextView(context).apply {
+                    text = if (isEnglish) "$mins min" else "$mins dk"
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                    setPadding(dp(context, 12), dp(context, 6), dp(context, 12), dp(context, 6))
+                    setOnClickListener {
+                        selectedDuration = mins
+                        refreshDurationChips()
+                        updateContinueLabel()
+                    }
+                }
+                durationChipViews.add(mins to chip)
+                durationRow.addView(chip, LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    marginStart = dp(context, 4)
+                    marginEnd = dp(context, 4)
+                })
             }
-        }
+            refreshDurationChips()
+            card.addView(durationRow, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = dp(context, 8)
+            })
 
-        card.addView(continueText, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = Gravity.CENTER_HORIZONTAL
-            bottomMargin = dp(context, 4)
-        })
+            continueText = TextView(context).apply {
+                setTextColor(Color.parseColor(textColor).let {
+                    Color.argb(160, Color.red(it), Color.green(it), Color.blue(it))
+                })
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                typeface = getSansRegular(context)
+                gravity = Gravity.CENTER
+                setPadding(dp(context, 16), dp(context, 8), dp(context, 16), dp(context, 8))
+                isClickable = false
+                isEnabled = false
+            }
+            updateContinueLabel()
+
+            val runnable = object : Runnable {
+                override fun run() {
+                    remainingSeconds--
+                    if (remainingSeconds > 0) {
+                        updateContinueLabel()
+                        mainHandler.postDelayed(this, 1000L)
+                    } else {
+                        updateContinueLabel()
+                        continueText.isEnabled = true
+                        continueText.isClickable = true
+                        continueText.setTextColor(Color.parseColor(primaryBtnBg))
+                        continueText.paintFlags = continueText.paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
+                    }
+                }
+            }
+            countdownRunnable = runnable
+            mainHandler.postDelayed(runnable, 1000L)
+
+            continueText.setOnClickListener {
+                if (remainingSeconds <= 0) {
+                    cleanupAnim()
+                    onApproved(selectedDuration, "")
+                }
+            }
+
+            card.addView(continueText, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                bottomMargin = dp(context, 4)
+            })
+        }
 
         scroll.addView(card)
         root.addView(scroll, FrameLayout.LayoutParams(
@@ -1014,69 +1309,141 @@ class OverlayController(
         return root
     }
 
+    data class NotificationVariant(val tr: String, val en: String)
+
+    private val swipeVariants = listOf(
+        NotificationVariant("Bir tane yeter 🌿", "One is enough 🌿"),
+        NotificationVariant("Odağın sende kalsın ✨", "Keep your focus ✨"),
+        NotificationVariant("Burada durabilirsin 🍃", "You can stop right here 🍃"),
+        NotificationVariant("Geri dönmeye ne dersin? 🌿", "How about heading back? 🌿"),
+        NotificationVariant("Döngüyü kırdın 🌱", "Loop broken 🌱"),
+        NotificationVariant("Derin bir nefes al 🌬️", "Take a deep breath 🌬️"),
+        NotificationVariant("Farkındalık kazandı 🌿", "Mindfulness won 🌿"),
+        NotificationVariant("Küçük bir mola yetti ☕", "A short pause was enough ☕"),
+        NotificationVariant("Gerçek dünya seni bekliyor 🌤️", "The real world awaits 🌤️"),
+        NotificationVariant("Ana dönme vakti 🌿", "Time to return to the present 🌿"),
+        NotificationVariant("Zamanın sana kalsın ✨", "Keep your time for yourself ✨"),
+        NotificationVariant("Otopilot durduruldu 🛑", "Autopilot stopped 🛑"),
+        NotificationVariant("Kendine alan açtın 🍃", "You made space for yourself 🍃"),
+        NotificationVariant("Bugünlük bu video yetti 🌿", "That reel was enough 🌿"),
+        NotificationVariant("Akıştan çıkma cesareti 🌱", "Courage to step out 🌱")
+    )
+
+    private val timeoutVariants = listOf(
+        NotificationVariant("Bu kadar mola yeter 🍃", "That's enough for now 🍃"),
+        NotificationVariant("Zaman doldu, odağa devam 🌱", "Time's up, back to focus 🌱"),
+        NotificationVariant("Mola tamamlandı 🌿", "Break completed 🌿"),
+        NotificationVariant("Küçük bir mola iyi geldi ✨", "A nice little reset ✨"),
+        NotificationVariant("Şimdi odaklanma zamanı 🎯", "Time to get focused 🎯"),
+        NotificationVariant("Nefes aldın, şimdi devam 🌬️", "Recharged, time to continue 🌬️")
+    )
+
+    private val bedtimeVariants = listOf(
+        NotificationVariant("İyi geceler, dinlen 🌙", "Rest well tonight 🌙"),
+        NotificationVariant("Yarın yeni bir gün 🌟", "Tomorrow is a new day 🌟"),
+        NotificationVariant("Gözlerini dinlendirme vakti 😴", "Time to rest your eyes 😴"),
+        NotificationVariant("Huzurlu bir uyku çek 🌙", "Sleep peacefully 🌙"),
+        NotificationVariant("Gece odağı devrede 🌌", "Night focus active 🌌")
+    )
+
+    private val quotaVariants = listOf(
+        NotificationVariant("Bugünlük bu kadar ✨", "All done for today ✨"),
+        NotificationVariant("Günlük hedefini korudun 🌿", "You protected today's goal 🌿"),
+        NotificationVariant("Harika bir sınır çizdin 🌱", "Great boundary set today 🌱"),
+        NotificationVariant("Bugünkü kotan doldu 🎯", "Daily quota met 🎯"),
+        NotificationVariant("Kendine verdiğin sözü tuttun 🍃", "You kept your promise 🍃")
+    )
+
+    private val defaultVariants = listOf(
+        NotificationVariant("Odağın sende 🌿", "Focus stays yours 🌿"),
+        NotificationVariant("Döngüyü kırdın 🌱", "Loop broken 🌱"),
+        NotificationVariant("Farkındalıkla devam et 🍃", "Move forward mindfully 🍃")
+    )
+
+    private var lastSelectedSwipeIndex: Int = -1
+    private var lastSelectedTimeoutIndex: Int = -1
+    private var lastSelectedBedtimeIndex: Int = -1
+    private var lastSelectedQuotaIndex: Int = -1
+    private var lastSelectedDefaultIndex: Int = -1
+
+    private fun pickRandomVariant(
+        list: List<NotificationVariant>,
+        lastIndex: Int,
+        onIndexSelected: (Int) -> Unit
+    ): NotificationVariant {
+        if (list.isEmpty()) return NotificationVariant("Bir tane yeter 🌿", "One is enough 🌿")
+        if (list.size == 1) return list[0]
+        var newIndex = java.util.concurrent.ThreadLocalRandom.current().nextInt(list.size)
+        if (newIndex == lastIndex) {
+            newIndex = (newIndex + 1 + java.util.concurrent.ThreadLocalRandom.current().nextInt(list.size - 1)) % list.size
+        }
+        onIndexSelected(newIndex)
+        return list[newIndex]
+    }
+
     fun getBannerStringsAndColor(
         decision: PolicyDecision,
         context: Context? = null
-    ): Triple<String, String, Int> {
+    ): Triple<String, String?, Int> {
         val isEnglish = SettingsStore.appLanguage.value == AppLanguage.EN
         val isDark = context?.let { SettingsStore.isDarkThemeActiveNow(it) } ?: false
         val calmSage = Color.parseColor(if (isDark) COLOR_DARK_PRIMARY else COLOR_LIGHT_PRIMARY)
 
-        return when (decision) {
-            PolicyDecision.BLOCK_AFTER_SWIPE -> Triple(
-                if (isEnglish) "Single Reel Limit Reached" else "Tek Reel İznin Bitti",
-                if (isEnglish) "Scrolled to 2nd video" else "2. videoya kaydırıldı",
-                calmSage
-            )
-            PolicyDecision.BLOCK_AFTER_TIMEOUT -> Triple(
-                if (isEnglish) "Time Limit Reached" else "Süre Sınırı Doldu",
-                if (isEnglish) "Single Reel timeout reached" else "Tek Reel süresi aşıldı",
-                calmSage
-            )
-            PolicyDecision.BLOCK_BEDTIME -> Triple(
-                if (isEnglish) "Bedtime Focus Active" else "Gece Odak Saati",
-                if (isEnglish) "Bedtime lock active" else "Uyku vakti kilidi devrede",
-                Color.parseColor(if (isDark) "#9FA8DA" else "#5C6BC0")
-            )
-            PolicyDecision.BLOCK_DAILY_COUNT_LIMIT -> Triple(
-                if (isEnglish) "Daily Reel Limit Reached" else "Reel Kotan Doldu",
-                if (isEnglish) "Daily limit reached" else "Günlük limitine ulaştın",
-                calmSage
-            )
-            PolicyDecision.BLOCK_DAILY_TIME_LIMIT -> Triple(
-                if (isEnglish) "Daily Time Limit Reached" else "Günlük Süren Doldu",
-                if (isEnglish) "Daily Reels target completed" else "Reels hedef süren tamamlandı",
-                calmSage
-            )
-            else -> Triple(
-                if (isEnglish) "Reels Blocked" else "Reels Engellendi",
-                if (isEnglish) "Your focus was protected" else "Odağın korundu",
-                calmSage
-            )
+        val variant = when (decision) {
+            PolicyDecision.BLOCK_AFTER_SWIPE -> pickRandomVariant(swipeVariants, lastSelectedSwipeIndex) {
+                lastSelectedSwipeIndex = it
+            }
+            PolicyDecision.BLOCK_AFTER_TIMEOUT -> pickRandomVariant(timeoutVariants, lastSelectedTimeoutIndex) {
+                lastSelectedTimeoutIndex = it
+            }
+            PolicyDecision.BLOCK_BEDTIME -> pickRandomVariant(bedtimeVariants, lastSelectedBedtimeIndex) {
+                lastSelectedBedtimeIndex = it
+            }
+            PolicyDecision.BLOCK_DAILY_COUNT_LIMIT,
+            PolicyDecision.BLOCK_DAILY_TIME_LIMIT -> pickRandomVariant(quotaVariants, lastSelectedQuotaIndex) {
+                lastSelectedQuotaIndex = it
+            }
+            else -> pickRandomVariant(defaultVariants, lastSelectedDefaultIndex) {
+                lastSelectedDefaultIndex = it
+            }
         }
+
+        val titleText = if (isEnglish) variant.en else variant.tr
+        val accentColor = if (decision == PolicyDecision.BLOCK_BEDTIME) {
+            Color.parseColor(if (isDark) "#9FA8DA" else "#5C6BC0")
+        } else {
+            calmSage
+        }
+
+        return Triple(titleText, null, accentColor)
     }
 
-    private fun buildPunchHolePillView(
+    private fun buildPunchHolePillWrapper(
         context: Context,
-        title: String,
-        subtitle: String?,
-        accentColor: Int
-    ): View {
+        text: String,
+        accentColor: Int,
+        padHorizontal: Int,
+        padTop: Int,
+        padBottom: Int
+    ): Triple<FrameLayout, View, TextView> {
         val isDark = SettingsStore.isDarkThemeActiveNow(context)
 
-        val bgColor = if (isDark) Color.parseColor("#F5111512") else Color.parseColor("#FDFEFC")
-        val borderColor = if (isDark) Color.parseColor("#2C3A2F") else Color.parseColor("#DCE4DC")
-        val titleColor = if (isDark) Color.parseColor("#F0F4ED") else Color.parseColor("#1E2B22")
-        val subtitleColor = if (isDark) Color.parseColor("#9CAD9F") else Color.parseColor("#637265")
-        val dividerColor = if (isDark) Color.parseColor("#2E3D31") else Color.parseColor("#D4DDD4")
+        val bgColor = if (isDark) Color.parseColor("#FA111613") else Color.parseColor("#FAFCFCFA")
+        val borderColor = if (isDark) Color.parseColor("#324436") else Color.parseColor("#D6E0D7")
+        val titleColor = if (isDark) Color.parseColor("#F0F4ED") else Color.parseColor("#1B2820")
         val haloColor = Color.argb(
-            if (isDark) 50 else 38,
+            if (isDark) 58 else 44,
             Color.red(accentColor),
             Color.green(accentColor),
             Color.blue(accentColor)
         )
 
-        return LinearLayout(context).apply {
+        val screenWidth = context.resources.displayMetrics.widthPixels
+        val maxTextWidth = (screenWidth - dp(context, 96)).coerceAtLeast(dp(context, 160))
+
+        lateinit var titleTextView: TextView
+
+        val pillView = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             background = GradientDrawable().apply {
@@ -1087,9 +1454,9 @@ class OverlayController(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 elevation = dp(context, 6).toFloat()
             }
-            setPadding(dp(context, 10), dp(context, 7), dp(context, 15), dp(context, 7))
+            setPadding(dp(context, 14), dp(context, 9), dp(context, 16), dp(context, 9))
 
-            // Glowing dual-layer indicator dot
+            // Parlayan çift katmanlı nokta göstergesi
             val dotContainer = FrameLayout(context).apply {
                 addView(View(context).apply {
                     background = GradientDrawable().apply {
@@ -1111,47 +1478,34 @@ class OverlayController(
                 gravity = Gravity.CENTER_VERTICAL
             })
 
-            val titleView = TextView(context).apply {
-                text = title
+            titleTextView = TextView(context).apply {
+                this.text = text
                 setTextColor(titleColor)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
                 typeface = getSansBold(context)
                 includeFontPadding = false
+                maxLines = 1
+                maxWidth = maxTextWidth
+                ellipsize = android.text.TextUtils.TruncateAt.END
             }
-            addView(titleView)
-
-            if (!subtitle.isNullOrBlank()) {
-                val separator = View(context).apply {
-                    background = GradientDrawable().apply {
-                        shape = GradientDrawable.OVAL
-                        setColor(dividerColor)
-                    }
-                }
-                addView(separator, LinearLayout.LayoutParams(dp(context, 3), dp(context, 3)).apply {
-                    marginStart = dp(context, 8)
-                    marginEnd = dp(context, 8)
-                    gravity = Gravity.CENTER_VERTICAL
-                })
-
-                val subtitleView = TextView(context).apply {
-                    text = subtitle
-                    setTextColor(subtitleColor)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-                    typeface = getSansRegular(context)
-                    includeFontPadding = false
-                }
-                addView(subtitleView)
-            }
+            addView(titleTextView)
         }
-    }
 
-    private fun buildCustomBannerView(
-        context: Context,
-        titleText: String,
-        subText: String,
-        accentColor: Int
-    ): View {
-        return buildPunchHolePillView(context, titleText, subText, accentColor)
+        val outerContainer = FrameLayout(context).apply {
+            clipChildren = false
+            clipToPadding = false
+            setPadding(padHorizontal, padTop, padHorizontal, padBottom)
+            addView(
+                pillView,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    Gravity.CENTER
+                )
+            )
+        }
+
+        return Triple(outerContainer, pillView, titleTextView)
     }
 
     private fun dp(context: Context, value: Int): Int {

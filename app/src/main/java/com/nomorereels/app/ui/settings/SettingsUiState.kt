@@ -1,7 +1,6 @@
 package com.nomorereels.app.ui.settings
 
 import com.nomorereels.app.billing.DonationItem
-import com.nomorereels.app.data.MindfulBarrierType
 import com.nomorereels.app.ui.theme.NmrLanguage
 import com.nomorereels.app.ui.theme.NmrThemeMode
 
@@ -10,10 +9,8 @@ import com.nomorereels.app.ui.theme.NmrThemeMode
  */
 data class SettingsUiState(
     val language: NmrLanguage = NmrLanguage.TR,
-    val themeMode: NmrThemeMode = NmrThemeMode.AMOLED,
+    val themeMode: NmrThemeMode = NmrThemeMode.LIGHT,
     val mindfulGatewayEnabled: Boolean = true,
-    val mindfulBarrierType: MindfulBarrierType = MindfulBarrierType.BREATH_AND_INTENT,
-    val nightCompassionEnabled: Boolean = true,
     val overlayFeedbackEnabled: Boolean = true,
     val hapticFeedbackEnabled: Boolean = true,
     val bedtimeEnabled: Boolean = false,

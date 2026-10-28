@@ -28,8 +28,9 @@ data class ReelContentFingerprint(
 
     /**
      * İki parmak izinin farklı bir Reel videosuna ait olup olmadığını döner.
-     * İlk yükleme anında bazı alanların (örn. caption) 100-200ms geç yüklenmesi
-     * yanlış pozitif üretmesin diye yalnızca her iki tarafta da dolu olan alanlar karşılaştırılır.
+     * İlk yükleme anında bazı alanların (örn. caption) 100-200ms geç yüklenmesi veya
+     * kullanıcının aynı videoda "...devamı" (more) diyerek altyazıyı genişletmesi
+     * yanlış pozitif kaydırma üretmez.
      */
     fun isDifferentReelFrom(other: ReelContentFingerprint): Boolean {
         if (!author.isNullOrBlank() && !other.author.isNullOrBlank() &&
@@ -43,7 +44,8 @@ data class ReelContentFingerprint(
             return true
         }
         if (!caption.isNullOrBlank() && !other.caption.isNullOrBlank() &&
-            caption != other.caption
+            caption != other.caption &&
+            !isCaptionExpansionOrCollapse(caption, other.caption)
         ) {
             return true
         }
@@ -51,13 +53,19 @@ data class ReelContentFingerprint(
     }
 
     /**
-     * Aynı Reel yüklenirken sonradan gelen eksik alanları (örn. geç yüklenen caption) tamamlar.
+     * Aynı Reel yüklenirken sonradan gelen eksik alanları veya genişletilen altyazıyı tamamlar.
      */
     fun mergeWith(newer: ReelContentFingerprint): ReelContentFingerprint {
+        val mergedCaption = when {
+            caption.isNullOrBlank() -> newer.caption?.takeIf { it.isNotBlank() }
+            newer.caption.isNullOrBlank() -> caption
+            newer.caption.length > caption.length -> newer.caption
+            else -> caption
+        }
         return ReelContentFingerprint(
             author = author?.takeIf { it.isNotBlank() } ?: newer.author?.takeIf { it.isNotBlank() },
             mediaDesc = mediaDesc?.takeIf { it.isNotBlank() } ?: newer.mediaDesc?.takeIf { it.isNotBlank() },
-            caption = caption?.takeIf { it.isNotBlank() } ?: newer.caption?.takeIf { it.isNotBlank() }
+            caption = mergedCaption
         )
     }
 
@@ -67,6 +75,53 @@ data class ReelContentFingerprint(
         if (!caption.isNullOrBlank()) parts.add("\"${caption.take(20)}\"")
         else if (!mediaDesc.isNullOrBlank()) parts.add("\"${mediaDesc.take(24)}\"")
         return if (parts.isEmpty()) "belirsiz" else parts.joinToString(" ")
+    }
+
+    companion object {
+        private val TRAILING_MORE_SUFFIXES = listOf(
+            "devamı", "daha fazla", "daha az", "more", "less", "see more",
+            "mehr", "plus", "más", "altro", "mais"
+        )
+
+        private fun normalizeCaptionRoot(raw: String): String {
+            var s = raw.trim()
+            for (suffix in TRAILING_MORE_SUFFIXES) {
+                if (s.endsWith(suffix, ignoreCase = true)) {
+                    s = s.dropLast(suffix.length).trimEnd()
+                }
+            }
+            s = s.trimEnd('.', '…', ' ', '\n', '\t')
+            for (suffix in TRAILING_MORE_SUFFIXES) {
+                if (s.endsWith(suffix, ignoreCase = true)) {
+                    s = s.dropLast(suffix.length).trimEnd('.', '…', ' ', '\n', '\t')
+                }
+            }
+            return s
+        }
+
+        /**
+         * Kullanıcının aynı Reel üzerinde altyazıya tıklayarak "...devamı" (more) ile
+         * metni açması veya kapatması durumunu tespit eder.
+         */
+        fun isCaptionExpansionOrCollapse(a: String, b: String): Boolean {
+            if (a.equals(b, ignoreCase = true)) return true
+            val normA = normalizeCaptionRoot(a)
+            val normB = normalizeCaptionRoot(b)
+            if (normA.isEmpty() || normB.isEmpty()) return true
+            if (normA.equals(normB, ignoreCase = true)) return true
+
+            val shorter = if (normA.length <= normB.length) normA else normB
+            val longer = if (normA.length <= normB.length) normB else normA
+
+            if (shorter.length >= 6 && longer.startsWith(shorter, ignoreCase = true)) {
+                return true
+            }
+            val safePrefix = if (shorter.length > 12) shorter.dropLast(3).trimEnd() else shorter
+            if (safePrefix.length >= 6 && longer.startsWith(safePrefix, ignoreCase = true)) {
+                return true
+            }
+            return false
+        }
     }
 }
 
@@ -203,10 +258,12 @@ class ScreenClassifier(
             id.contains("clips_caption_component", ignoreCase = true)
         }.firstOrNull()
 
-        val captionDesc = captionContainer
-            ?.find { !it.contentDescription.isNullOrBlank() }
+        val captionNode = captionContainer
+            ?.find { !it.contentDescription.isNullOrBlank() || !it.text.isNullOrBlank() }
             ?.firstOrNull()
-            ?.contentDescription
+
+        val captionDesc = (captionNode?.contentDescription?.takeIf { it.isNotBlank() }
+            ?: captionNode?.text?.takeIf { it.isNotBlank() })
             ?.trim()
 
         return ReelContentFingerprint(

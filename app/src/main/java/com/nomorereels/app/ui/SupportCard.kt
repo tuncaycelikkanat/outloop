@@ -187,48 +187,36 @@ fun SupportBottomSheet(
                 lineHeight = 22.sp
             )
 
-            // 4'lü Bahşiş Seçenekleri (2x2 Grid Düzeni)
+            // Destek Seçenekleri
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                val row1 = donationItems.take(2)
-                val row2 = donationItems.drop(2).take(2)
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    row1.forEach { item ->
-                        TipButton(
-                            item = item,
-                            isEnglish = isEnglish,
-                            onClick = { onTipClick(item.productId) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    row2.forEach { item ->
-                        TipButton(
-                            item = item,
-                            isEnglish = isEnglish,
-                            onClick = { onTipClick(item.productId) },
-                            modifier = Modifier.weight(1f)
-                        )
+                donationItems.chunked(2).forEach { rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        rowItems.forEach { item ->
+                            TipButton(
+                                item = item,
+                                isEnglish = isEnglish,
+                                onClick = { onTipClick(item.productId) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        if (rowItems.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }
 
-            // Alt Güvenlik & Bilgilendirme Notu
+            // Alt Güvenlik & Bilgilendirme Notu (%100 Çevrimdışı Güvencesi)
             Text(
                 text = if (isEnglish)
-                    "🔒 Google Play Secured • One-time contribution (No subscription)"
+                    "🔒 100% Offline & Secure • Opens in external browser • No internet permission required"
                 else
-                    "🔒 Google Play Güvencesiyle • Tek seferlik bahşiş (Abonelik değildir)",
+                    "🔒 %100 Çevrimdışı & Güvenli • Harici tarayıcıda açılır • Uygulama internet izni istemez",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier
@@ -486,38 +474,26 @@ fun SupportProjectCard(
                 lineHeight = 20.sp
             )
 
-            // 4'lü Bahşiş Seçenekleri (2x2 Grid Düzeni)
+            // Destek Seçenekleri
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                val row1 = donationItems.take(2)
-                val row2 = donationItems.drop(2).take(2)
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    row1.forEach { item ->
-                        TipButton(
-                            item = item,
-                            isEnglish = isEnglish,
-                            onClick = { onTipClick(item.productId) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    row2.forEach { item ->
-                        TipButton(
-                            item = item,
-                            isEnglish = isEnglish,
-                            onClick = { onTipClick(item.productId) },
-                            modifier = Modifier.weight(1f)
-                        )
+                donationItems.chunked(2).forEach { rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        rowItems.forEach { item ->
+                            TipButton(
+                                item = item,
+                                isEnglish = isEnglish,
+                                onClick = { onTipClick(item.productId) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        if (rowItems.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }
@@ -546,25 +522,42 @@ private fun TipButton(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = item.iconEmoji,
-                fontSize = 24.sp
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = item.iconEmoji,
+                    fontSize = 20.sp
+                )
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                ) {
+                    Text(
+                        text = item.localizedBadge(isEnglish),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = item.localizedTitle(isEnglish),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = item.formattedPrice(isEnglish),
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.primary,
+                text = item.localizedSubtitle(isEnglish),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
                 textAlign = TextAlign.Center
             )
         }

@@ -64,6 +64,8 @@ object ServiceHealthMonitor {
             return
         } catch (_: Exception) {}
 
+        val isTr = com.nomorereels.app.data.SettingsStore.appLanguage.value == com.nomorereels.app.data.AppLanguage.TR
+
         // 2. Uygulama Detayları Sayfası (Pil ayarının doğrudan seçilebildiği yerel Android ekranı)
         try {
             val appDetailsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -73,7 +75,8 @@ object ServiceHealthMonitor {
             context.startActivity(appDetailsIntent)
             android.widget.Toast.makeText(
                 context,
-                "Pil ayarlarından 'Kısıtlanmamış' (Optimize Edilmemiş) seçin.",
+                if (isTr) "Pil ayarlarından 'Kısıtlanmamış' (Optimize Edilmemiş) seçin."
+                else "Select 'Unrestricted' (Not optimized) in Battery settings.",
                 android.widget.Toast.LENGTH_LONG
             ).show()
             return
@@ -87,11 +90,16 @@ object ServiceHealthMonitor {
             context.startActivity(fallbackIntent)
             android.widget.Toast.makeText(
                 context,
-                "Outloop'u bulup 'Optimize Etme' seçeneğini işaretleyin.",
+                if (isTr) "Outloop'u bulup 'Optimize Etme' seçeneğini işaretleyin."
+                else "Find Outloop and select 'Don't optimize'.",
                 android.widget.Toast.LENGTH_LONG
             ).show()
         } catch (_: Exception) {
-            android.widget.Toast.makeText(context, "Pil ayarları açılamadı.", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(
+                context,
+                if (isTr) "Pil ayarları açılamadı." else "Could not open battery settings.",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
         }
     }
 }

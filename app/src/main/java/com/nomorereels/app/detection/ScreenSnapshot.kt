@@ -52,7 +52,8 @@ data class ScreenSnapshot(
 
     companion object {
         private const val MAX_TREE_DEPTH = 22
-        private const val MAX_TOTAL_NODES = 250
+        private const val MAX_TOTAL_NODES = 450
+        private const val HARD_MAX_NODES = 650
 
         fun fromNodeInfo(
             packageName: String,
@@ -78,14 +79,16 @@ data class ScreenSnapshot(
             val children = ArrayList<NodeSnapshot>(childCount)
 
             // Derinlik sınırı ve toplam düğüm kotası kontrolü:
-            // Instagram ekranındaki tüm yapısal bileşenler (sekmeler, Reels oynatıcı, ızgara vb.)
-            // ilk 22 katman ve 250 düğüm içerisindedir. Yorumlar gibi devasa alt listelerin taranması
-            // engellenerek Binder IPC yükü ve bellek tahsisi en aza indirilir.
-            val shouldTraverseChildren = depth < MAX_TREE_DEPTH && nodeCounter[0] < MAX_TOTAL_NODES
+            // Üst seviye kapsayıcılar (depth <= 5) ve sekme çubuğu (tab_bar / feed_tab / clips_tab)
+            // yoğun ekranlarda bile asla budanmaz; böylece ekranın altındaki sekme çubuğu her zaman yakalanır.
+            val canTraverseNormal = depth < MAX_TREE_DEPTH && nodeCounter[0] < MAX_TOTAL_NODES
+            val canTraverseShallowOrTab = depth <= 5 && nodeCounter[0] < HARD_MAX_NODES
 
-            if (shouldTraverseChildren) {
+            if (canTraverseNormal || canTraverseShallowOrTab) {
                 for (i in 0 until childCount) {
-                    if (nodeCounter[0] >= MAX_TOTAL_NODES) break
+                    if (nodeCounter[0] >= HARD_MAX_NODES) break
+                    if (nodeCounter[0] >= MAX_TOTAL_NODES && depth > 5) break
+
                     val child = node.getChild(i)
                     if (child != null) {
                         try {
@@ -104,31 +107,49 @@ data class ScreenSnapshot(
                 }
             }
 
+            val viewId = node.viewIdResourceName
+            val rawText = node.text?.toString()
+            val safeText = when {
+                rawText.isNullOrBlank() -> null
+                isStructuralText(rawText) -> rawText
+                isFingerprintNodeId(viewId) -> rawText.take(160)
+                else -> null
+            }
+
             return NodeSnapshot(
-                viewId = node.viewIdResourceName,
+                viewId = viewId,
                 className = node.className?.toString(),
                 contentDescription = node.contentDescription?.toString(),
-                // Sadece yapısal tespit için kullanılacak, kişisel metinler okunmaz/saklanmaz
-                text = if (isStructuralText(node.text?.toString())) node.text?.toString() else null,
+                // Sadece yapısal tespit veya Reel kimlik parmak izi için kullanılır; özel mesajlar asla okunmaz
+                text = safeText,
                 isSelected = node.isSelected,
                 isClickable = node.isClickable,
                 children = children
             )
         }
 
+        private fun isFingerprintNodeId(viewId: String?): Boolean {
+            if (viewId.isNullOrBlank()) return false
+            return viewId.contains("clips_author_username", ignoreCase = true) ||
+                viewId.contains("clips_caption", ignoreCase = true) ||
+                viewId.contains("clips_viewer_action_bar_title", ignoreCase = true) ||
+                viewId.contains("reel_viewer_title", ignoreCase = true)
+        }
+
         private val STRUCTURAL_WORDS = setOf(
-            "reels", "reel", "akış", "feed", "ana sayfa", "home",
-            "keşfet", "explore", "ara", "search", "ara ve keşfet",
-            "profil", "profile", "gönderiler", "posts", "profili düzenle", "edit profile",
-            "mesajlar", "messages", "sohbetler", "chats", "sohbet", "chat",
+            "reels", "reel", "akış", "feed", "ana sayfa", "home", "accueil", "inicio", "startseite",
+            "keşfet", "explore", "ara", "search", "ara ve keşfet", "suche", "rechercher", "buscar", "explorar",
+            "profil", "profile", "perfil", "gönderiler", "posts", "beiträge", "publications", "publicaciones",
+            "profili düzenle", "edit profile", "profil bearbeiten", "modifier le profil", "editar perfil",
+            "mesajlar", "messages", "nachrichten", "mensajes", "sohbetler", "chats", "sohbet", "chat",
             "birincil", "primary", "genel", "general", "istekler", "requests",
-            "mesaj gönder", "send message", "mesaj yaz"
+            "mesaj gönder", "send message", "mesaj yaz", "friends", "arkadaşlar"
         )
 
         private fun isStructuralText(text: String?): Boolean {
             if (text.isNullOrBlank()) return false
             val lower = text.trim().lowercase()
-            return STRUCTURAL_WORDS.any { lower == it || lower.startsWith(it) }
+            return lower in STRUCTURAL_WORDS
         }
     }
 }

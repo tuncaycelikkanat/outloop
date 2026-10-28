@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nomorereels.app.data.QuotaStore
 import com.nomorereels.app.policy.DmReelMode
-import com.nomorereels.app.ui.MindfulQuotes
 import com.nomorereels.app.ui.i18n.EnglishStrings
 import com.nomorereels.app.ui.i18n.LocalAppStrings
 import com.nomorereels.app.ui.theme.NmrTheme
@@ -102,8 +101,7 @@ fun InsightsScreenContent(
 
     val isQuotaModeActive = generalMode == DmReelMode.COUNT_QUOTA || generalMode == DmReelMode.TIME_QUOTA
 
-    val savedSeconds = blockCount * 45L
-    val savedMinutes = savedSeconds / 60
+    val savedMinutes = uiState.todaySavedMinutes
 
     // Haftalık kazanım verisi (HeatmapStore gerçek matris verisiyle)
     val dayNames = if (isEnglish) {
@@ -146,9 +144,6 @@ fun InsightsScreenContent(
 
     val totalAttempts = remember(matrix) { matrix.sum() }
     val maxCellAttempts = remember(matrix) { matrix.maxOrNull()?.coerceAtLeast(1) ?: 1 }
-
-    // Günün sözü (Günde bir kez sabit kalır, değiştirme yapılmaz)
-    val quoteOfTheDay = remember { MindfulQuotes.getQuoteForDay() }
 
     LazyColumn(
         modifier = modifier
@@ -447,6 +442,38 @@ fun InsightsScreenContent(
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isEnglish)
+                                "7d saved: ~${uiState.weeklySavedMinutes}m · 30d: ~${uiState.monthlySavedMinutes}m"
+                            else
+                                "7G kazanım: ~${uiState.weeklySavedMinutes} dk · 30G: ~${uiState.monthlySavedMinutes} dk",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (uiState.totalGatewayDismissCount > 0 || uiState.todayGatewayDismissCount > 0) {
+                            Text(
+                                text = if (isEnglish)
+                                    "Gateway turns: ${uiState.todayGatewayDismissCount} today (${uiState.totalGatewayDismissCount} total)"
+                                else
+                                    "Kapıdan dönüş: bugün ${uiState.todayGatewayDismissCount} (toplam ${uiState.totalGatewayDismissCount})",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 }
@@ -782,62 +809,9 @@ fun InsightsScreenContent(
             }
         }
 
-        // 5. GÜNÜN SÖZÜ & DESTEK KARTI
-        item {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
-                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
-                color = NmrTheme.colors.mistBlue.copy(alpha = 0.35f),
-                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
-                tonalElevation = 0.dp
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(text = "🌿", fontSize = 18.sp)
-                            Text(
-                                text = strings.quoteOfTheDayTitle,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 1.1.sp
-                                ),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = "“${quoteOfTheDay.localized(isEnglish)}”",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Medium,
-                            fontStyle = FontStyle.Italic,
-                            lineHeight = 22.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "— ${quoteOfTheDay.author}",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
-                        ),
-                        modifier = Modifier.align(Alignment.End)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (!isSupporter) {
+        // 5. DESTEK KARTI
+        if (!isSupporter) {
+            item {
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),

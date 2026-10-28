@@ -4,8 +4,8 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Pure AMOLED Black Background -->
+    <!-- Calm Light Sage Ivory Background -->
     <path
-        android:fillColor="#0A0A0A"
+        android:fillColor="#F8FAF6"
         android:pathData="M0,0h108v108h-108z" />
 </vector>

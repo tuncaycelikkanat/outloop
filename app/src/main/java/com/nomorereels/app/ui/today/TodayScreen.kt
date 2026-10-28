@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Pause
@@ -35,18 +34,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nomorereels.app.policy.DmReelMode
-import com.nomorereels.app.ui.MindfulActivities
-import com.nomorereels.app.ui.TimeBracket
+import com.nomorereels.app.ui.MindfulQuotes
+import com.nomorereels.app.ui.PracticalSuggestions
 import com.nomorereels.app.ui.i18n.LocalAppStrings
 import com.nomorereels.app.ui.theme.NmrTheme
 import com.nomorereels.app.ui.theme.StatusGreen
@@ -450,6 +451,55 @@ fun TodayScreenContent(
             }
         }
 
+        // Instagram Güncellemesi / Tespit Sağlığı Uyarısı (30+ dk IG kullanımında 0 tespit varsa)
+        item {
+            val isDetectionWarning by com.nomorereels.app.data.LocalDiagnosticsStore
+                .isDetectionHealthWarningActive.collectAsStateWithLifecycle()
+            if (isDetectionWarning && isServiceActive) {
+                val ctx = LocalContext.current
+                val isEng = strings is com.nomorereels.app.ui.i18n.EnglishStrings
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = StatusOrange.copy(alpha = 0.12f),
+                    border = BorderStroke(1.dp, StatusOrange.copy(alpha = 0.35f)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            com.nomorereels.app.data.LocalDiagnosticsStore.shareDiagnosticReport(ctx)
+                        }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = null,
+                            tint = StatusOrange,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (isEng) "Instagram UI Update Detected?" else "Instagram Güncellemesi Uyarısı",
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = if (isEng)
+                                    "No Reels were detected during extended Instagram usage. Tap to share a local diagnostic log."
+                                else
+                                    "Uzun süreli Instagram kullanımında hiç Reels tespit edilmedi. Tanılama günlüğünü paylaşmak için dokunun.",
+                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         // 4. KURTARILAN ZAMANLA NELER MÜMKÜN? (Detaylandırılmış İnsan Odaklı Anlam Kartı)
         item {
             val isEnglish = strings is com.nomorereels.app.ui.i18n.EnglishStrings
@@ -459,6 +509,63 @@ fun TodayScreenContent(
                 blockCount = blockCount,
                 isEnglish = isEnglish
             )
+        }
+
+        // 5. GÜNÜN SÖZÜ
+        item {
+            val isEnglish = strings is com.nomorereels.app.ui.i18n.EnglishStrings
+            val quoteOfTheDay = remember { MindfulQuotes.getQuoteForDay() }
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(NmrTheme.dimens.cardRadius)),
+                shape = RoundedCornerShape(NmrTheme.dimens.cardRadius),
+                color = NmrTheme.colors.mistBlue.copy(alpha = 0.35f),
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
+                tonalElevation = 0.dp
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(text = "🌿", fontSize = 18.sp)
+                            Text(
+                                text = strings.quoteOfTheDayTitle,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 1.1.sp
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "“${quoteOfTheDay.localized(isEnglish)}”",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontStyle = FontStyle.Italic,
+                            lineHeight = 22.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "— ${quoteOfTheDay.author}",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
+            }
         }
 
         item {
@@ -474,33 +581,14 @@ fun KurtarilanZamanCard(
     blockCount: Int,
     isEnglish: Boolean
 ) {
-    val earnedBracket = remember(savedMinutes) {
-        TimeBracket.forMinutes(savedMinutes)
-    }
-
-    val currentActivity = remember(earnedBracket, savedMinutes) {
-        MindfulActivities.getActivityForToday(earnedBracket, savedMinutes)
-    }
-
     val headerTitle = when {
-        savedMinutes >= 1 -> if (isEnglish) "With your $savedMinutes min focus today:" else "Bugün kazandığın $savedMinutes dakika ile:"
-        savedSeconds > 0 -> if (isEnglish) "With your $savedSeconds s pause today:" else "Bugün kazandığın $savedSeconds saniye ile:"
+        savedMinutes >= 1 -> if (isEnglish) "With your ~$savedMinutes min focus today:" else "Bugün kazandığın ~$savedMinutes dakika ile:"
+        savedSeconds > 0 -> if (isEnglish) "With your ~$savedSeconds s pause today:" else "Bugün kazandığın ~$savedSeconds saniye ile:"
         else -> if (isEnglish) "What saved time gives you:" else "Reels yerine kendine alan açtığında:"
     }
 
-    val headerSubtitle = when {
-        savedMinutes >= 1 -> if (isEnglish)
-            "Reclaimed from endless scrolling, ready to enrich your real life:"
-        else
-            "Dopamin döngüsünden kurtardığın anları gerçek hayatta bunlara dönüştürebilirsin:"
-        savedSeconds > 0 -> if (isEnglish)
-            "A moment of pause to breathe and ground yourself:"
-        else
-            "Otomatik kaydırmayı durdurup derin bir nefes aldığın her an odaklanmanı güçlendirir:"
-        else -> if (isEnglish)
-            "Every short video you skip becomes room for mindful living:"
-        else
-            "Atladığın her kısa video, zihnine dinlenme ve odaklanma alanı açar:"
+    val suggestionText = remember(savedMinutes, savedSeconds, isEnglish) {
+        PracticalSuggestions.forTimeSingle(savedMinutes, savedSeconds, isEnglish)
     }
 
     Surface(
@@ -519,44 +607,16 @@ fun KurtarilanZamanCard(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
-                text = headerSubtitle,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 12.sp,
-                    lineHeight = 17.sp
+                text = suggestionText,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 13.5.sp,
+                    lineHeight = 20.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = currentActivity.localizedTitle(isEnglish),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.5.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = currentActivity.localizedDesc(isEnglish),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.5.sp,
-                            lineHeight = 18.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
         }
     }
 }

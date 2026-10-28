@@ -8,6 +8,7 @@ plugins {
 
 android {
     namespace = "com.nomorereels.app"
+    // Not: Yerel SDK'da android-35 kurulu; Play Console API 36 geçişinde android-36 SDK paketi kurularak 36'ya yükseltilebilir (Edge-to-Edge zaten aktif).
     compileSdk = 35
 
     defaultConfig {
@@ -59,16 +60,18 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
     }
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -88,7 +91,6 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("com.android.billingclient:billing-ktx:7.1.1")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")

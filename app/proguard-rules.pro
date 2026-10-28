@@ -12,18 +12,18 @@
     *;
 }
 
-# 2. Google Play Billing Client
--keep class com.android.billingclient.api.** { *; }
--dontwarn com.android.billingclient.api.**
-
-# 3. DataStore & Serialization Models
+# 2. DataStore & Serialization Models
 -keepclassmembers class * {
     @androidx.annotation.Keep <fields>;
     @androidx.annotation.Keep <methods>;
 }
--keep class com.nomorereels.app.detection.DynamicRules { *; }
+-keep public class com.nomorereels.app.OutloopApplication {
+    public <init>();
+    *;
+}
+-keep class com.nomorereels.app.detection.RuleSet { *; }
 -keep class com.nomorereels.app.detection.ScreenRule { *; }
--keep class com.nomorereels.app.data.** { *; }
+-keep class com.nomorereels.app.detection.ActionTargetsRule { *; }
 
 # 4. Strip Debug & Verbose Logging from Release Builds
 # Release derlemesinde Log.d ve Log.v çağrılarını bayt kodundan tamamen siler

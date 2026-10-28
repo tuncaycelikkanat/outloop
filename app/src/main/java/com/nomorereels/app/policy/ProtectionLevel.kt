@@ -69,6 +69,24 @@ enum class ProtectionLevel(
         reelsTabMode = DmReelMode.BLOCK_ALL
     );
 
+    fun localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
+        STRICT -> "Block All"
+        SINGLE_REEL -> "Just One Reel"
+        COUNT_QUOTA -> "Count Quota"
+        TIME_QUOTA -> "Time Quota"
+        BALANCED -> "Balanced"
+        MINDFUL -> "Mindful Friction (5s Hold)"
+    }
+
+    fun localizedSubtitle(isEnglish: Boolean): String = if (!isEnglish) subtitle else when (this) {
+        STRICT -> "Reels is completely locked across all regions (Reels tab, DM, Explore). Zero videos."
+        SINGLE_REEL -> "First video opened from DM or Reels tab is allowed; exits immediately on swipe to 2nd video."
+        COUNT_QUOTA -> "Allowed up to your daily count (e.g. 10 Reels); locks once reached."
+        TIME_QUOTA -> "Allowed up to your daily time (e.g. 15 min); locks once expired."
+        BALANCED -> "Single video allowed from DM and Explore (swipe-protected), direct Reels tab locked."
+        MINDFUL -> "Requires a 5s hold confirmation for DM and Explore videos; feed and Reels tab locked."
+    }
+
     fun matches(
         dm: DmReelMode,
         explore: DmReelMode,

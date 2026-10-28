@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Outloop</string>
     <string name="accessibility_service_name">Outloop Hizmeti</string>
-    <string name="accessibility_service_description">Instagram Reels akışını algılayıp otomatik geri dönerek veya engelleyerek dikkatinizi korur. Bu hizmet hiçbir metin, mesaj veya kişisel veri okumaz ve internete iletmez.</string>
+    <string name="accessibility_service_description">Instagram Reels ekranını ve video geçişlerini algılayıp otomatik geri dönerek veya Farkındalık Kapısı\'nı açarak dikkatinizi korur. Arayüz yapısı yalnızca cihaz belleğinde anlık olarak kontrol edilir; hiçbir mesaj, kişisel veri veya içerik kaydedilmez ve internete iletilmez.</string>
 </resources>
