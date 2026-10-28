@@ -31,6 +31,24 @@ object ServiceHealthMonitor {
      * Sistem ayarlarında servisin açık olup olmadığını doğrular.
      */
     fun isAccessibilityPermissionGranted(context: Context): Boolean {
+        try {
+            val enabledServices = Settings.Secure.getString(
+                context.contentResolver,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            )
+            if (!enabledServices.isNullOrEmpty()) {
+                val myPackage = context.packageName
+                val colonSplit = android.text.TextUtils.SimpleStringSplitter(':')
+                colonSplit.setString(enabledServices)
+                while (colonSplit.hasNext()) {
+                    val componentName = colonSplit.next()
+                    if (componentName.startsWith("$myPackage/") || componentName.contains(myPackage)) {
+                        return true
+                    }
+                }
+            }
+        } catch (_: Exception) {}
+
         val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager ?: return false
         val enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
         val myPackage = context.packageName

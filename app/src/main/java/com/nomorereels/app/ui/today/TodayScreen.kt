@@ -59,13 +59,15 @@ fun TodayScreen(
     viewModel: TodayViewModel,
     onNavigateToProtection: () -> Unit,
     onStartSnoozeClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isServiceActiveOverride: Boolean? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isEffectiveActive = isServiceActiveOverride ?: uiState.isServiceActive
     val context = LocalContext.current
 
     TodayScreenContent(
-        uiState = uiState,
+        uiState = uiState.copy(isServiceActive = isEffectiveActive),
         onProtectionMasterToggle = { viewModel.toggleProtectionMaster(it) },
         onOpenAccessibilitySettings = {
             context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))

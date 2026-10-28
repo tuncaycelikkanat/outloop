@@ -142,9 +142,11 @@ class TodayViewModel(
             isProtectionEnabled = masterEnabled
         )
 
+        val effectiveServiceActive = isServiceActive || com.nomorereels.app.service.ServiceHealthMonitor.isAccessibilityPermissionGranted(getApplication())
+
         TodayUiState(
             todayDateFormatted = formattedDate,
-            isServiceActive = isServiceActive,
+            isServiceActive = effectiveServiceActive,
             protectionMasterEnabled = masterEnabled,
             generalMode = generalMode,
             blockCount = totalBlockCount,

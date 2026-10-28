@@ -165,7 +165,23 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
     val currentTab = NmrBottomTab.entries.firstOrNull { it.name == currentTabName } ?: NmrBottomTab.BUGUN
 
     val appLanguage by SettingsStore.appLanguage.collectAsState()
-    val isServiceActive by ReelsAccessibilityService.isServiceActive.collectAsState()
+    val isServiceBound by ReelsAccessibilityService.isServiceActive.collectAsState()
+    var isPermissionGranted by remember {
+        mutableStateOf(com.nomorereels.app.service.ServiceHealthMonitor.isAccessibilityPermissionGranted(context))
+    }
+    DisposableEffect(Unit) {
+        val lifecycleObserver = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                isPermissionGranted = com.nomorereels.app.service.ServiceHealthMonitor.isAccessibilityPermissionGranted(context)
+            }
+        }
+        val lifecycle = (context as? androidx.lifecycle.LifecycleOwner)?.lifecycle
+        lifecycle?.addObserver(lifecycleObserver)
+        onDispose {
+            lifecycle?.removeObserver(lifecycleObserver)
+        }
+    }
+    val isServiceActive = isServiceBound || isPermissionGranted
     val currentStrings = AppStrings.get(appLanguage)
     val isEnglish = (appLanguage == AppLanguage.EN)
 
@@ -317,6 +333,7 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
                                         NmrBottomTab.BUGUN -> {
                                             TodayScreen(
                                                 viewModel = todayViewModel,
+                                                isServiceActiveOverride = isServiceActive,
                                                 onNavigateToProtection = { currentTabName = NmrBottomTab.KORUMA.name },
                                                 onStartSnoozeClick = { showSnoozeDialog = true }
                                             )

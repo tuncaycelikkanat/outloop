@@ -40,3 +40,7 @@ store_assets/screenshot_*.png
 store_assets/buymeacoffee_cover_*.png
 store_assets/goal_badge_*.png
 store_assets/tier_*.png
+store_assets/*.mp4
+*.mp4
+app-release.apk
+app-release.aab
