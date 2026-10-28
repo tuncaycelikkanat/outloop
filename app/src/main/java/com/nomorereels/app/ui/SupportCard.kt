@@ -162,18 +162,6 @@ fun SupportBottomSheet(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
                             )
-                            if (onResetSupporter != null) {
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = if (isEnglish) "[Reset status (Test)]" else "[Destekçiliği Sıfırla (Test)]",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.clickable { onResetSupporter() }
-                                )
-                            }
                         }
                     }
                 }
@@ -306,18 +294,6 @@ fun SupportSettingCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (isSupporter && onResetSupporter != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = if (isEnglish) "[Reset status (Test)]" else "[Destekçiliği Sıfırla (Test)]",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable { onResetSupporter() }
-                    )
-                }
             }
 
             Surface(
@@ -449,18 +425,6 @@ fun SupportProjectCard(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
                             )
-                            if (onResetSupporter != null) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = if (isEnglish) "[Reset status (Test)]" else "[Destekçiliği Sıfırla (Test)]",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
-                                        fontWeight = FontWeight.Medium
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.clickable { onResetSupporter() }
-                                )
-                            }
                         }
                     }
                 }
