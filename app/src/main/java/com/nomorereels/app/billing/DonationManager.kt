@@ -116,8 +116,8 @@ class DonationManager(private val context: Context) {
             iconEmoji = "🐙",
             titleTr = "GitHub Sponsors",
             titleEn = "GitHub Sponsors",
-            currencyBadgeTr = "%0 Kesinti",
-            currencyBadgeEn = "0% Fee",
+            currencyBadgeTr = "",
+            currencyBadgeEn = "",
             subtitleTr = "Açık kaynak destek",
             subtitleEn = "Open source backer",
             targetUrl = DonationUrls.GITHUB_SPONSORS_URL
