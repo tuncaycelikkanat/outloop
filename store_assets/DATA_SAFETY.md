@@ -22,4 +22,4 @@ Google Play Console'da "Uygulama İçeriği -> Veri Güvenliği" (Data Safety) b
 
 ### 3. Gizlilik Politikası URL'si (Privacy Policy Link)
 GitHub üzerindeki gizlilik politikası doğrudan kullanılabilir:
-`https://github.com/tuncaycelikkanat/NoMoreReels/blob/main/PRIVACY_POLICY.md` (veya kendi web siteniz).
+`https://github.com/tuncaycelikkanat/outloop/blob/main/PRIVACY_POLICY.md` (veya kendi web siteniz).
