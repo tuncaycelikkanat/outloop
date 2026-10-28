@@ -26,6 +26,8 @@ signing.properties
 warden_reports/
 WARDEN_EXECUTIVE_REPORT.md
 scratch/
+.android/
+.android-home/
 *.log
 captures/
 .navigation/
