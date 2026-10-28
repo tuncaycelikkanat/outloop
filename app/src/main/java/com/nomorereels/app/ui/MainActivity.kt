@@ -3,6 +3,7 @@ package com.nomorereels.app.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -85,6 +86,13 @@ class MainActivity : ComponentActivity() {
         QuotaStore.init(this)
         HeatmapStore.init(this)
         donationManager.startConnection()
+        com.nomorereels.app.notification.FeedbackNotificationHelper.ensureChannel(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+            }
+        }
 
         setContent {
             val appThemeMode by SettingsStore.appThemeMode.collectAsState()

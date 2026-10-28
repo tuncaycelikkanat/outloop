@@ -35,6 +35,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.nomorereels.app.R
 import com.nomorereels.app.data.AppLanguage
 import com.nomorereels.app.data.SettingsStore
+import com.nomorereels.app.notification.FeedbackNotificationHelper
 import com.nomorereels.app.policy.GatewaySpec
 import com.nomorereels.app.policy.PolicyDecision
 import com.nomorereels.app.ui.i18n.AppStrings
@@ -353,7 +354,7 @@ class OverlayController(
     }
 
     /**
-     * Bilinçli pencere süresi dolduğunda nazik ve kısa hatırlatma hapı gösterir (microPlan alt metniyle).
+     * Bilinçli pencere süresi dolduğunda nazik ve kısa hatırlatma bildirimi gösterir (microPlan alt metniyle).
      */
     fun showMindfulWindowExpired(
         microPlan: String,
@@ -361,410 +362,61 @@ class OverlayController(
         fallbackContext: Context? = null
     ) {
         if (!SettingsStore.overlayFeedbackEnabled.value && fallbackContext == null) return
+        val targetCtx = fallbackContext ?: serviceProvider() ?: return
         val title = if (isEnglish) "Break's over 🌱" else "Mola bitti, devam 🌱"
         val sub = microPlan.trim().takeIf { it.isNotEmpty() }
-        showPunchHolePill(title, sub, Color.parseColor("#274D3E"), fallbackContext, durationMs = 3000L)
+        FeedbackNotificationHelper.showFeedbackNotification(targetCtx, title, sub, durationMs = 3000L)
     }
 
-    private var bannerView: View? = null
-    private var bannerPillView: View? = null
-    private var bannerTitleView: TextView? = null
-    private var bannerAnimator: ValueAnimator? = null
-    private var bannerWindowManager: WindowManager? = null
-    private var bannerParentGroup: android.view.ViewGroup? = null
-    private var isBannerDismissing: Boolean = false
-    private var pendingBannerShowRunnable: Runnable? = null
-    private var bannerDismissRunnable: Runnable? = null
-    private var bannerWatchdog: Runnable? = null
-    private var bannerGen: Int = 0
-    private var lastBannerShownAtMs: Long = 0L
-    private var lastBannerSignature: String = ""
-
     /**
-     * Servis veya Activity sonlandırılırken / kesintiye uğrarken tüm banner kaynaklarını derhal temizler.
+     * Servis veya Activity sonlandırılırken / kesintiye uğrarken tüm bildirimleri temizler.
      */
     fun release() {
-        mainHandler.post { removeBannerImmediate() }
-    }
-
-    private fun scheduleDismiss(pill: View, gen: Int, durationMs: Long) {
-        bannerDismissRunnable?.let { mainHandler.removeCallbacks(it) }
-        bannerWatchdog?.let { mainHandler.removeCallbacks(it) }
-
-        val dismiss = Runnable {
-            if (gen == bannerGen) {
-                startExit(pill, gen)
-            }
-        }
-        bannerDismissRunnable = dismiss
-        mainHandler.postDelayed(dismiss, durationMs)
-
-        // Ne olursa olsun pencereyi kesin olarak kaldıran son çare güvenlik ağı
-        val watchdog = Runnable {
-            if (gen == bannerGen) {
-                removeBannerImmediate()
-            }
-        }
-        bannerWatchdog = watchdog
-        mainHandler.postDelayed(watchdog, durationMs + 600L)
-    }
-
-    private fun startExit(pill: View, gen: Int) {
-        isBannerDismissing = true
-        bannerAnimator?.cancel()
-        val endOffsetPx = -dp(pill.context, 8).toFloat()
-        var cancelled = false
-        val exitAnim = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 170L
-            interpolator = AccelerateDecelerateInterpolator()
-            addUpdateListener { anim ->
-                val f = anim.animatedValue as Float
-                pill.translationY = endOffsetPx * f
-                val s = 1f - 0.08f * f
-                pill.scaleX = s
-                pill.scaleY = s
-                pill.alpha = (1f - f).coerceIn(0f, 1f)
-            }
-            addListener(object : android.animation.AnimatorListenerAdapter() {
-                override fun onAnimationCancel(animation: android.animation.Animator) {
-                    cancelled = true
-                }
-                override fun onAnimationEnd(animation: android.animation.Animator) {
-                    if (!cancelled && gen == bannerGen) {
-                        removeBannerImmediate()
-                    }
-                }
-            })
-        }
-        bannerAnimator = exitAnim
-        exitAnim.start()
-    }
-
-    /**
-     * Kamera deliği (punch-hole) ve durum çubuğunun (status bar) tam altında,
-     * hiçbir zaman fiziksel kameranın altında kalmayan güvenli, kısa ve tatlı üst hap bildirimini gösterir.
-     */
-    fun showPunchHolePill(
-        title: String,
-        subtitle: String? = null,
-        accentColor: Int,
-        fallbackContext: Context? = null,
-        durationMs: Long = 2200L,
-        showDelayMs: Long = 0L
-    ): Boolean {
-        val resolved = resolveOverlayContextAndType(fallbackContext)
-        val activityFallback = findActivity(fallbackContext)
-        if (resolved == null && activityFallback == null) {
-            Log.w(TAG, "Üst hap bildirimi gösterilemedi: Aktif servis veya Activity bulunamadı.")
-            return false
-        }
-
-        pendingBannerShowRunnable?.let { mainHandler.removeCallbacks(it) }
-        val task = Runnable {
-            pendingBannerShowRunnable = null
-            val now = System.currentTimeMillis()
-            val displayText = if (!subtitle.isNullOrBlank()) "$title · $subtitle" else title
-
-            // P0: 150ms içinde gelen tamamen aynı metinli çağrıyı yok say (seri tetikleme titremesini engelle)
-            if (displayText == lastBannerSignature && (now - lastBannerShownAtMs) < 150L && bannerView != null) {
-                return@Runnable
-            }
-
-            // 1. HIZLI YOL: Halihazırda ekranda sağlıklı bir pencere varsa (ve kapanmıyorsa),
-            // pencereyi WindowManager'da yıkıp baştan kurma gecikmesini önle!
-            val existingRoot = bannerView
-            val existingPill = bannerPillView
-            if (fallbackContext == null && existingRoot != null && existingPill != null
-                && existingRoot.isAttachedToWindow && !isBannerDismissing) {
-                bannerAnimator?.cancel()
-                isBannerDismissing = false
-
-                bannerTitleView?.text = displayText
-                lastBannerSignature = displayText
-                lastBannerShownAtMs = now
-
-                // Canlı yenileme animasyonu: hafif pop (0.93 -> 1.0)
-                existingPill.scaleX = 0.93f
-                existingPill.scaleY = 0.93f
-                existingPill.alpha = 0.7f
-                existingPill.translationY = 0f
-                val refreshAnim = ValueAnimator.ofFloat(0f, 1f).apply {
-                    duration = 180L
-                    interpolator = android.view.animation.OvershootInterpolator(1.1f)
-                    addUpdateListener { anim ->
-                        val f = anim.animatedValue as Float
-                        val s = 0.93f + 0.07f * f
-                        existingPill.scaleX = s
-                        existingPill.scaleY = s
-                        existingPill.alpha = (0.7f + 0.3f * f).coerceIn(0f, 1f)
-                    }
-                }
-                bannerAnimator = refreshAnim
-                refreshAnim.start()
-
-                scheduleDismiss(existingPill, bannerGen, durationMs)
-                return@Runnable
-            }
-
-            removeBannerImmediate()
-
-            val renderContext = resolved?.first ?: activityFallback ?: return@Runnable
-            val wm = renderContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val outerPadTop = dp(renderContext, 12)
-            val outerPadBottom = dp(renderContext, 16)
-            val outerPadHorizontal = dp(renderContext, 16)
-            val safeTopPx = (computeSafeTopOffsetPx(renderContext, wm) - outerPadTop).coerceAtLeast(0)
-
-            val (outerContainer, pillView, titleTextView) = buildPunchHolePillWrapper(
-                context = renderContext,
-                text = displayText,
-                accentColor = accentColor,
-                padHorizontal = outerPadHorizontal,
-                padTop = outerPadTop,
-                padBottom = outerPadBottom
-            )
-
-            var addedToWindow = false
-
-            // 1. Öncelik: Erişilebilirlik katmanı (TYPE_ACCESSIBILITY_OVERLAY) veya Activity alt penceresi (TYPE_APPLICATION)
-            if (resolved != null) {
-                try {
-                    val params = buildBannerLayoutParams(resolved.second, safeTopPx).apply {
-                        if (resolved.second == WindowManager.LayoutParams.TYPE_APPLICATION) {
-                            activityFallback?.window?.decorView?.windowToken?.let { token = it }
-                        }
-                    }
-                    wm.addView(outerContainer, params)
-                    bannerView = outerContainer
-                    bannerPillView = pillView
-                    bannerTitleView = titleTextView
-                    bannerWindowManager = wm
-                    addedToWindow = true
-                } catch (e: Exception) {
-                    Log.w(TAG, "Birincil WindowManager üst bildirim hatası (${resolved.second}): ${e.message}")
-                }
-            }
-
-            // 2. Yedek: Uygulama içi önizleme veya servis kapalıyken Activity decorView üzerine doğrudan ekle
-            if (!addedToWindow && activityFallback != null && !activityFallback.isFinishing && !activityFallback.isDestroyed) {
-                try {
-                    val decorGroup = activityFallback.window?.decorView as? android.view.ViewGroup
-                    if (decorGroup != null) {
-                        val lp = FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.WRAP_CONTENT,
-                            FrameLayout.LayoutParams.WRAP_CONTENT,
-                            Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                        ).apply {
-                            topMargin = safeTopPx
-                        }
-                        outerContainer.isClickable = false
-                        outerContainer.isFocusable = false
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            outerContainer.elevation = dp(renderContext, 24).toFloat()
-                        }
-                        decorGroup.addView(outerContainer, lp)
-                        bannerView = outerContainer
-                        bannerPillView = pillView
-                        bannerTitleView = titleTextView
-                        bannerParentGroup = decorGroup
-                        addedToWindow = true
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Activity decorView üst bildirim ekleme hatası: ${e.message}")
-                }
-            }
-
-            if (!addedToWindow) return@Runnable
-
-            val currentGen = bannerGen
-            isBannerDismissing = false
-            lastBannerSignature = displayText
-            lastBannerShownAtMs = now
-
-            // Dismiss zamanlayıcısını ve watchdog'unu hemen kur (attach veya post gecikmesine bağlama!)
-            scheduleDismiss(pillView, currentGen, durationMs)
-
-            val startOffsetPx = -dp(renderContext, 10).toFloat()
-            pillView.translationY = startOffsetPx
-            pillView.scaleX = 0.92f
-            pillView.scaleY = 0.92f
-            pillView.alpha = 0f
-
-            outerContainer.post {
-                if (currentGen == bannerGen && bannerPillView === pillView) {
-                    val enterAnim = ValueAnimator.ofFloat(0f, 1f).apply {
-                        duration = 200L
-                        interpolator = android.view.animation.OvershootInterpolator(1.05f)
-                        addUpdateListener { anim ->
-                            val f = anim.animatedValue as Float
-                            pillView.translationY = startOffsetPx * (1f - f)
-                            val s = 0.92f + 0.08f * f
-                            pillView.scaleX = s
-                            pillView.scaleY = s
-                            pillView.alpha = f.coerceIn(0f, 1f)
-                        }
-                    }
-                    bannerAnimator = enterAnim
-                    enterAnim.start()
-                }
-            }
-        }
-
-        if (showDelayMs > 0L) {
-            pendingBannerShowRunnable = task
-            mainHandler.postDelayed(task, showDelayMs)
-        } else {
-            mainHandler.post(task)
-        }
-        return true
-    }
-
-    private fun buildBannerLayoutParams(windowType: Int, safeTopPx: Int): WindowManager.LayoutParams {
-        return WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            windowType,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-            y = safeTopPx
-            // Sistem pencere animasyonunu kapat: Instagram'ın geri geçişi sürerken WindowManager
-            // bu animasyonu erteleyip pencereyi yarı saydam bekletiyordu. Animasyonu kendimiz yapıyoruz.
-            windowAnimations = 0
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-            }
-        }
-    }
-
-    /**
-     * Cihazın ön kamera deliği (displayCutout) ve durum çubuğu (statusBars) yüksekliğini
-     * hesaplayarak bildirimin ASLA kameranın altında kalmamasını sağlayan güvenli üst boşluğu döndürür.
-     */
-    private fun computeSafeTopOffsetPx(context: Context, wm: WindowManager): Int {
-        var safeTop = 0
-
-        // 1. Android 11+ (API 30+): WindowMetrics üzerinden hem statusBar hem displayCutout yüksekliği
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                val windowInsets = wm.currentWindowMetrics.windowInsets
-                val insets = windowInsets.getInsetsIgnoringVisibility(
-                    android.view.WindowInsets.Type.statusBars() or
-                        android.view.WindowInsets.Type.displayCutout()
-                )
-                safeTop = maxOf(safeTop, insets.top)
-                windowInsets.displayCutout?.safeInsetTop?.let {
-                    safeTop = maxOf(safeTop, it)
-                }
-            } catch (_: Exception) {}
-        }
-
-        // 2. Android 10+ (API 29+): Display.getCutout yedek kontrolü
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            try {
-                @Suppress("DEPRECATION")
-                wm.defaultDisplay?.cutout?.safeInsetTop?.let {
-                    safeTop = maxOf(safeTop, it)
-                }
-            } catch (_: Exception) {}
-        }
-
-        // 3. Klasik Android status_bar_height sistem kaynağı
-        try {
-            val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
-            if (resourceId > 0) {
-                safeTop = maxOf(safeTop, context.resources.getDimensionPixelSize(resourceId))
-            }
-        } catch (_: Exception) {}
-
-        // 4. Kamera deliği olan modern ekranlar için en az 38dp taban + 10dp ferahlık payı (~48dp)
-        val minCameraCutoutHeight = dp(context, 38)
-        return maxOf(safeTop, minCameraCutoutHeight) + dp(context, 10)
+        val targetCtx = serviceProvider() ?: return
+        FeedbackNotificationHelper.cancelFeedbackNotification(targetCtx)
     }
 
     /**
      * Reels engellendiğinde veya 2. videoya kaydırıldığında
-     * ekranın üst kısmında kısa, tatlı bir hap bildirimi gösterir.
+     * ekranın üst kısmından kayan yerel Android sistem bildirimi gösterir.
      */
     fun showBlockBanner(
         decision: PolicyDecision,
         fallbackContext: Context? = null,
-        durationMs: Long = 2200L,
+        durationMs: Long = 2500L,
         showDelayMs: Long = 0L
     ) {
         if (fallbackContext == null && !SettingsStore.overlayFeedbackEnabled.value) {
             return
         }
-        val targetCtx = fallbackContext ?: serviceProvider()
-        val (titleText, subText, accentColor) = getBannerStringsAndColor(decision, targetCtx)
-        showPunchHolePill(titleText, subText, accentColor, fallbackContext, durationMs, showDelayMs)
+        val targetCtx = fallbackContext ?: serviceProvider() ?: return
+        val (titleText, subText, _) = getBannerStringsAndColor(decision, targetCtx)
+        if (showDelayMs > 0L) {
+            mainHandler.postDelayed({
+                FeedbackNotificationHelper.showFeedbackNotification(targetCtx, titleText, subText, durationMs)
+            }, showDelayMs)
+        } else {
+            FeedbackNotificationHelper.showFeedbackNotification(targetCtx, titleText, subText, durationMs)
+        }
     }
 
     /**
-     * Kota eşiğine yaklaşıldığında ekranın üstünde dokunmayı engellemeyen kısa bir uyarı hapı gösterir.
+     * Kota eşiğine yaklaşıldığında ekranın üstünde dokunmayı engellemeyen kısa bir uyarı bildirimi gösterir.
      */
     fun showQuotaWarningBanner(
         title: String,
         message: String? = null,
         fallbackContext: Context? = null,
-        durationMs: Long = 2400L
+        durationMs: Long = 2500L
     ) {
         if (!SettingsStore.overlayFeedbackEnabled.value && fallbackContext == null) return
-        showPunchHolePill(title, message, Color.parseColor("#D4973B"), fallbackContext, durationMs)
-    }
-
-    private fun removeBannerImmediate() {
-        bannerGen++ // Eski tüm bekleyen callback ve animasyonları derhal geçersiz kılar
-        pendingBannerShowRunnable?.let { mainHandler.removeCallbacks(it) }
-        pendingBannerShowRunnable = null
-        bannerDismissRunnable?.let { mainHandler.removeCallbacks(it) }
-        bannerDismissRunnable = null
-        bannerWatchdog?.let { mainHandler.removeCallbacks(it) }
-        bannerWatchdog = null
-        isBannerDismissing = false
-
-        val anim = bannerAnimator
-        bannerAnimator = null
-        if (anim != null) {
-            try {
-                anim.removeAllListeners()
-                anim.cancel()
-            } catch (_: Exception) {}
-        }
-
-        val view = bannerView
-        val wm = bannerWindowManager
-        val parentGroup = bannerParentGroup
-        bannerView = null
-        bannerPillView = null
-        bannerTitleView = null
-        bannerWindowManager = null
-        bannerParentGroup = null
-
-        if (view != null) {
-            if (wm != null) {
-                try {
-                    wm.removeViewImmediate(view)
-                } catch (e: Exception) {
-                    Log.w(TAG, "removeViewImmediate başarısız: ${e.message}")
-                    try { wm.removeView(view) } catch (_: Exception) {}
-                }
-            }
-            if (parentGroup != null) {
-                try {
-                    parentGroup.removeView(view)
-                } catch (_: Exception) {}
-            }
-        }
+        val targetCtx = fallbackContext ?: serviceProvider() ?: return
+        FeedbackNotificationHelper.showFeedbackNotification(targetCtx, title, message, durationMs)
     }
 
     fun dismissAll() {
         dismissMindfulFrictionOverlay(releaseAudioImmediately = true)
-        mainHandler.post { removeBannerImmediate() }
+        release()
     }
 
     private fun findActivity(context: Context?): android.app.Activity? {
@@ -1446,96 +1098,6 @@ class OverlayController(
         }
 
         return Triple(titleText, null, accentColor)
-    }
-
-    private fun buildPunchHolePillWrapper(
-        context: Context,
-        text: String,
-        accentColor: Int,
-        padHorizontal: Int,
-        padTop: Int,
-        padBottom: Int
-    ): Triple<FrameLayout, View, TextView> {
-        val isDark = SettingsStore.isDarkThemeActiveNow(context)
-
-        val bgColor = if (isDark) Color.parseColor("#FA111613") else Color.parseColor("#FAFCFCFA")
-        val borderColor = if (isDark) Color.parseColor("#324436") else Color.parseColor("#D6E0D7")
-        val titleColor = if (isDark) Color.parseColor("#F0F4ED") else Color.parseColor("#1B2820")
-        val haloColor = Color.argb(
-            if (isDark) 58 else 44,
-            Color.red(accentColor),
-            Color.green(accentColor),
-            Color.blue(accentColor)
-        )
-
-        val screenWidth = context.resources.displayMetrics.widthPixels
-        val maxTextWidth = (screenWidth - dp(context, 96)).coerceAtLeast(dp(context, 160))
-
-        lateinit var titleTextView: TextView
-
-        val pillView = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            background = GradientDrawable().apply {
-                setColor(bgColor)
-                cornerRadius = dp(context, 999).toFloat()
-                setStroke(dp(context, 1), borderColor)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                elevation = dp(context, 6).toFloat()
-            }
-            setPadding(dp(context, 14), dp(context, 9), dp(context, 16), dp(context, 9))
-
-            // Parlayan çift katmanlı nokta göstergesi
-            val dotContainer = FrameLayout(context).apply {
-                addView(View(context).apply {
-                    background = GradientDrawable().apply {
-                        shape = GradientDrawable.OVAL
-                        setColor(haloColor)
-                    }
-                }, FrameLayout.LayoutParams(dp(context, 14), dp(context, 14), Gravity.CENTER))
-
-                addView(View(context).apply {
-                    background = GradientDrawable().apply {
-                        shape = GradientDrawable.OVAL
-                        setColor(accentColor)
-                    }
-                }, FrameLayout.LayoutParams(dp(context, 7), dp(context, 7), Gravity.CENTER))
-            }
-
-            addView(dotContainer, LinearLayout.LayoutParams(dp(context, 14), dp(context, 14)).apply {
-                marginEnd = dp(context, 9)
-                gravity = Gravity.CENTER_VERTICAL
-            })
-
-            titleTextView = TextView(context).apply {
-                this.text = text
-                setTextColor(titleColor)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
-                typeface = getSansBold(context)
-                includeFontPadding = false
-                maxLines = 1
-                maxWidth = maxTextWidth
-                ellipsize = android.text.TextUtils.TruncateAt.END
-            }
-            addView(titleTextView)
-        }
-
-        val outerContainer = FrameLayout(context).apply {
-            clipChildren = false
-            clipToPadding = false
-            setPadding(padHorizontal, padTop, padHorizontal, padBottom)
-            addView(
-                pillView,
-                FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    Gravity.CENTER
-                )
-            )
-        }
-
-        return Triple(outerContainer, pillView, titleTextView)
     }
 
     private fun dp(context: Context, value: Int): Int {

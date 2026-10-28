@@ -284,6 +284,7 @@ class ReelsAccessibilityService : AccessibilityService() {
         SettingsStore.init(this)
         QuotaStore.init(this)
         HeatmapStore.init(this)
+        com.nomorereels.app.notification.FeedbackNotificationHelper.ensureChannel(this)
 
         // Dinamik kuralları assets/rules.json dosyasından yükle
         classifier.rules = loadRulesFromAssets()
