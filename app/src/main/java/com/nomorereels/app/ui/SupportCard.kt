@@ -203,43 +203,72 @@ fun SupportBottomSheet(
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                donationItems.chunked(2).forEach { rowItems ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        rowItems.forEach { item ->
-                            TipButton(
-                                item = item,
-                                isEnglish = isEnglish,
-                                onClick = { onTipClick(item.productId) },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        if (rowItems.size == 1) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
+                donationItems.forEach { item ->
+                    DonationChannelCard(
+                        item = item,
+                        isEnglish = isEnglish,
+                        onClick = { onTipClick(item.productId) }
+                    )
                 }
             }
 
             if (!isSupporter && onVerifySupporterCode != null) {
-                OutlinedButton(
-                    onClick = { showCodeDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp)
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { showCodeDialog = true },
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = strings.enterSupporterCodeButton,
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 13.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                        CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            Column {
+                                Text(
+                                    text = if (isEnglish) "Already supported?" else "Zaten destek oldunuz mu?",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = strings.enterSupporterCodeButton,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                        Icon(
+                            imageVector = Icons.Outlined.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
@@ -486,23 +515,12 @@ fun SupportProjectCard(
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                donationItems.chunked(2).forEach { rowItems ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        rowItems.forEach { item ->
-                            TipButton(
-                                item = item,
-                                isEnglish = isEnglish,
-                                onClick = { onTipClick(item.productId) },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        if (rowItems.size == 1) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
+                donationItems.forEach { item ->
+                    DonationChannelCard(
+                        item = item,
+                        isEnglish = isEnglish,
+                        onClick = { onTipClick(item.productId) }
+                    )
                 }
             }
         }
@@ -510,7 +528,7 @@ fun SupportProjectCard(
 }
 
 @Composable
-private fun TipButton(
+private fun DonationChannelCard(
     item: DonationItem,
     isEnglish: Boolean,
     onClick: () -> Unit,
@@ -518,55 +536,74 @@ private fun TipButton(
 ) {
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .padding(vertical = 12.dp, horizontal = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surface,
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = item.iconEmoji,
-                    fontSize = 20.sp
+                    fontSize = 22.sp
                 )
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = item.localizedBadge(isEnglish),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold
+                        text = item.localizedTitle(isEnglish),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold
                         ),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                    ) {
+                        Text(
+                            text = item.localizedBadge(isEnglish),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = item.localizedSubtitle(isEnglish),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = item.localizedTitle(isEnglish),
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = item.localizedSubtitle(isEnglish),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                textAlign = TextAlign.Center
+
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -653,6 +690,7 @@ fun SupporterCodeDialog(
                     placeholder = { Text(strings.supporterCodeInputPlaceholder) },
                     singleLine = true,
                     isError = isError,
+                    shape = RoundedCornerShape(14.dp),
                     supportingText = if (isError) {
                         {
                             Text(
@@ -668,6 +706,7 @@ fun SupporterCodeDialog(
         },
         confirmButton = {
             Button(
+                shape = RoundedCornerShape(12.dp),
                 onClick = {
                     val ok = onVerify(codeInput)
                     if (!ok) {
