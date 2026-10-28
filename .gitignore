@@ -34,3 +34,9 @@ captures/
 
 # Android Studio & OS memory dumps
 *.hprof
+
+# Store and platform upload marketing binaries (kept locally, not in git)
+store_assets/screenshot_*.png
+store_assets/buymeacoffee_cover_*.png
+store_assets/goal_badge_*.png
+store_assets/tier_*.png
