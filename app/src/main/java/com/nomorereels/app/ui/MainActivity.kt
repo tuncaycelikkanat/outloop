@@ -79,9 +79,12 @@ class MainActivity : ComponentActivity() {
     private val donationManager: DonationManager
         get() = (application as com.nomorereels.app.OutloopApplication).container.donationManager
 
+    private val currentIntentState = mutableStateOf<Intent?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        currentIntentState.value = intent
         SettingsStore.init(this)
         QuotaStore.init(this)
         HeatmapStore.init(this)
@@ -141,10 +144,19 @@ class MainActivity : ComponentActivity() {
                     tonalElevation = 0.dp,
                     shadowElevation = 0.dp
                 ) {
-                    NoMoreReelsAppRoot(donationManager = donationManager)
+                    NoMoreReelsAppRoot(
+                        donationManager = donationManager,
+                        intentState = currentIntentState
+                    )
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        currentIntentState.value = intent
     }
 }
 
@@ -154,7 +166,10 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
+fun NoMoreReelsAppRoot(
+    donationManager: DonationManager? = null,
+    intentState: androidx.compose.runtime.State<Intent?>? = null
+) {
     val context = LocalContext.current
 
     val hasCompletedOnboarding by SettingsStore.hasCompletedOnboarding.collectAsState()
@@ -163,6 +178,19 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
     var walkthroughStep by rememberSaveable { mutableIntStateOf(0) }
     var currentTabName by rememberSaveable { mutableStateOf(NmrBottomTab.BUGUN.name) }
     val currentTab = NmrBottomTab.entries.firstOrNull { it.name == currentTabName } ?: NmrBottomTab.BUGUN
+
+    val currentIntent = intentState?.value ?: (context as? Activity)?.intent
+    LaunchedEffect(currentIntent, currentIntent?.extras) {
+        if (currentIntent?.getBooleanExtra("open_disclosure", false) == true) {
+            walkthroughStep = 2
+            showAppWalkthrough = true
+            currentIntent.removeExtra("open_disclosure")
+        } else if (currentIntent?.getBooleanExtra("open_dashboard", false) == true) {
+            showAppWalkthrough = false
+            currentTabName = NmrBottomTab.BUGUN.name
+            currentIntent.removeExtra("open_dashboard")
+        }
+    }
 
     val appLanguage by SettingsStore.appLanguage.collectAsState()
     val isServiceBound by ReelsAccessibilityService.isServiceActive.collectAsState()
@@ -359,7 +387,7 @@ fun NoMoreReelsAppRoot(donationManager: DonationManager? = null) {
                                                 onOpenBedtimePicker = { showBedtimePickerDialog = true },
                                                 onPreviewGateway = { showMindfulGatewayDialog = true },
                                                 onOpenWalkthrough = {
-                                                    walkthroughStep = 0
+                                                    walkthroughStep = 2
                                                     showAppWalkthrough = true
                                                 }
                                             )
