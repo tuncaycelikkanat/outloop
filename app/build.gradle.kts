@@ -8,14 +8,13 @@ plugins {
 
 android {
     namespace = "com.nomorereels.app"
-    // Not: Yerel SDK'da android-35 kurulu; Play Console API 36 geçişinde android-36 SDK paketi kurularak 36'ya yükseltilebilir (Edge-to-Edge zaten aktif).
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.tuncaycelikkanat.outloop"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 1
+        targetSdk = 36
+        versionCode = 2
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
